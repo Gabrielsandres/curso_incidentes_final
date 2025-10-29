@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gestao de Incidentes – Plataforma & LP
 
-## Getting Started
+Plataforma Next.js que servira de base para o produto "Gestao de Incidentes". Esta etapa (Etapa 0) cobre bootstrapping do monorepo web, integracao com Supabase Auth, observabilidade com Sentry e automacoes de CI/CD.
 
-First, run the development server:
+## Arquitetura
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Frontend**: Next.js 16 (App Router) com TypeScript e Tailwind.
+- **Autenticacao**: Supabase Auth com cookies e middleware protegendo rotas.
+- **Banco**: Supabase Postgres (migracoes manuais em `supabase/migrations`).
+- **Observabilidade**: Sentry para erros/performance + logger basico.
+- **Hospedagem sugerida**: Vercel (frontend) e Supabase (DB/Auth/Storage).
+
+## Requisitos de ambiente
+
+1. Node.js >= 20 e npm.
+2. Conta Supabase com projeto provisionado.
+3. Conta Sentry (opcional, mas recomendada).
+
+## Variaveis de ambiente
+
+Copie `.env.example` para `.env.local` e ajuste os valores:
+
+```
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Variavel | Descricao |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave anon do Supabase. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Opcional, usado para tarefas administrativas. |
+| `SUPABASE_JWT_SECRET` | Opcional, necessario para webhooks/verificacao. |
+| `NEXT_PUBLIC_APP_URL` | URL publica da aplicacao (ex: `https://demo.vercel.app`). |
+| `SENTRY_DSN` | DSN do projeto Sentry. Deixe vazio para desativar. |
+| `SENTRY_ENVIRONMENT` | Nome do ambiente (ex: `homolog`). |
+| `LOG_LEVEL` | Nivel minimo de log (`debug`, `info`, `warn`, `error`). |
+| `APP_VERSION` | Versao exibida na rota `/health`. |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Migracoes do banco
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Abra o SQL Editor do projeto Supabase ou utilize `supabase cli`.
+2. Rode o conteudo de `supabase/migrations/0001_initial_schema.sql`.
+3. Verifique se as tabelas e enums foram criados conforme esperado.
 
-## Learn More
+## Autenticacao de teste
 
-To learn more about Next.js, take a look at the following resources:
+- Com as configuracoes acima, acesse `/login` e autentique com um usuario criado via Supabase Auth (perfis de Email/Password).
+- Rotas sob `/dashboard` sao protegidas. Middleware redireciona usuarios nao autenticados para `/login` mantendo o parametro `redirectTo`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts principais
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Comando | Descricao |
+| --- | --- |
+| `npm run dev` | Sobe a aplicacao em desenvolvimento (http://localhost:3000). |
+| `npm run lint` | Executa `next lint`. |
+| `npm run test` | Roda os testes unitarios (Vitest). |
+| `npm run build` | Gera build de producao. |
+| `npm run start` | Sobe build compilado. |
+| `npm run typecheck` | Rodar checagem de tipos sem emitir codigo. |
 
-## Deploy on Vercel
+## Rota de saude
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`GET /health` responde com JSON contendo `status`, `uptime`, `timestamp` e `version` (valor de `APP_VERSION`). Configurado como `dynamic` para garantir que nao seja cacheado.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Observabilidade
+
+- Configuracoes do Sentry em `sentry.client.config.ts`, `sentry.server.config.ts` e `sentry.edge.config.ts`.
+- Arquivo `instrumentation.ts` integra `captureRequestError` com o lifecycle do Next.
+- Logger minimalista em `src/lib/logger.ts` respeita `LOG_LEVEL`.
+
+## CI/CD
+
+Workflow GitHub Actions em `.github/workflows/ci.yml` valida cada push/PR (`npm install`, `npm run lint`, `npm run test`, `npm run build`). Em Vercel, configure variaveis de ambiente equivalentes e selecione Node 20.
+
+## Deploy sugerido
+
+1. **Supabase**: criar projeto, aplicar migracoes, configurar autentificacao Email/Password.
+2. **Vercel**: importar repositório, definir `ROOT DIRECTORY = app`, usar build `npm run build` e install `npm install`. Aponte `PROJECT SETTINGS > ENVIRONMENT VARIABLES` para os campos indicados.
+3. Defina `NEXT_PUBLIC_APP_URL` com a URL de homolog para alinhamento com metadata e health check.
+
+## Estrutura de pastas
+
+```
+app/
+ +- src/
+ ¦   +- app/             # Rotas App Router (login, dashboard, health)
+ ¦   +- components/      # Componentes reutilizaveis (formularios, botoes)
+ ¦   +- lib/             # Helpers (env, logger, supabase clients)
+ +- supabase/            # Migracoes SQL
+ +- .github/workflows/   # Pipelines CI
+ +- sentry.*.config.ts   # Configuracao Sentry
+ +- middleware.ts        # Protecao de rotas via Supabase
+```
+
+## Etapa 0: entregaveis
+
+- **Autenticacao** basica funcionando (login/logout com Supabase).
+- **Rota `/health`** ativa.
+- **Observabilidade** preparada (Sentry + logger).
+- **CI/CD** em execucao via GitHub Actions.
+- **Testes** unitarios minimos com Vitest (`src/lib/env.test.ts`).
+- **Migracoes** iniciais versionadas em `supabase/migrations/0001_initial_schema.sql`.
+
+Documentos complementares estao em `docs/` (checklist, changelog, instrucoes de teste e status do deploy).
