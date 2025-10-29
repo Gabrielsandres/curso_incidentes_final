@@ -1,14 +1,7 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  // suas configs do Next.js aqui (se houver)
+};
 
-export default withSentryConfig(nextConfig, {
-  silent: true,
-  widenClientFileUpload: true,
-  // ⬇️ Substitua 'hideSourceMaps: true' por:
-  sourcemaps: { hideSources: true },
-
-  // opcional: como você já tinha
-  disableServerWebpackPlugin: process.env.NODE_ENV === "development",
-});
+export default nextConfig;
