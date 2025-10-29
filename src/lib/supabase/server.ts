@@ -21,20 +21,20 @@ export async function createSupabaseServerClient() {
         cookieBatch.forEach(({ name, value, options }) => {
           if (!value) {
             if ("delete" in cookieStore) {
-              // @ts-expect-error Next exposes delete at runtime
+              
               cookieStore.delete(name);
             }
             return;
           }
 
           if (options && "set" in cookieStore) {
-            // @ts-expect-error Next provides mutation helpers at runtime
+            
             cookieStore.set({ name, value, ...options });
             return;
           }
 
           if ("set" in cookieStore) {
-            // @ts-expect-error Next provides mutation helpers at runtime
+            
             cookieStore.set(name, value);
           }
         });
