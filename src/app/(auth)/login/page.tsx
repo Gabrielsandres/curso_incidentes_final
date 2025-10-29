@@ -2,24 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { LoginForm } from "@/components/auth/login-form";
-import { logger } from "@/lib/logger";
 
 export const metadata: Metadata = {
   title: "Entrar | Gestao de Incidentes",
 };
 
 type LoginPageProps = {
-  searchParams: Promise<Record<string, string | string[]>>;
+  searchParams?: Promise<Record<string, string | string[]>>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  let params: Record<string, string | string[]> = {};
-  try {
-    params = await searchParams;
-  } catch (error) {
-    logger.warn("Nao foi possivel resolver searchParams", error);
-  }
-
+  const params = searchParams ? await searchParams : {};
   const raw = Array.isArray(params.redirectTo) ? params.redirectTo[0] : params.redirectTo;
   const redirectTo = typeof raw === "string" ? raw : undefined;
 

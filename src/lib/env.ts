@@ -37,8 +37,17 @@ export function getEnv(): ServerSchema {
 }
 
 export function getClientEnv() {
-  const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_APP_URL } = getEnv();
-  return { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_APP_URL };
+  const parsed = clientSchema.safeParse({
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  });
+
+  if (!parsed.success) {
+    throw new Error("Client environment variables are missing or invalid. Check NEXT_PUBLIC_SUPABASE_* values.");
+  }
+
+  return parsed.data;
 }
 
 export function resetEnvCache() {

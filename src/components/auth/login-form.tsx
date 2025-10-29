@@ -1,28 +1,66 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { loginAction, type LoginActionState } from "@/app/(auth)/login/actions";
-
-const initialState: LoginActionState = {};
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type LoginFormProps = {
   redirectTo?: string;
 };
 
 export function LoginForm({ redirectTo }: LoginFormProps) {
-  const [state, dispatch] = useFormState(loginAction, initialState);
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  const handleSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const email = (formData.get("email") as string | null)?.trim();
+      const password = formData.get("password") as string | null;
+
+      if (!email || !password) {
+        setError("Informe email e senha.");
+        return;
+      }
+
+      setPending(true);
+      setError(null);
+
+      try {
+        const supabase = getSupabaseBrowserClient();
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError) {
+          setError("Credenciais invalidas. Confira e tente novamente.");
+          return;
+        }
+
+        router.replace(redirectTo ?? "/dashboard");
+        router.refresh();
+      } catch (signInException) {
+        console.error("Erro ao autenticar Supabase", signInException);
+        setError("Ocorreu um erro inesperado. Tente novamente.");
+      } finally {
+        setPending(false);
+      }
+    },
+    [redirectTo, router],
+  );
 
   return (
-    <form action={dispatch} className="flex w-full max-w-sm flex-col gap-6 rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+    <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-6 rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
       <div className="space-y-1">
         <h1 className="text-xl font-semibold text-slate-900">Acessar plataforma</h1>
         <p className="text-sm text-slate-500">Informe suas credenciais para entrar</p>
       </div>
 
-      {state?.error ? (
-        <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</div>
-      ) : null}
+      {error ? <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div> : null}
 
       <label className="flex flex-col gap-2">
         <span className="text-sm font-medium text-slate-700">Email</span>
@@ -33,6 +71,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
           required
           autoComplete="email"
           placeholder="nome@escola.com"
+          disabled={pending}
         />
       </label>
 
@@ -44,26 +83,18 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
           name="password"
           required
           autoComplete="current-password"
-          placeholder="••••••"
+          placeholder="******"
+          disabled={pending}
         />
       </label>
 
-      {redirectTo ? <input type="hidden" name="redirectTo" value={redirectTo} /> : null}
-
-      <SubmitButton />
+      <button
+        type="submit"
+        disabled={pending}
+        className="flex w-full items-center justify-center gap-2 rounded bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        {pending ? "Entrando..." : "Entrar"}
+      </button>
     </form>
-  );
-}
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="flex w-full items-center justify-center gap-2 rounded bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-70"
-    >
-      {pending ? "Entrando..." : "Entrar"}
-    </button>
   );
 }
