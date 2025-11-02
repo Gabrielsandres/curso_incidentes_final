@@ -1,5 +1,12 @@
 # Changelog
 
+## [Etapa 1] - Landing Page Comercial
+- Cria landing page completa na rota `/` com hero, secoes de valor, FAQ e CTA final.
+- Centraliza copy e estrutura em `src/lib/marketing/content.ts` e componentes em `src/components/marketing`.
+- Implementa formulario institucional com validacao (Zod) + server action gravando leads no Supabase.
+- Atualiza design system global (fonte Inter, tokens de cor) e CTAs configuraveis via variaveis `NEXT_PUBLIC_CHECKOUT_URL_*`.
+- Adiciona testes para o schema de leads e documentacao dos novos fluxos.
+
 ## [Etapa 0] - Fundacoes
 - Cria projeto Next.js 16 com Tailwind, TypeScript e alias `@/`.
 - Integra Supabase Auth com middleware, rotas `/login` e `/dashboard` protegidas.

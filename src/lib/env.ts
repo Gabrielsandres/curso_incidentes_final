@@ -7,6 +7,9 @@ const clientSchema = z.object({
     .string()
     .url()
     .default("http://localhost:3000"),
+  NEXT_PUBLIC_CHECKOUT_URL_ESSENCIAL: z.string().url().optional(),
+  NEXT_PUBLIC_CHECKOUT_URL_PRO: z.string().url().optional(),
+  NEXT_PUBLIC_CHECKOUT_URL_INSTITUCIONAL: z.string().url().optional(),
 });
 
 const serverSchema = clientSchema.extend({
@@ -41,6 +44,9 @@ export function getClientEnv() {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_CHECKOUT_URL_ESSENCIAL: process.env.NEXT_PUBLIC_CHECKOUT_URL_ESSENCIAL,
+    NEXT_PUBLIC_CHECKOUT_URL_PRO: process.env.NEXT_PUBLIC_CHECKOUT_URL_PRO,
+    NEXT_PUBLIC_CHECKOUT_URL_INSTITUCIONAL: process.env.NEXT_PUBLIC_CHECKOUT_URL_INSTITUCIONAL,
   });
 
   if (!parsed.success) {
