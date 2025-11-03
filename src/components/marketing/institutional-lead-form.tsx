@@ -47,8 +47,8 @@ export function InstitutionalLeadForm() {
     >
       <div className="space-y-2">
         <p className="text-sm text-slate-600">
-          Preencha o formul\u00e1rio com os dados da sua escola ou rede. Nosso time retornar\u00e1 em at\u00e9 24 horas
-          \u00fateis com uma proposta alinhada \u00e0s suas necessidades.
+          Preencha o formulário com os dados da sua escola ou rede. Nosso time retornará em até 24 horas
+          úteis com uma proposta alinhada às suas necessidades.
         </p>
       </div>
 
@@ -191,7 +191,7 @@ export function InstitutionalLeadForm() {
             disabled={isPending}
             aria-invalid={Boolean(getFieldError(state, "message"))}
             className="min-h-[120px] rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-            placeholder="Conte como est\u00e1 a estrutura atual ou objetivos que deseja alcan\u00e7ar."
+            placeholder="Conte como está a estrutura atual ou objetivos que deseja alcançar."
           />
         </div>
       </div>
@@ -199,9 +199,9 @@ export function InstitutionalLeadForm() {
       <div className="flex flex-col gap-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
         <p className="font-medium text-slate-800">Como funciona o atendimento?</p>
         <ul className="list-disc space-y-1 pl-4">
-          <li>Retorno por e-mail ou WhatsApp em at\u00e9 24 horas \u00fateis.</li>
-          <li>Apresenta\u00e7\u00e3o do plano ideal para o porte e necessidade da institui\u00e7\u00e3o.</li>
-          <li>Envio de proposta formal e agenda para reuni\u00e3o de alinhamento.</li>
+          <li>Retorno por e-mail ou WhatsApp em até 24 horas úteis.</li>
+          <li>Apresentação do plano ideal para o porte e necessidade da instituição.</li>
+          <li>Envio de proposta formal e agenda para reunião de alinhamento.</li>
         </ul>
       </div>
 
@@ -210,7 +210,7 @@ export function InstitutionalLeadForm() {
         disabled={isPending}
         className="inline-flex items-center justify-center gap-2 rounded-full bg-sky-600 px-6 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-300 disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {isPending ? "Enviando..." : state.success ? "Recebido" : "Enviar informa\u00e7\u00f5es"}
+        {isPending ? "Enviando..." : state.success ? "Recebido" : "Enviar informações"}
       </button>
     </form>
   );

@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gest\u00e3o de Incidentes \u2014 Plataforma & LP",
+  title: "Gestão de Incidentes Plataforma & LP",
   description:
-    "Projeto de plataforma educacional e landing page comercial para o programa Gest\u00e3o de Incidentes - Escola Segura.",
+    "Projeto de plataforma educacional e landing page comercial para o programa Gestão de Incidentes - Escola Segura.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
 };
 

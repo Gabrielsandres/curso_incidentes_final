@@ -46,7 +46,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(15,118,255,0.35),_transparent_60%)]" />
         <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 pb-24 pt-10 sm:pt-12 lg:pt-16">
           <nav className="flex items-center justify-between">
-            <span className="text-lg font-semibold tracking-tight">Gest\u00e3o de Incidentes</span>
+            <span className="text-lg font-semibold tracking-tight">Gestão de Incidentes</span>
             <Link
               href="/login"
               className="rounded-full border border-white/30 px-4 py-1.5 text-sm font-medium text-slate-50 transition hover:border-white hover:bg-white/10"
@@ -92,9 +92,9 @@ export default function Home() {
               <div className="space-y-6">
                 <div>
                   <span className="text-xs font-semibold uppercase tracking-wide text-sky-200">Destaques do curso</span>
-                  <p className="mt-2 text-lg font-semibold text-white">Transforme risco em seguran\u00e7a abrangente</p>
+                  <p className="mt-2 text-lg font-semibold text-white">Transforme risco em segurança abrangente</p>
                   <p className="mt-2 text-sm text-slate-200">
-                    Conte\u00fado gravado, modelos prontos e acompanhamento para implementar protocolos completos em poucos dias.
+                    Conteúdo gravado, modelos prontos e acompanhamento para implementar protocolos completos em poucos dias.
                   </p>
                 </div>
                 <ul className="space-y-3 text-sm text-slate-200">
@@ -108,7 +108,7 @@ export default function Home() {
                 <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-sm text-slate-100">
                   <p className="font-semibold text-white">Mentoria com especialistas</p>
                   <p className="mt-1">
-                    Hamilton Santos Esteves Jr. e Marcos de Alencar Dantas compartilham experi\u00eancias reais em escolas do DF e redes privadas.
+                    Hamilton Santos Esteves Jr. e Marcos de Alencar Dantas compartilham experiências reais em escolas do DF e redes privadas.
                   </p>
                 </div>
               </div>
@@ -142,7 +142,7 @@ export default function Home() {
           <SectionHeader
             eyebrow="Resultados"
             title={outcomes.title}
-            subtitle="Aplica\u00e7\u00e3o imediata com protocolos validados e replic\u00e1veis."
+            subtitle="Aplicações imediata com protocolos validados e replicáveis."
             align="center"
           />
           <ul className="mt-12 grid gap-4 sm:grid-cols-2">
@@ -162,7 +162,7 @@ export default function Home() {
           <SectionHeader
             eyebrow="Metodologia"
             title={workflow.title}
-            subtitle="Estrutura pensada para facilitar a implementa\u00e7\u00e3o e a ado\u00e7\u00e3o por toda a comunidade escolar."
+            subtitle="Estrutura pensada para facilitar a implementações e a adoção por toda a comunidade escolar."
           />
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {workflow.steps.map((step) => (
@@ -185,9 +185,9 @@ export default function Home() {
 
         <MarketingSection id={curriculum.id} background="muted">
           <SectionHeader
-            eyebrow="Conte\u00fado program\u00e1tico"
+            eyebrow="Conteúdo programado"
             title={curriculum.title}
-            subtitle="Cada m\u00f3dulo evolui para o protocolo completo da sua escola."
+            subtitle="Cada módulo evolui para o protocolo completo da sua escola."
           />
           <ol className="mt-12 grid gap-4 sm:grid-cols-2">
             {curriculum.modules.map((module, index) => (
@@ -206,9 +206,9 @@ export default function Home() {
 
         <MarketingSection id={materials.id} background="default">
           <SectionHeader
-            eyebrow="B\u00f4nus"
+            eyebrow="Bônus"
             title={materials.title}
-            subtitle="Ferramentas prontas para acelerar a execu\u00e7\u00e3o e o acompanhamento com sua equipe."
+            subtitle="Ferramentas prontas para acelerar a execução e o acompanhamento com sua equipe."
           />
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {materials.items.map((item) => (
@@ -236,13 +236,13 @@ export default function Home() {
               <footer className="mt-6 text-sm font-normal text-slate-200">\u2014 {testimonial.author}</footer>
             </blockquote>
             <div className="flex flex-1 flex-col gap-6 rounded-2xl border border-white/20 bg-white/5 p-8 text-sm text-slate-100 shadow-lg">
-              <p className="font-semibold text-white">Institui\u00e7\u00f5es onde a metodologia foi aplicada</p>
+              <p className="font-semibold text-white">Instituições onde a metodologia foi aplicada</p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-xl border border-white/20 bg-white/10 px-4 py-6 text-center text-sm font-semibold uppercase tracking-wide text-slate-100">
-                  Universidade de Bras\u00edlia (UnB)
+                  Universidade de Brasília (UnB)
                 </div>
                 <div className="rounded-xl border border-white/20 bg-white/10 px-4 py-6 text-center text-sm font-semibold uppercase tracking-wide text-slate-100">
-                  Secretaria de Educa\u00e7\u00e3o do DF
+                  Secretaria de Educação do DF
                 </div>
               </div>
             </div>
@@ -258,15 +258,15 @@ export default function Home() {
             })}
           </div>
           <p className="mt-6 text-center text-sm text-slate-500">
-            Precisa de uma proposta personalizada? Preencha o formul\u00e1rio institucional e nossa equipe retorna em at\u00e9 24h \u00fateis.
+            Precisa de uma proposta personalizada? Preencha o formulário institucional e nossa equipe retorna em até 24h úteis.
           </p>
         </MarketingSection>
 
         <MarketingSection id="institucional" background="muted">
           <SectionHeader
             eyebrow="Atendimento institucional"
-            title="Converse com o time especialista e ajuste o plano \u00e0 sua realidade."
-            subtitle="Conte-nos sobre a sua escola para alinharmos licen\u00e7as, condi\u00e7\u00f5es de pagamento e personaliza\u00e7\u00e3o dos protocolos."
+            title="Converse com o time especialista e ajuste o plano à sua realidade."
+            subtitle="Conte-nos sobre a sua escola para alinharmos licenças, condições de pagamento e personalizações dos protocolos."
           />
           <div className="mt-10">
             <InstitutionalLeadForm />
@@ -275,9 +275,9 @@ export default function Home() {
 
         <MarketingSection id={guarantee.id} background="default">
           <SectionHeader
-            eyebrow="Confian\u00e7a"
+            eyebrow="Confiança"
             title={guarantee.title}
-            subtitle="Suporte integral para garantir a ado\u00e7\u00e3o da metodologia na sua institui\u00e7\u00e3o."
+            subtitle="Suporte integral para garantir a adoção da metodologia na sua instituição"
           />
           <div className="mt-12 grid gap-6 sm:grid-cols-3">
             {guarantee.items.map((item) => (
@@ -299,7 +299,7 @@ export default function Home() {
           <SectionHeader
             eyebrow="FAQ"
             title={faq.title}
-            subtitle="Se a sua d\u00favida n\u00e3o est\u00e1 aqui, envie uma mensagem para nosso time comercial."
+            subtitle="Se a sua dúvida nãoo está aqui, envie uma mensagem para nosso time comercial."
           />
           <div className="mt-10 grid gap-4">
             {faq.items.map((item) => (
@@ -330,9 +330,9 @@ export default function Home() {
       <footer className="border-t border-slate-200 bg-slate-900 py-12 text-slate-100">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 md:flex-row md:items-start md:justify-between">
           <div className="space-y-3">
-            <span className="text-lg font-semibold">Gest\u00e3o de Incidentes</span>
+            <span className="text-lg font-semibold">Gestão de Incidentes</span>
             <p className="max-w-sm text-sm text-slate-300">
-              Curso online para transformar risco em seguran\u00e7a com protocolos prontos e suporte especializado.
+              Curso online para transformar risco em segurança com protocolos prontos e suporte especializado.
             </p>
             <div className="space-y-1 text-sm text-slate-300">
               <p>Contato: {footer.contactEmail}</p>
