@@ -10,7 +10,7 @@ describe("institutionalLeadSchema", () => {
       email: "ana@escola.com",
       phone: "(61) 99999-0000",
       headcount: "500",
-      message: "Precisamos de apoio para plano de evacua\u00e7\u00e3o.",
+      message: "Precisamos de apoio para plano de evacuação.",
     });
 
     expect(result.success).toBe(true);

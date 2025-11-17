@@ -21,7 +21,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <Link href="/" className="text-base font-semibold text-slate-900">
-            Gestao de Incidentes
+            Gestão de Incidentes
           </Link>
           <span className="text-sm text-slate-500">Plataforma &amp; LP</span>
         </div>

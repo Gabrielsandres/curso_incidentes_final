@@ -30,7 +30,7 @@ export default async function DashboardPage() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex flex-col">
-            <span className="text-base font-semibold text-slate-900">Gestao de Incidentes</span>
+            <span className="text-base font-semibold text-slate-900">Gestão de Incidentes</span>
             <span className="text-xs text-slate-500">Plataforma em desenvolvimento</span>
           </div>
           <LogoutButton />
@@ -40,7 +40,7 @@ export default async function DashboardPage() {
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold text-slate-900">Bem-vindo(a), {user.email}</h1>
           <p className="text-sm text-slate-600">
-            Area autenticada temporaria para o projeto Gestao de Incidentes. Os modulos de curso e administracao serao
+            Área autenticada temporaria para o projeto Gestao de Incidentes. Os modulos de curso e administracao serao
             implementados nas proximas etapas.
           </p>
         </div>

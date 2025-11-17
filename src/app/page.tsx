@@ -232,8 +232,8 @@ export default function Home() {
           <SectionHeader tone="light" eyebrow="Prova social" title={testimonial.title} subtitle={testimonial.description} />
           <div className="mt-12 flex flex-col gap-10 lg:flex-row lg:items-start">
             <blockquote className="flex-1 rounded-2xl border border-white/20 bg-white/5 p-8 text-lg font-medium text-slate-50 shadow-lg">
-              \u201c{testimonial.quote}\u201d
-              <footer className="mt-6 text-sm font-normal text-slate-200">\u2014 {testimonial.author}</footer>
+              {testimonial.quote}
+              <footer className="mt-6 text-sm font-normal text-slate-200"> {testimonial.author}</footer>
             </blockquote>
             <div className="flex flex-1 flex-col gap-6 rounded-2xl border border-white/20 bg-white/5 p-8 text-sm text-slate-100 shadow-lg">
               <p className="font-semibold text-white">Instituições onde a metodologia foi aplicada</p>

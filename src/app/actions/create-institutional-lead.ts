@@ -59,7 +59,7 @@ export async function submitInstitutionalLead(
       });
       return {
         success: false,
-        message: "N\u00e3o foi poss\u00edvel enviar suas informa\u00e7\u00f5es. Tente novamente.",
+        message: "Não foi possível enviar suas informações. Tente novamente.",
       };
     }
 
@@ -70,7 +70,7 @@ export async function submitInstitutionalLead(
 
     return {
       success: true,
-      message: "Recebemos suas informa\u00e7\u00f5es! Em at\u00e9 24h \u00fateis entraremos em contato.",
+      message: "Recebemos suas informações! Em até 24h úteis entraremos em contato.",
     };
   } catch (error) {
     logger.error(

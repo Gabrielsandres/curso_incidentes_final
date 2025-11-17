@@ -16,7 +16,7 @@ const headcountOptions = [
 ];
 
 const fieldLabels: Record<string, string> = {
-  organization: "Institui\u00e7\u00e3o ou rede",
+  organization: "Instituiçõo ou rede",
   contactName: "Nome do contato",
   email: "E-mail",
   phone: "Telefone ou WhatsApp",
