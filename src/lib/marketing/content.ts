@@ -1,9 +1,13 @@
 export const landingContent = {
   hero: {
-    eyebrow: "Plataforma & LP",
-    title: "Sua escola preparada para qualquer situação",
+    title: "Sua escola preparada para qualquer situação.",
     subtitle:
-      "Transforme risco em segurança com o curso Gestão de Incidentes em Estabelecimentos de Ensino.",
+      "Transforme risco em segurança com o curso Gestão de Incidentes em Estabelecimentos de Ensino, baseado em protocolos já aplicados em escolas públicas e privadas.",
+    badges: [
+      { label: "+200 profissionais capacitados", icon: "check-circle" },
+      { label: "+70 protocolos implantados", icon: "shield-check" },
+      { label: "Metodologia validada na UnB e na SEDF", icon: "university" },
+    ],
     primaryCta: {
       label: "Quero garantir meu acesso agora",
       href: "#planos",
@@ -12,18 +16,14 @@ export const landingContent = {
       label: "Conhecer planos",
       href: "#planos",
     },
-    trustBadges: [
-      "+200 profissionais capacitados",
-      "+70 protocolos implantados",
-      "Metodologia validada na UnB e SEDF",
-    ],
+    helper: "Curso 100% online, com aulas gravadas, materiais complementares e suporte humano.",
   },
   audience: {
-    id: "para-quem",
+    id: "para-quem-e",
     title: "Feito para quem lidera, protege e educa.",
-    description:
+    subtitle:
       "Se você faz parte de uma escola, sabe que a segurança é responsabilidade de todos. Este curso é ideal para:",
-    items: [
+    cards: [
       {
         title: "Gestores e diretores",
         description: "Protocolos claros para prevenção e resposta a incidentes em toda a instituição.",
@@ -37,7 +37,7 @@ export const landingContent = {
       {
         title: "Psicólogos e orientadores",
         description: "Mediação emocional e comunicação assertiva com alunos, famílias e equipes.",
-        icon: "HeartHandshake",
+        icon: "HeartPulse",
       },
       {
         title: "Mantenedoras e redes escolares",
@@ -48,47 +48,75 @@ export const landingContent = {
   },
   outcomes: {
     id: "resultados",
-    title: "Resultados reais, aplicáveis e transformadores.",
-    items: [
-      "Um protocolo de gestão de incidentes pronto para aplicar na sua escola.",
-      "Planos de ação para evacuação, lockdown e comunicação de crise.",
-      "Checklist de resposta e simulação de incidentes.",
-      "Maior tranquilidade, preparo e confiança para toda a comunidade escolar.",
+    header: {
+      pill: "RESULTADOS",
+      title: "Resultados que a sua escola já pode aplicar.",
+      subtitle: "Aplicação imediata com protocolos validados e replicáveis em diferentes contextos escolares.",
+    },
+    cards: [
+      {
+        icon: "FileCheck2",
+        title: "Protocolo completo de gestão de incidentes",
+        description: "Você sai do curso com um protocolo estruturado, pronto para adaptar à sua escola.",
+      },
+      {
+        icon: "Map",
+        title: "Planos de evacuação, lockdown e comunicação",
+        description: "Defina rotas, pontos de encontro, responsáveis e fluxos de comunicação em situações críticas.",
+      },
+      {
+        icon: "ListChecks",
+        title: "Checklists prontos para simulação e resposta",
+        description: "Listas práticas para uso em treinamento, simulado e em incidentes reais.",
+      },
+      {
+        icon: "Sparkles",
+        title: "Cultura preventiva fortalecida",
+        description: "Maior tranquilidade, preparo e confiança para toda a comunidade escolar.",
+      },
     ],
   },
-  workflow: {
-    id: "como-funciona",
-    title: "Aprenda no seu ritmo, com acompanhamento e prática.",
+  methodology: {
+    id: "metodologia",
+    header: {
+      pill: "METODOLOGIA",
+      title: "Aprenda no seu ritmo, com acompanhamento e prática.",
+      subtitle:
+        "Estrutura pensada para facilitar a implementação do Sistema de Gestão de Incidentes e envolver toda a comunidade escolar.",
+    },
     steps: [
       {
-        title: "Acesse as aulas",
-        description:
-          "12 videoaulas gravadas com o especialista Hamilton Esteves, com linguagem clara e prática.",
         icon: "PlayCircle",
+        title: "Acesse as aulas",
+        description: "Videoaulas gravadas com especialistas, com linguagem clara e foco em casos reais.",
       },
       {
+        icon: "ArrowDownToLine",
         title: "Baixe os modelos",
         description: "Protocolos, checklists e formulários para personalizar e aplicar na sua instituição.",
-        icon: "FileDown",
       },
       {
-        title: "Implemente e valide",
-        description: "Monte o plano da sua escola, valide com sua equipe e fortaleça sua cultura de segurança.",
         icon: "ClipboardCheck",
+        title: "Implemente e valide",
+        description: "Monte o plano da sua escola, valide com a equipe e fortaleça sua cultura de segurança.",
       },
     ],
-    highlight:
-      "Tudo em uma plataforma própria, com login individual, certificado de conclusão e suporte exclusivo.",
+    footnote: "Tudo em uma plataforma própria, com login individual, certificado de conclusão e suporte exclusivo.",
   },
   curriculum: {
-    id: "conteudo",
-    title: "Do conceito à prática: veja o que você vai aprender.",
+    id: "conteudo-programado",
+    header: {
+      pill: "CONTEÚDO PROGRAMADO",
+      title: "Do conceito à prática: cada módulo evolui para o protocolo completo da sua escola.",
+      subtitle:
+        "Os módulos combinam fundamentos, histórico, análise de riscos e aplicação prática do Sistema de Gestão de Incidentes em ambientes escolares.",
+    },
     modules: [
       "Introdução à Gestão de Incidentes em Escolas",
       "Estrutura e papéis no Sistema de Gestão de Incidentes",
       "Identificação e avaliação de riscos",
       "Comunicação e resposta em situações críticas",
-      "Planos de Evacuação e Lockdown",
+      "Planos de evacuação e lockdown",
       "Gestão de Conflitos e Comunicação Não Violenta",
       "Primeiras ações e comando inicial",
       "Coordenação de equipes e recursos",
@@ -98,48 +126,67 @@ export const landingContent = {
       "Elaboração do Protocolo Final da Escola",
     ],
   },
-  materials: {
+  bonus: {
     id: "bonus",
-    title: "Materiais e bônus exclusivos.",
+    header: {
+      pill: "BÔNUS",
+      title: "Materiais e bônus exclusivos.",
+      subtitle: "Ferramentas prontas para acelerar a execução e o acompanhamento com sua equipe.",
+    },
     items: [
-      { title: "Modelos de protocolo", description: "Evacuação e lockdown prontos para personalizar.", icon: "FileDigit" },
-      { title: "Checklist de gestão", description: "Fluxo completo de resposta a incidentes.", icon: "ListCheck" },
       {
+        icon: "CalendarDays",
+        title: "Modelos de protocolo",
+        description: "Evacuação e lockdown prontos para personalizar, baseados em experiências reais.",
+      },
+      {
+        icon: "ClipboardList",
+        title: "Checklist de gestão",
+        description: "Fluxo completo de resposta a incidentes, da identificação à avaliação pós-ocorrência.",
+      },
+      {
+        icon: "FileText",
         title: "E-book Comunicação Não Violenta",
-        description: "Guia de mediação e comunicação em cenários críticos.",
-        icon: "BookOpenCheck",
+        description: "Guia para mediar conflitos e melhorar a comunicação em cenários críticos.",
       },
       {
-        title: "Aula bônus",
-        description: "Como lidar com imprensa e redes sociais durante um incidente.",
         icon: "Megaphone",
+        title: "Aula bônus: imprensa e redes sociais",
+        description: "Como lidar com a imprensa e redes sociais durante um incidente, reduzindo riscos e boatos.",
       },
       {
-        title: "Grupo exclusivo",
-        description: "WhatsApp para suporte e trocas entre participantes.",
         icon: "MessageCircle",
+        title: "Grupo exclusivo",
+        description: "Grupo de WhatsApp para suporte e troca de experiências entre participantes.",
       },
       {
+        icon: "ShieldCheck",
         title: "Selo Escola Segura",
-        description: "Reconhecimento para instituições certificadas.",
-        icon: "Award",
+        description: "Reconhecimento para instituições que implementam o protocolo de gestão de incidentes.",
       },
     ],
   },
   testimonial: {
     id: "prova-social",
-    title: "Uma metodologia já validada em campo.",
-    description:
-      "O curso foi aplicado com sucesso em escolas públicas do Distrito Federal e na Universidade de Brasília (UnB), formando mais de 200 profissionais e resultando em mais de 70 protocolos de segurança implantados.",
+    header: {
+      pill: "PROVA SOCIAL",
+      title: "Uma metodologia já validada em campo.",
+      subtitle:
+        "Aplicada com sucesso em escolas públicas do Distrito Federal e na Universidade de Brasília (UnB), formando mais de 200 profissionais e gerando mais de 70 protocolos de segurança implantados.",
+    },
     quote:
-      "A metodologia é prática, realista e transformadora. Nossas equipes se sentem preparadas e seguras para agir em qualquer situação.",
-    author: "Gestora escolar participante do curso piloto - DF",
-    logos: ["unb", "sedf"],
+      "“A metodologia é prática, realista e transformadora. Nossas equipes se sentem preparadas e seguras para agir em qualquer situação.”",
+    author: "Gestora escolar participante do curso piloto – DF",
+    logos: ["Universidade de Brasília (UnB)", "Secretaria de Educação do DF"],
   },
   plans: {
     id: "planos",
-    title: "Planos e investimento.",
-    description: "Escolha o formato ideal para sua necessidade:",
+    header: {
+      pill: "PLANOS",
+      title: "Escolha a melhor forma de implementar o protocolo na sua escola.",
+      subtitle: "Opções para profissionais individuais, escolas e redes, com possibilidade de consultoria e mentoria adicional.",
+    },
+    note: "Os detalhes específicos de preço podem permanecer como já estão. Apenas melhorar contraste dos títulos, botões e listas de benefícios.",
     items: [
       {
         sku: "ESSENCIAL",
@@ -173,62 +220,80 @@ export const landingContent = {
       },
     ],
   },
+  institutional: {
+    id: "atendimento-institucional",
+    header: {
+      pill: "ATENDIMENTO INSTITUCIONAL",
+      title: "Atendimento dedicado para escolas, redes e mantenedoras.",
+      subtitle:
+        "Conte-nos sobre a sua realidade para alinharmos licenças, condições de pagamento e personalizações dos protocolos.",
+    },
+    footnote: "Encontros presenciais, se realizados, são definidos conforme contrato específico.",
+  },
   guarantee: {
-    id: "garantia",
-    title: "Certificado e garantia.",
+    id: "confianca",
+    header: {
+      pill: "CONFIANÇA",
+      title: "Certificação e garantia.",
+      subtitle: "Suporte integral para garantir a adoção da metodologia na sua instituição.",
+    },
     items: [
       {
         title: "Certificado 60h",
-        description: "Emitido pela plataforma ao concluir todas as aulas.",
+        description: "Emitido pela plataforma ao concluir todas as aulas e atividades propostas.",
         icon: "GraduationCap",
       },
       {
         title: "Garantia 7 dias",
-        description: "Se não estiver satisfeito, devolvemos seu investimento.",
+        description: "Se não estiver satisfeito com o conteúdo, devolvemos seu investimento.",
         icon: "BadgeCheck",
       },
       {
         title: "Acesso vitalício",
-        description: "Aulas e materiais sempre disponíveis, com atualizações.",
+        description: "Aulas e materiais sempre disponíveis, com atualizações incluídas.",
         icon: "Infinity",
       },
     ],
   },
   faq: {
     id: "faq",
-    title: "Perguntas frequentes.",
+    header: {
+      pill: "FAQ",
+      title: "Perguntas frequentes.",
+      subtitle: "Se a sua dúvida não estiver aqui, envie uma mensagem para nosso time comercial.",
+    },
     items: [
       {
         question: "Por quanto tempo terei acesso ao curso?",
-        answer: "Acesso vitalício às aulas e materiais, incluindo futuras atualizações.",
+        answer: "O acesso é vitalício. Você poderá rever as aulas e consultar os materiais sempre que precisar.",
       },
       {
         question: "Receberei certificado?",
-        answer: "Sim. Ao concluir todas as aulas, você recebe automaticamente o certificado de 60h.",
+        answer: "Sim. Ao concluir todas as aulas e atividades, você recebe um certificado de 60 horas emitido pela plataforma.",
       },
       {
         question: "Posso comprar para minha escola inteira?",
         answer:
-          "Sim! Temos planos institucionais com licenças múltiplas e sessões personalizadas. Fale com nossa equipe comercial para alinhar a necessidade.",
+          "Sim. Temos condições especiais para escolas, redes e mantenedoras. Preencha o formulário de atendimento institucional para receber uma proposta personalizada.",
       },
       {
         question: "Como funcionam os bônus e o grupo de suporte?",
         answer:
-          "Após a compra, você recebe o link do grupo exclusivo no WhatsApp e o acesso aos materiais complementares diretamente na plataforma.",
+          "Os materiais bônus ficam disponíveis na plataforma e o grupo de WhatsApp é destinado a suporte, trocas de experiências e avisos importantes durante o período de implantação.",
       },
       {
         question: "O curso é reconhecido oficialmente?",
         answer:
-          "É um curso livre, com metodologia validada em instituições públicas e privadas e formadores com experiência comprovada.",
+          "O curso oferece certificação emitida pela organização responsável, com metodologia validada em experiências reais em escolas e instituições como a UnB e a Secretaria de Educação do DF.",
       },
     ],
   },
   finalCta: {
     id: "cta-final",
-    title: "Sua escola pronta para agir com segurança começa aqui.",
+    title: "Curso 100% online focado na segurança da sua escola.",
     subtitle:
-      "Invista hoje em prevenção, preparo e tranquilidade. Em poucas horas, você pode transformar a gestão de segurança da sua instituição.",
-    ctaLabel: "Garantir meu acesso agora",
+      "Garanta acesso vitalício às aulas gravadas, materiais complementares e atualizações sempre que precisar.",
+    ctaLabel: "Quero garantir meu acesso",
     ctaHref: "#planos",
   },
   footer: {
@@ -244,21 +309,24 @@ export const landingContent = {
 } as const;
 
 export type IconName =
-  | "Award"
+  | "ArrowDownToLine"
   | "BadgeCheck"
-  | "BookOpenCheck"
   | "Building2"
+  | "CalendarDays"
   | "ClipboardCheck"
-  | "FileDigit"
-  | "FileDown"
+  | "ClipboardList"
+  | "FileCheck2"
+  | "FileText"
   | "GraduationCap"
-  | "HeartHandshake"
+  | "HeartPulse"
   | "Infinity"
-  | "ListCheck"
+  | "ListChecks"
+  | "Map"
   | "Megaphone"
   | "MessageCircle"
   | "PlayCircle"
   | "ShieldCheck"
+  | "Sparkles"
   | "Users";
 
 export type PlanItem = (typeof landingContent)["plans"]["items"][number];

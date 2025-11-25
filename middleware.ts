@@ -4,8 +4,12 @@ import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/lib/database.types";
 import { getEnv } from "@/lib/env";
 
-const PROTECTED_ROUTES = ["/dashboard"];
+const PROTECTED_ROUTES = ["/dashboard", "/curso"];
 const AUTH_ROUTES = ["/login"];
+
+function isProtectedPath(path: string) {
+  return PROTECTED_ROUTES.some((route) => path === route || path.startsWith(`${route}/`));
+}
 
 export async function middleware(request: NextRequest) {
   const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } = getEnv();
@@ -47,10 +51,10 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  if (!user && PROTECTED_ROUTES.some((route) => path.startsWith(route))) {
+  if (!user && isProtectedPath(path)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("redirectTo", path);
+    redirectUrl.searchParams.set("redirectTo", `${path}${request.nextUrl.search}`);
     return NextResponse.redirect(redirectUrl);
   }
 
@@ -62,5 +66,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login"],
+  matcher: ["/dashboard/:path*", "/curso/:path*", "/login"],
 };

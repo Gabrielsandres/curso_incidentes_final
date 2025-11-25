@@ -1,58 +1,99 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
-:root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --surface-page: #f8fafc;
-  --surface-muted: #eef2ff;
-  --surface-contrast: #020617;
-  --brand-navy: #0b1c3d;
-  --brand-royal: #123b82;
-  --brand-sky: #2563eb;
-  --brand-gold: #f6c343;
-  --brand-ink: #020617;
-  --ring-offset: rgba(37, 99, 235, 0.12);
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-surface-muted: var(--surface-muted);
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #020617;
-    --foreground: #e2e8f0;
-    --surface-page: #020617;
-    --surface-muted: #111827;
-    --surface-contrast: #0b1c3d;
+    --background: 0 0% 100%;
+    --foreground: 215 65% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 65% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 65% 14%;
+
+    --primary: 215 65% 14%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 218 75% 29%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 50% 95%;
+    --muted-foreground: 215 20% 40%;
+
+    --accent: 44 90% 62%;
+    --accent-foreground: 215 65% 14%;
+
+    --soft: 210 33% 98%;
+    --soft-foreground: 215 65% 14%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 218 75% 29%;
+
+    --radius: 0.75rem;
+
+    --gradient-hero: linear-gradient(135deg, hsl(215 65% 14%) 0%, hsl(218 75% 29%) 100%);
+    --gradient-cta: linear-gradient(135deg, hsl(218 75% 29%) 0%, hsl(44 90% 62%) 100%);
+
+    --shadow-soft: 0 4px 24px -4px hsl(215deg 65% 14% / 0.08);
+    --shadow-medium: 0 8px 32px -8px hsl(215deg 65% 14% / 0.12);
+    --shadow-strong: 0 16px 48px -12px hsl(215deg 65% 14% / 0.16);
+
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --surface-page: hsl(var(--background));
+    --surface-muted: hsl(var(--soft));
+    --surface-contrast: hsl(var(--secondary) / 0.08);
+    --brand-primary: hsl(var(--primary));
+    --brand-primary-light: hsl(218 75% 45%);
+    --accent-pill: hsl(210 33% 96%);
+    --text-primary: hsl(var(--foreground));
+    --text-secondary: hsl(var(--muted-foreground));
+    --card-background: hsl(var(--card));
+    --card-elevated: hsl(var(--soft));
+    --card-border: hsl(var(--border));
+    --ring-offset: hsla(218, 75%, 29%, 0.25);
+  }
+
+  * {
+    box-sizing: border-box;
+    @apply border-border;
+  }
+
+  body {
+    min-height: 100vh;
+    font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    @apply bg-background text-foreground antialiased;
+  }
+
+  body[class] {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ::selection {
+    background: hsla(218, 75%, 29%, 0.2);
+    color: hsl(var(--primary-foreground));
   }
 }
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  background: var(--surface-page);
-  color: var(--foreground);
-  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-::selection {
-  background: rgba(18, 59, 130, 0.2);
-  color: var(--surface-contrast);
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-surface-muted: hsl(var(--soft));
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-geist-mono);
 }

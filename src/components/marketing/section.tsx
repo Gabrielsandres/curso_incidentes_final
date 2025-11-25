@@ -8,19 +8,16 @@ type MarketingSectionProps = {
 };
 
 const backgroundClassNames: Record<NonNullable<MarketingSectionProps["background"]>, string> = {
-  default: "bg-[var(--surface-page)]",
-  muted: "bg-[var(--surface-muted)]",
-  accent: "bg-[var(--surface-contrast)] text-slate-50",
-  dark: "bg-slate-900 text-slate-50",
+  default: "bg-white text-slate-900",
+  muted: "bg-[#030b1f] text-white",
+  accent: "bg-gradient-to-br from-[#04122c] via-[#030b1f] to-[#010512] text-white",
+  dark: "bg-[#010512] text-white",
 };
 
 export function MarketingSection({ id, background = "default", children, className }: MarketingSectionProps) {
   return (
-    <section
-      id={id}
-      className={`${backgroundClassNames[background]} ${background === "default" ? "text-slate-900" : ""}`}
-    >
-      <div className={`mx-auto w-full max-w-6xl px-6 py-16 sm:py-20 ${className ?? ""}`.trim()}>{children}</div>
+    <section id={id} className={backgroundClassNames[background]}>
+      <div className={`mx-auto w-full max-w-6xl px-6 py-20 sm:py-24 ${className ?? ""}`.trim()}>{children}</div>
     </section>
   );
 }
@@ -34,27 +31,29 @@ type SectionHeaderProps = {
 };
 
 export function SectionHeader({ title, subtitle, eyebrow, align = "left", tone = "default" }: SectionHeaderProps) {
+  const isCenter = align === "center";
+  const isLight = tone === "light";
+  const baseTextColor = isLight ? "text-white" : "text-slate-900";
+  const subtitleColor = isLight ? "text-slate-200" : "text-slate-600";
+  const pillClasses = isLight
+    ? "border border-white/25 bg-white/10 text-white"
+    : "bg-[var(--accent-pill)] text-[#0f172a]";
+
   return (
     <div
-      className={`mx-auto flex max-w-3xl flex-col gap-3 ${align === "center" ? "text-center" : ""} ${
-        tone === "light" ? "text-slate-100" : "text-slate-900"
+      className={`mx-auto flex w-full max-w-3xl flex-col gap-4 ${isCenter ? "items-center text-center" : ""} ${
+        isLight ? "text-white" : "text-slate-900"
       }`}
     >
       {eyebrow ? (
         <span
-          className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
-            tone === "light"
-              ? "border border-white/30 bg-white/10 text-slate-50"
-              : "border border-sky-300 bg-sky-50 text-sky-800"
-          }`}
+          className={`inline-flex items-center justify-center rounded-full px-4 py-1 text-[0.75rem] font-semibold uppercase tracking-[0.12em] ${pillClasses}`}
         >
           {eyebrow}
         </span>
       ) : null}
-      <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h2>
-      {subtitle ? (
-        <p className={`text-base ${tone === "light" ? "text-slate-200" : "text-slate-600"}`}>{subtitle}</p>
-      ) : null}
+      <h2 className={`text-[2.4rem] font-bold leading-[1.2] tracking-tight ${baseTextColor}`}>{title}</h2>
+      {subtitle ? <p className={`max-w-3xl text-lg leading-relaxed ${subtitleColor}`}>{subtitle}</p> : null}
     </div>
   );
 }
