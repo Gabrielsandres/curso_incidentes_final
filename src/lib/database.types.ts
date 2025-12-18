@@ -171,6 +171,31 @@ export interface Database {
         };
         Relationships: [];
       };
+      profiles: {
+        Row: {
+          id: string;
+          role: Database["public"]["Enums"]["user_role"];
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          role?: Database["public"]["Enums"]["user_role"];
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          role?: Database["public"]["Enums"]["user_role"];
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey";
+            columns: ["id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       orders: {
         Row: {
           id: string;
@@ -363,6 +388,7 @@ export interface Database {
       enrollment_status: "ACTIVE" | "INACTIVE" | "COMPLETED";
       lesson_progress_status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
       coupon_discount_type: "PERCENTAGE" | "FIXED";
+      user_role: "student" | "admin";
     };
     CompositeTypes: {
       [_ in never]: never;

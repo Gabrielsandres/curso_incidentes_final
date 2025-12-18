@@ -13,6 +13,7 @@ import type {
   MaterialRow,
   ModuleRow,
   ModuleWithLessons,
+  ModuleForLessonOption,
 } from "@/lib/courses/types";
 
 type SupabaseServerClient = SupabaseClient<Database>;
@@ -25,6 +26,10 @@ type CourseQueryResult = CourseRow & {
 
 type LessonQueryResult = LessonRow & {
   materials: MaterialRow[] | null;
+};
+
+type ModuleWithCourse = ModuleRow & {
+  courses: { slug: string; title: string } | null;
 };
 
 async function resolveClient(client?: SupabaseServerClient) {
@@ -120,6 +125,43 @@ export async function getCourseWithContent(
     ...course,
     modules,
   };
+}
+
+export async function getModulesForLessonForm(client?: SupabaseServerClient): Promise<ModuleForLessonOption[]> {
+  const supabase = await resolveClient(client);
+  const { data, error } = await supabase
+    .from("modules")
+    .select(
+      `
+        id,
+        course_id,
+        title,
+        description,
+        position,
+        courses:course_id (
+          slug,
+          title
+        )
+      `,
+    )
+    .order("created_at", { ascending: true })
+    .order("position", { ascending: true });
+
+  if (error) {
+    logger.error("Falha ao carregar modulos para cadastro de aula", error.message);
+    return [];
+  }
+
+  const modules = (data as ModuleWithCourse[] | null) ?? [];
+
+  return modules.map((module) => ({
+    id: module.id,
+    title: module.title,
+    position: module.position,
+    courseId: module.course_id,
+    courseSlug: module.courses?.slug ?? "",
+    courseTitle: module.courses?.title ?? "",
+  }));
 }
 
 export async function getLessonWithCourseContext(

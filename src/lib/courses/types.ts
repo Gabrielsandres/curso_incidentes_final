@@ -15,6 +15,15 @@ export type ModuleWithLessons = ModuleRow & {
   lessons: LessonWithMaterials[];
 };
 
+export type ModuleForLessonOption = {
+  id: string;
+  title: string;
+  position: number;
+  courseId: string;
+  courseSlug: string;
+  courseTitle: string;
+};
+
 export type CourseWithContent = CourseRow & {
   modules: ModuleWithLessons[];
 };

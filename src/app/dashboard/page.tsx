@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { fetchUserRole } from "@/lib/auth/roles";
 import { getAvailableCourses } from "@/lib/courses/queries";
 import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -27,6 +28,7 @@ export default async function DashboardPage() {
     redirect(`/login?${search.toString()}`);
   }
 
+  const role = await fetchUserRole(supabase, user.id);
   const courses = await getAvailableCourses(supabase);
 
   return (
@@ -50,6 +52,24 @@ export default async function DashboardPage() {
             ser vistos após entrar no curso.
           </p>
         </section>
+
+        {role === "admin" ? (
+          <section className="flex flex-col justify-between gap-4 rounded-2xl border border-dashed border-slate-300 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Ações do admin</p>
+              <h2 className="text-lg font-semibold text-slate-900">Cadastrar nova aula</h2>
+              <p className="text-sm text-slate-600">
+                Adicione aulas em módulos existentes. Apenas perfis com role admin conseguem acessar o formulário.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/aulas/nova"
+              className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+            >
+              Cadastrar aula
+            </Link>
+          </section>
+        ) : null}
 
         <section className="space-y-4">
           <div>

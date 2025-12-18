@@ -3,12 +3,18 @@ import { createServerClient } from "@supabase/ssr";
 
 import type { Database } from "@/lib/database.types";
 import { getEnv } from "@/lib/env";
+import { fetchUserRole } from "@/lib/auth/roles";
 
-const PROTECTED_ROUTES = ["/dashboard", "/curso"];
+const PROTECTED_ROUTES = ["/dashboard", "/curso", "/admin"];
+const ADMIN_ROUTES = ["/admin", "/dashboard/aulas"];
 const AUTH_ROUTES = ["/login"];
 
 function isProtectedPath(path: string) {
   return PROTECTED_ROUTES.some((route) => path === route || path.startsWith(`${route}/`));
+}
+
+function isAdminPath(path: string) {
+  return ADMIN_ROUTES.some((route) => path === route || path.startsWith(`${route}/`));
 }
 
 export async function middleware(request: NextRequest) {
@@ -62,9 +68,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
+  if (user && isAdminPath(path)) {
+    const role = await fetchUserRole(supabase, user.id);
+
+    if (role !== "admin") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
   return response;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/curso/:path*", "/login"],
+  matcher: ["/dashboard/:path*", "/curso/:path*", "/admin/:path*", "/login"],
 };
