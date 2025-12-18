@@ -16,7 +16,7 @@ const initialCreateLessonState: CreateLessonFormState = {
 };
 
 export function CreateLessonForm({ modules }: CreateLessonFormProps) {
-  const [state, formAction] = useActionState<CreateLessonFormState>(
+  const [state, formAction] = useActionState<CreateLessonFormState, FormData>(
     createLessonAction,
     initialCreateLessonState,
   );
