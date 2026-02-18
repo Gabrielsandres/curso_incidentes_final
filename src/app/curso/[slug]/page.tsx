@@ -10,7 +10,7 @@ import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Curso | Gestao de Incidentes",
+  title: "Curso | Gestão de Incidentes",
 };
 
 type CoursePageProps = {

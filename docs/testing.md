@@ -33,4 +33,20 @@
    - Opcional: definir `SENTRY_DSN` e forcar erro (ex.: credenciais invalidas) para validar envio ao dashboard Sentry.
 
 7. **Migracoes**
-   - Executar SQL `supabase/migrations/0001_initial_schema.sql` e confirmar existencia das tabelas principais (`courses`, `modules`, `orders`, `institutional_leads`, etc.).
+   - Executar em ordem:
+     - `supabase/migrations/0001_initial_schema.sql`
+     - `supabase/migrations/0002_roles_and_profiles.sql`
+     - `supabase/migrations/0003_lessons_materials_admin_policies.sql`
+     - `supabase/migrations/0004_institutional_leads_rls.sql`
+   - Confirmar existencia das tabelas principais (`courses`, `modules`, `orders`, `institutional_leads`, etc.) e policies de RLS.
+
+## Status de retomada (2026-02-18)
+
+1. **/login -> /dashboard**
+   - Status: Pendente validacao manual no ambiente Supabase atual.
+2. **Aluno acessa /curso/[slug] e /curso/[slug]/aula/[lessonId]**
+   - Status: Pendente validacao manual com dados reais de curso/aula.
+3. **Admin acessa /dashboard/aulas/nova e cadastra aula**
+   - Status: Pendente validacao manual com usuario `admin` em `profiles`.
+4. **Formulario institucional salva lead**
+   - Status: Pendente validacao manual apos configurar `SUPABASE_SERVICE_ROLE_KEY`.

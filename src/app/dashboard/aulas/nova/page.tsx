@@ -10,7 +10,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CreateLessonForm } from "./lesson-form";
 
 export const metadata: Metadata = {
-  title: "Nova aula | Gestao de Incidentes",
+  title: "Nova aula | Gestão de Incidentes",
 };
 
 export default async function NewLessonPage() {
@@ -42,7 +42,7 @@ export default async function NewLessonPage() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex flex-col">
-            <span className="text-base font-semibold text-slate-900">Gestao de Incidentes</span>
+            <span className="text-base font-semibold text-slate-900">Gestão de Incidentes</span>
             <span className="text-xs text-slate-500">Cadastro de aulas (admin)</span>
           </div>
           <div className="flex items-center gap-3">

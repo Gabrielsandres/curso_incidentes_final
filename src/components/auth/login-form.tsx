@@ -37,7 +37,7 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
         });
 
         if (signInError) {
-          setError("Credenciais invalidas. Confira e tente novamente.");
+          setError("Credenciais inválidas. Confira e tente novamente.");
           return;
         }
 

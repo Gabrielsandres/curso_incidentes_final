@@ -5,12 +5,16 @@
 ## Passos sugeridos
 
 1. **Criar projeto Supabase**
-   - Aplicar migracoes de `supabase/migrations/0001_initial_schema.sql`.
+   - Aplicar migracoes em ordem:
+     - `supabase/migrations/0001_initial_schema.sql`
+     - `supabase/migrations/0002_roles_and_profiles.sql`
+     - `supabase/migrations/0003_lessons_materials_admin_policies.sql`
+     - `supabase/migrations/0004_institutional_leads_rls.sql`
    - Ativar autenticacao Email/Password e, opcionalmente, SMTP transacional.
 
 2. **Criar projeto na Vercel**
    - Importar o repositorio.
-   - Definir `Framework = Next.js` e `Root Directory = app`.
+   - Definir `Framework = Next.js` e manter `Root Directory` vazio (raiz do repositorio).
    - `Build Command = npm run build` e `Install Command = npm install`.
    - Habilitar Node 20.
 

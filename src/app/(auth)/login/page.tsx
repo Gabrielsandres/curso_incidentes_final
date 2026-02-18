@@ -4,7 +4,7 @@ import Link from "next/link";
 import { LoginForm } from "@/components/auth/login-form";
 
 export const metadata: Metadata = {
-  title: "Entrar | Gestao de Incidentes",
+  title: "Entrar | Gestão de Incidentes",
 };
 
 type LoginPageProps = {

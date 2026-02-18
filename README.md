@@ -18,13 +18,13 @@ Plataforma Next.js que serve de base para o produto "Gestao de Incidentes". A Et
 
 ## Variaveis de ambiente
 
-Ajuste os valores em `.env.local` (modelo em `.env.example`). Caso nao utilize Sentry ou checkout, deixe as variaveis vazias ou remova-as.
+Ajuste os valores em `.env.local` (modelo em `.env.example`).
 
 | Variavel | Descricao |
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase. |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave anon do Supabase. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Opcional, usado para tarefas administrativas. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Obrigatorio para gravar `institutional_leads` via server action com service role. |
 | `SUPABASE_JWT_SECRET` | Opcional, necessario para webhooks/verificacao. |
 | `NEXT_PUBLIC_APP_URL` | URL publica da aplicacao (ex: `https://demo.vercel.app`). |
 | `NEXT_PUBLIC_CHECKOUT_URL_ESSENCIAL` | URL do checkout para o plano Essencial (opcional). |
@@ -38,8 +38,12 @@ Ajuste os valores em `.env.local` (modelo em `.env.example`). Caso nao utilize S
 ## Migracoes do banco
 
 1. Abra o SQL Editor do projeto Supabase ou utilize `supabase cli`.
-2. Rode o conteudo de `supabase/migrations/0001_initial_schema.sql`.
-3. Verifique se as tabelas e enums foram criados conforme esperado.
+2. Rode as migracoes em ordem:
+   - `supabase/migrations/0001_initial_schema.sql`
+   - `supabase/migrations/0002_roles_and_profiles.sql`
+   - `supabase/migrations/0003_lessons_materials_admin_policies.sql`
+   - `supabase/migrations/0004_institutional_leads_rls.sql`
+3. Verifique se as tabelas, enums e policies foram criados conforme esperado.
 
 ## Autenticacao de teste
 
@@ -51,11 +55,18 @@ Ajuste os valores em `.env.local` (modelo em `.env.example`). Caso nao utilize S
 | Comando | Descricao |
 | --- | --- |
 | `npm run dev` | Desenvolvimento (http://localhost:3000). |
-| `npm run lint` | Executa `next lint`. |
+| `npm run lint` | Executa ESLint no projeto (`eslint . --max-warnings=0`). |
 | `npm run test` | Roda testes unitarios (Vitest). |
 | `npm run build` | Gera build de producao. |
 | `npm run start` | Sobe o build gerado. |
 | `npm run typecheck` | Checagem de tipos sem emitir codigo. |
+
+## Como rodar localmente
+
+1. `npm install`
+2. Configure `.env.local` a partir de `.env.example`.
+3. Aplique as migracoes do banco em ordem.
+4. `npm run dev` e abra `http://localhost:3000`.
 
 ## Rota de saude
 
@@ -74,21 +85,20 @@ Workflow GitHub Actions em `.github/workflows/ci.yml` valida cada push/PR (`npm 
 ## Deploy sugerido
 
 1. **Supabase**: criar projeto, aplicar migracoes, configurar autenticacao email/senha.
-2. **Vercel**: importar repositorio, definir `ROOT DIRECTORY = app`, usar build `npm run build` e install `npm install`. Configure as variaveis de ambiente.
+2. **Vercel**: importar repositorio, manter `Root Directory` vazio (raiz), usar build `npm run build` e install `npm install`. Configure as variaveis de ambiente.
 3. Defina `NEXT_PUBLIC_APP_URL` com a URL de homolog para alinhar metadata e health check.
 
 ## Estrutura de pastas
 
 ```
-app/
- +- src/
-     +- app/             # Rotas App Router (login, dashboard, health, landing)
-     +- components/      # Componentes reutilizaveis
-     +- lib/             # Helpers (env, logger, schemas, supabase clients)
- +- supabase/            # Migracoes SQL
- +- .github/workflows/   # Pipelines CI
- +- sentry.*.config.ts   # Configuracao Sentry
- +- middleware.ts        # Protecao de rotas via Supabase
+src/
+ +- app/                 # Rotas App Router (landing, auth, dashboard, curso, admin)
+ +- components/          # Componentes reutilizaveis
+ +- lib/                 # Helpers (env, logger, schemas, supabase clients)
+supabase/                # Migracoes SQL
+docs/                    # Documentacao de deploy/testes/changelog
+.github/workflows/       # Pipelines CI
+middleware.ts            # Protecao de rotas via Supabase
 ```
 
 ## Etapa 0: entregaveis

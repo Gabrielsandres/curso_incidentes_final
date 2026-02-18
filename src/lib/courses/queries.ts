@@ -148,7 +148,7 @@ export async function getModulesForLessonForm(client?: SupabaseServerClient): Pr
     .order("position", { ascending: true });
 
   if (error) {
-    logger.error("Falha ao carregar modulos para cadastro de aula", error.message);
+    logger.error("Falha ao carregar módulos para cadastro de aula", error.message);
     return [];
   }
 
@@ -213,21 +213,21 @@ export async function getLessonWithCourseContext(
     .eq("id", lesson.module_id)
     .maybeSingle();
 
-  const module = moduleResponse.data as ModuleRow | null;
+  const lessonModule = moduleResponse.data as ModuleRow | null;
   const moduleError = moduleResponse.error;
 
   if (moduleError) {
-    logger.error("Falha ao carregar modulo da aula", { lessonId, moduleId: lesson.module_id, error: moduleError.message });
+    logger.error("Falha ao carregar módulo da aula", { lessonId, moduleId: lesson.module_id, error: moduleError.message });
   }
 
-  if (!module) {
+  if (!lessonModule) {
     return null;
   }
 
   const courseResponse = await supabase
     .from("courses")
     .select("id, slug, title, description, created_at, updated_at")
-    .eq("id", module.course_id)
+    .eq("id", lessonModule.course_id)
     .eq("slug", courseSlug)
     .maybeSingle();
 
@@ -237,8 +237,8 @@ export async function getLessonWithCourseContext(
   if (courseError) {
     logger.error("Falha ao carregar curso vinculado a aula", {
       lessonId,
-      moduleId: module.id,
-      courseId: module.course_id,
+      moduleId: lessonModule.id,
+      courseId: lessonModule.course_id,
       error: courseError.message,
     });
   }
@@ -254,7 +254,7 @@ export async function getLessonWithCourseContext(
 
   return {
     course,
-    module,
+    module: lessonModule,
     lesson: normalizedLesson,
   };
 }

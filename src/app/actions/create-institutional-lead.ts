@@ -4,7 +4,7 @@ import { captureException } from "@sentry/nextjs";
 
 import { logger } from "@/lib/logger";
 import { institutionalLeadSchema } from "@/lib/marketing/institutional-lead-schema";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export type InstitutionalLeadFormState = {
   success: boolean;
@@ -42,7 +42,7 @@ export async function submitInstitutionalLead(
   }
 
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { error } = await supabase.from("institutional_leads").insert({
       organization: parsed.data.organization,
       contact_name: parsed.data.contactName,
@@ -73,6 +73,14 @@ export async function submitInstitutionalLead(
       message: "Recebemos suas informações! Em até 24h úteis entraremos em contato.",
     };
   } catch (error) {
+    if (error instanceof Error && error.message.includes("SUPABASE_SERVICE_ROLE_KEY")) {
+      logger.error("Configuração ausente para salvar lead institucional", error.message);
+      return {
+        success: false,
+        message: "Configuração de ambiente incompleta. Tente novamente mais tarde.",
+      };
+    }
+
     logger.error(
       "Erro inesperado ao registrar lead institucional",
       error instanceof Error ? error.message : String(error),
