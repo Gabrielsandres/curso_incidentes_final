@@ -150,7 +150,7 @@ export function CreateLessonForm({
               </option>
               {moduleOptions.map((moduleOption) => (
                 <option key={moduleOption.id} value={moduleOption.id}>
-                  {moduleOption.title} (ordem {moduleOption.position})
+                  {moduleOption.title}
                 </option>
               ))}
             </select>
