@@ -62,12 +62,20 @@ export default async function DashboardPage() {
                 Adicione aulas em módulos existentes. Apenas perfis com role admin conseguem acessar o formulário.
               </p>
             </div>
-            <Link
-              href="/dashboard/aulas/nova"
-              className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
-            >
-              Cadastrar aula
-            </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/dashboard/aulas/nova"
+                className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+              >
+                Cadastrar aula
+              </Link>
+              <Link
+                href="/dashboard/aulas/nova?createModule=1&askCreateLesson=1"
+                className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              >
+                Criar módulo
+              </Link>
+            </div>
           </section>
         ) : null}
 

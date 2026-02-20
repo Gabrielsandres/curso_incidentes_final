@@ -1,4 +1,4 @@
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
 import type { Database } from "@/lib/database.types";
@@ -6,7 +6,6 @@ import { getEnv } from "@/lib/env";
 
 export async function createSupabaseServerClient() {
   const cookieStore = await Promise.resolve(cookies());
-  const headersList = await Promise.resolve(headers());
   const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY } = getEnv();
 
   return createServerClient<Database>(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, {
@@ -39,9 +38,6 @@ export async function createSupabaseServerClient() {
           }
         });
       },
-    },
-    global: {
-      headers: Object.fromEntries(headersList.entries()),
     },
   });
 }

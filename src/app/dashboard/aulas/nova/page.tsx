@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { fetchUserRole } from "@/lib/auth/roles";
-import { getModulesForLessonForm } from "@/lib/courses/queries";
+import { getAvailableCourses, getModulesForLessonForm } from "@/lib/courses/queries";
 import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { CreateLessonForm } from "./lesson-form";
@@ -13,7 +13,17 @@ export const metadata: Metadata = {
   title: "Nova aula | Gestão de Incidentes",
 };
 
-export default async function NewLessonPage() {
+type NewLessonPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function NewLessonPage({ searchParams }: NewLessonPageProps) {
+  const params = searchParams ? await searchParams : {};
+  const createModuleRaw = Array.isArray(params.createModule) ? params.createModule[0] : params.createModule;
+  const askCreateLessonRaw = Array.isArray(params.askCreateLesson) ? params.askCreateLesson[0] : params.askCreateLesson;
+  const openCreateModuleOnLoad = createModuleRaw === "1";
+  const askToCreateLessonAfterModule = askCreateLessonRaw === "1";
+
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -36,6 +46,7 @@ export default async function NewLessonPage() {
   }
 
   const modules = await getModulesForLessonForm(supabase);
+  const courses = await getAvailableCourses(supabase);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
@@ -67,7 +78,12 @@ export default async function NewLessonPage() {
           </p>
         </div>
 
-        <CreateLessonForm modules={modules} />
+        <CreateLessonForm
+          modules={modules}
+          courses={courses}
+          openCreateModuleOnLoad={openCreateModuleOnLoad}
+          askToCreateLessonAfterModule={askToCreateLessonAfterModule}
+        />
       </main>
     </div>
   );
