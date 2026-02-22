@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { CourseManager } from "@/app/admin/course-manager";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { fetchUserRole } from "@/lib/auth/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Admin | Gestão de Incidentes",
+  title: "Admin | Gestao de Incidentes",
 };
 
 export default async function AdminPage() {
@@ -32,13 +33,22 @@ export default async function AdminPage() {
     redirect("/dashboard");
   }
 
+  const { data: courses, error: coursesError } = await supabase
+    .from("courses")
+    .select("id, slug, title, description, cover_image_url, created_at")
+    .order("created_at", { ascending: true });
+
+  if (coursesError) {
+    console.error("Failed to load courses for admin page", coursesError.message);
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex flex-col">
-            <span className="text-base font-semibold text-slate-900">Gestão de Incidentes</span>
-            <span className="text-xs text-slate-500">Área restrita (admin)</span>
+            <span className="text-base font-semibold text-slate-900">Gestao de Incidentes</span>
+            <span className="text-xs text-slate-500">Area restrita (admin)</span>
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -55,12 +65,13 @@ export default async function AdminPage() {
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-6 py-10">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Admin</p>
-          <h1 className="mt-2 text-2xl font-semibold text-slate-900">Área administrativa</h1>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-900">Area administrativa</h1>
           <p className="mt-2 text-sm text-slate-600">
-            Este espaço está protegido por role. Apenas usuários com perfil <strong>admin</strong> passam do middleware e
-            desta checagem no servidor. Construa funcionalidades administrativas aqui com segurança adicional.
+            Gerencie cursos, incluindo capa de destaque, sem depender de ajustes manuais no banco.
           </p>
         </div>
+
+        <CourseManager courses={courses ?? []} />
       </main>
     </div>
   );

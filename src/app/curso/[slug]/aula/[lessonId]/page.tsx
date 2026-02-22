@@ -73,7 +73,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
           <span className="text-slate-900">{context.lesson.title}</span>
         </nav>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
+        <div className="space-y-6">
           <LessonPlayer lesson={context.lesson} initialIsCompleted={context.lesson.isCompleted} />
           <LessonMaterials materials={context.lesson.materials} />
         </div>

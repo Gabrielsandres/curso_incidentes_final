@@ -97,6 +97,7 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
         slug,
         title,
         description,
+        cover_image_url,
         created_at,
         updated_at,
         modules (
@@ -133,6 +134,7 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
       slug: course.slug,
       title: course.title,
       description: course.description,
+      cover_image_url: course.cover_image_url,
       created_at: course.created_at,
       updated_at: course.updated_at,
       ...buildProgressStats(lessonIds.length, completedLessons),
@@ -154,6 +156,7 @@ export async function getCourseWithContent(
         slug,
         title,
         description,
+        cover_image_url,
         created_at,
         updated_at,
         modules (
@@ -175,6 +178,13 @@ export async function getCourseWithContent(
               id,
               lesson_id,
               label,
+              description,
+              source_kind,
+              storage_bucket,
+              storage_path,
+              mime_type,
+              file_size_bytes,
+              original_file_name,
               material_type,
               resource_url,
               created_at
@@ -287,6 +297,13 @@ export async function getLessonWithCourseContext(
           id,
           lesson_id,
           label,
+          description,
+          source_kind,
+          storage_bucket,
+          storage_path,
+          mime_type,
+          file_size_bytes,
+          original_file_name,
           material_type,
           resource_url,
           created_at
@@ -325,7 +342,7 @@ export async function getLessonWithCourseContext(
 
   const courseResponse = await supabase
     .from("courses")
-    .select("id, slug, title, description, created_at, updated_at")
+    .select("id, slug, title, description, cover_image_url, created_at, updated_at")
     .eq("id", lessonModule.course_id)
     .eq("slug", courseSlug)
     .maybeSingle();

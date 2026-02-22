@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { resolveCourseCoverUrl } from "@/lib/courses/covers";
 import { fetchUserRole } from "@/lib/auth/roles";
 import { getAvailableCourses } from "@/lib/courses/queries";
 import { logger } from "@/lib/logger";
@@ -71,13 +72,19 @@ export default async function DashboardPage() {
         {role === "admin" ? (
           <section className="flex flex-col justify-between gap-4 rounded-2xl border border-dashed border-slate-300 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
             <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Acoes do admin</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Ações do administrador</p>
               <h2 className="text-lg font-semibold text-slate-900">Cadastrar nova aula</h2>
-              <p className="text-sm text-slate-600">
-                Adicione aulas em modulos existentes. Apenas perfis com role admin conseguem acessar o formulario.
+              <p className="text-sm text-slate-600">  
+                Adicione aulas em módulos existentes. Apenas perfis com permissão de administrador conseguem acessar o formulário.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/admin"
+                className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              >
+                Gerenciar cursos
+              </Link>
               <Link
                 href="/dashboard/aulas/nova"
                 className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
@@ -88,7 +95,7 @@ export default async function DashboardPage() {
                 href="/dashboard/aulas/nova?createModule=1&askCreateLesson=1"
                 className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
               >
-                Criar modulo
+                Criar módulo
               </Link>
             </div>
           </section>
@@ -109,7 +116,20 @@ export default async function DashboardPage() {
               {courses.map((course) => (
                 <article key={course.id} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Curso</p>
-                  <h3 className="mt-1 text-lg font-semibold text-slate-900">{course.title}</h3>
+                  <div
+                    className="mt-2 overflow-hidden rounded-xl border border-slate-200 bg-slate-900"
+                    style={{
+                      backgroundImage: `linear-gradient(to top, rgba(15,23,42,0.92), rgba(15,23,42,0.18)), url('${resolveCourseCoverUrl(
+                        course.cover_image_url,
+                      )}')`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  >
+                    <div className="flex min-h-36 items-end p-4">
+                      <h3 className="text-lg font-semibold leading-tight text-white">{course.title}</h3>
+                    </div>
+                  </div>
                   {course.description ? <p className="mt-2 flex-1 text-sm text-slate-600">{course.description}</p> : null}
 
                   <div className="mt-4 space-y-1.5">

@@ -4,6 +4,7 @@ export type CourseRow = Database["public"]["Tables"]["courses"]["Row"];
 export type ModuleRow = Database["public"]["Tables"]["modules"]["Row"];
 export type LessonRow = Database["public"]["Tables"]["lessons"]["Row"];
 export type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+export type MaterialSourceKind = "LINK" | "UPLOAD";
 export type LessonProgressStatus = Database["public"]["Enums"]["lesson_progress_status"];
 
 export type ProgressStats = {

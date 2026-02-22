@@ -15,6 +15,7 @@ export interface Database {
           slug: string;
           title: string;
           description: string | null;
+          cover_image_url: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -23,6 +24,7 @@ export interface Database {
           slug: string;
           title: string;
           description?: string | null;
+          cover_image_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -31,6 +33,7 @@ export interface Database {
           slug?: string;
           title?: string;
           description?: string | null;
+          cover_image_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -112,24 +115,45 @@ export interface Database {
           id: string;
           lesson_id: string;
           label: string;
+          description: string | null;
+          source_kind: string;
+          storage_bucket: string | null;
+          storage_path: string | null;
+          mime_type: string | null;
+          file_size_bytes: number | null;
+          original_file_name: string | null;
           material_type: string;
-          resource_url: string;
+          resource_url: string | null;
           created_at: string;
         };
         Insert: {
           id?: string;
           lesson_id: string;
           label: string;
+          description?: string | null;
+          source_kind?: string;
+          storage_bucket?: string | null;
+          storage_path?: string | null;
+          mime_type?: string | null;
+          file_size_bytes?: number | null;
+          original_file_name?: string | null;
           material_type: string;
-          resource_url: string;
+          resource_url?: string | null;
           created_at?: string;
         };
         Update: {
           id?: string;
           lesson_id?: string;
           label?: string;
+          description?: string | null;
+          source_kind?: string;
+          storage_bucket?: string | null;
+          storage_path?: string | null;
+          mime_type?: string | null;
+          file_size_bytes?: number | null;
+          original_file_name?: string | null;
           material_type?: string;
-          resource_url?: string;
+          resource_url?: string | null;
           created_at?: string;
         };
         Relationships: [
