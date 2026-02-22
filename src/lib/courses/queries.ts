@@ -8,12 +8,14 @@ import type {
   CourseSummary,
   CourseWithContent,
   LessonRow,
+  LessonProgressStatus,
   LessonWithCourseContext,
   LessonWithMaterials,
   MaterialRow,
   ModuleRow,
   ModuleWithLessons,
   ModuleForLessonOption,
+  ProgressStats,
 } from "@/lib/courses/types";
 
 type SupabaseServerClient = SupabaseClient<Database>;
@@ -24,6 +26,10 @@ type CourseQueryResult = CourseRow & {
   })[] | null;
 };
 
+type CourseSummaryQueryResult = CourseRow & {
+  modules: ({ lessons: Pick<LessonRow, "id">[] | null } & Pick<ModuleRow, "id">)[] | null;
+};
+
 type LessonQueryResult = LessonRow & {
   materials: MaterialRow[] | null;
 };
@@ -31,6 +37,11 @@ type LessonQueryResult = LessonRow & {
 type ModuleWithCourse = ModuleRow & {
   courses: { slug: string; title: string } | null;
 };
+
+type LessonProgressResult = Pick<
+  Database["public"]["Tables"]["lesson_progress"]["Row"],
+  "lesson_id" | "status" | "completed_at"
+>;
 
 async function resolveClient(client?: SupabaseServerClient) {
   if (client) {
@@ -40,11 +51,62 @@ async function resolveClient(client?: SupabaseServerClient) {
   return createSupabaseServerClient();
 }
 
-export async function getAvailableCourses(client?: SupabaseServerClient): Promise<CourseSummary[]> {
+function buildProgressStats(totalLessons: number, completedLessons: number): ProgressStats {
+  const completionPercentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+  return { totalLessons, completedLessons, completionPercentage };
+}
+
+async function getLessonProgressByLessonId(
+  supabase: SupabaseServerClient,
+  userId: string | undefined,
+  lessonIds: string[],
+) {
+  const progressMap = new Map<string, LessonProgressResult>();
+
+  if (!userId || lessonIds.length === 0) {
+    return progressMap;
+  }
+
+  const { data, error } = await supabase
+    .from("lesson_progress")
+    .select("lesson_id, status, completed_at")
+    .eq("user_id", userId)
+    .in("lesson_id", lessonIds);
+
+  if (error) {
+    logger.error("Falha ao carregar progresso das aulas", { userId, error: error.message });
+    return progressMap;
+  }
+
+  const progressRows = (data as LessonProgressResult[] | null) ?? [];
+
+  progressRows.forEach((progress) => {
+    progressMap.set(progress.lesson_id, progress);
+  });
+
+  return progressMap;
+}
+
+export async function getAvailableCourses(client?: SupabaseServerClient, userId?: string): Promise<CourseSummary[]> {
   const supabase = await resolveClient(client);
   const { data, error } = await supabase
     .from("courses")
-    .select("id, slug, title, description, created_at, updated_at")
+    .select(
+      `
+        id,
+        slug,
+        title,
+        description,
+        created_at,
+        updated_at,
+        modules (
+          id,
+          lessons (
+            id
+          )
+        )
+      `,
+    )
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -52,12 +114,36 @@ export async function getAvailableCourses(client?: SupabaseServerClient): Promis
     return [];
   }
 
-  return data ?? [];
+  const courses = (data as CourseSummaryQueryResult[] | null) ?? [];
+  const lessonsByCourse = courses.map((course) => ({
+    course,
+    lessonIds: (course.modules ?? []).flatMap((module) => (module.lessons ?? []).map((lesson) => lesson.id)),
+  }));
+
+  const uniqueLessonIds = Array.from(new Set(lessonsByCourse.flatMap((item) => item.lessonIds)));
+  const progressByLessonId = await getLessonProgressByLessonId(supabase, userId, uniqueLessonIds);
+
+  return lessonsByCourse.map(({ course, lessonIds }) => {
+    const completedLessons = lessonIds.reduce((total, lessonId) => {
+      const status = progressByLessonId.get(lessonId)?.status;
+      return total + (status === "COMPLETED" ? 1 : 0);
+    }, 0);
+    return {
+      id: course.id,
+      slug: course.slug,
+      title: course.title,
+      description: course.description,
+      created_at: course.created_at,
+      updated_at: course.updated_at,
+      ...buildProgressStats(lessonIds.length, completedLessons),
+    };
+  });
 }
 
 export async function getCourseWithContent(
   slug: string,
   client?: SupabaseServerClient,
+  userId?: string,
 ): Promise<CourseWithContent | null> {
   const supabase = await resolveClient(client);
   const { data, error } = await supabase
@@ -113,17 +199,29 @@ export async function getCourseWithContent(
     return null;
   }
 
+  const lessonIds = (course.modules ?? []).flatMap((module) => (module.lessons ?? []).map((lesson) => lesson.id));
+  const progressByLessonId = await getLessonProgressByLessonId(supabase, userId, lessonIds);
+
   const modules = (course.modules ?? []).map((module) => ({
     ...module,
     lessons: (module.lessons ?? []).map((lesson) => ({
       ...lesson,
       materials: lesson.materials ?? [],
+      progressStatus: (progressByLessonId.get(lesson.id)?.status ?? "NOT_STARTED") as LessonProgressStatus,
+      completedAt: progressByLessonId.get(lesson.id)?.completed_at ?? null,
+      isCompleted: progressByLessonId.get(lesson.id)?.status === "COMPLETED",
     })),
   })) as ModuleWithLessons[];
+
+  const completedLessons = modules.reduce(
+    (total, module) => total + module.lessons.reduce((moduleTotal, lesson) => moduleTotal + (lesson.isCompleted ? 1 : 0), 0),
+    0,
+  );
 
   return {
     ...course,
     modules,
+    ...buildProgressStats(lessonIds.length, completedLessons),
   };
 }
 
@@ -168,6 +266,7 @@ export async function getLessonWithCourseContext(
   courseSlug: string,
   lessonId: string,
   client?: SupabaseServerClient,
+  userId?: string,
 ): Promise<LessonWithCourseContext | null> {
   const supabase = await resolveClient(client);
   const {
@@ -231,7 +330,7 @@ export async function getLessonWithCourseContext(
     .eq("slug", courseSlug)
     .maybeSingle();
 
-  const course = courseResponse.data as CourseSummary | null;
+  const course = courseResponse.data as CourseRow | null;
   const courseError = courseResponse.error;
 
   if (courseError) {
@@ -247,13 +346,22 @@ export async function getLessonWithCourseContext(
     return null;
   }
 
+  const lessonProgressByLessonId = await getLessonProgressByLessonId(supabase, userId, [lesson.id]);
+  const lessonProgress = lessonProgressByLessonId.get(lesson.id);
+
   const normalizedLesson: LessonWithMaterials = {
     ...lesson,
     materials: lesson.materials ?? [],
+    progressStatus: (lessonProgress?.status ?? "NOT_STARTED") as LessonProgressStatus,
+    completedAt: lessonProgress?.completed_at ?? null,
+    isCompleted: lessonProgress?.status === "COMPLETED",
   };
 
   return {
-    course,
+    course: {
+      ...course,
+      ...buildProgressStats(0, 0),
+    },
     module: lessonModule,
     lesson: normalizedLesson,
   };

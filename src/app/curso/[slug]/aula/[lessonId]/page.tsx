@@ -34,7 +34,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
     redirect(`/login?${search.toString()}`);
   }
 
-  const context = await getLessonWithCourseContext(slug, lessonId, supabase);
+  const context = await getLessonWithCourseContext(slug, lessonId, supabase, user.id);
 
   if (!context) {
     notFound();
@@ -45,7 +45,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex flex-col">
-            <span className="text-base font-semibold text-slate-900">Gestǜo de Incidentes</span>
+            <span className="text-base font-semibold text-slate-900">Gestão de Incidentes</span>
             <span className="text-xs text-slate-500">Conteúdo restrito</span>
           </div>
           <div className="flex items-center gap-3">
@@ -74,7 +74,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
         </nav>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr),minmax(0,1fr)]">
-          <LessonPlayer lesson={context.lesson} />
+          <LessonPlayer lesson={context.lesson} initialIsCompleted={context.lesson.isCompleted} />
           <LessonMaterials materials={context.lesson.materials} />
         </div>
       </main>

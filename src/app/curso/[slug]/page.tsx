@@ -34,7 +34,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     redirect(`/login?${search.toString()}`);
   }
 
-  const course = await getCourseWithContent(slug, supabase);
+  const course = await getCourseWithContent(slug, supabase, user.id);
 
   if (!course) {
     notFound();
@@ -45,7 +45,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex flex-col">
-            <span className="text-base font-semibold text-slate-900">Gestǜo de Incidentes</span>
+            <span className="text-base font-semibold text-slate-900">Gestão de Incidentes</span>
             <span className="text-xs text-slate-500">Conteúdo restrito</span>
           </div>
           <div className="flex items-center gap-3">

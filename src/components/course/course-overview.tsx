@@ -6,7 +6,6 @@ type CourseOverviewProps = {
 
 export function CourseOverview({ course }: CourseOverviewProps) {
   const moduleCount = course.modules.length;
-  const lessonCount = course.modules.reduce((total, module) => total + module.lessons.length, 0);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -16,14 +15,27 @@ export function CourseOverview({ course }: CourseOverviewProps) {
 
       <dl className="mt-6 grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Módulos</dt>
+          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Modulos</dt>
           <dd className="text-2xl font-semibold text-slate-900">{moduleCount}</dd>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
           <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Aulas</dt>
-          <dd className="text-2xl font-semibold text-slate-900">{lessonCount}</dd>
+          <dd className="text-2xl font-semibold text-slate-900">{course.totalLessons}</dd>
         </div>
       </dl>
+
+      <div className="mt-6 space-y-2">
+        <div className="flex items-center justify-between text-sm font-medium text-slate-700">
+          <span>Progresso do curso</span>
+          <span>{course.completionPercentage}%</span>
+        </div>
+        <div className="h-2.5 overflow-hidden rounded-full bg-slate-200">
+          <div className="h-full rounded-full bg-sky-600 transition-all" style={{ width: `${course.completionPercentage}%` }} />
+        </div>
+        <p className="text-xs text-slate-500">
+          {course.completedLessons} de {course.totalLessons} aulas concluidas
+        </p>
+      </div>
     </section>
   );
 }
