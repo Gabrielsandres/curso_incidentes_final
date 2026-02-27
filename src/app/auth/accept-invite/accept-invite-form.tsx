@@ -25,7 +25,7 @@ function getUpdatePasswordErrorMessage(message: string | undefined) {
   }
 
   if (normalizedMessage.includes("jwt") || normalizedMessage.includes("session")) {
-    return "Link de convite invalido ou expirado. Solicite um novo convite ao administrador.";
+    return "Link invalido ou expirado. Solicite um novo link.";
   }
 
   return "Nao foi possivel definir a senha. Tente novamente.";
@@ -72,7 +72,7 @@ export function AcceptInviteForm() {
     const timeoutId = window.setTimeout(() => {
       resolveSession({
         sessionFound: false,
-        message: "Nao foi possivel validar o link. Solicite um novo convite ao administrador.",
+        message: "Nao foi possivel validar o link. Solicite um novo link.",
       });
     }, 7000);
 
@@ -125,7 +125,7 @@ export function AcceptInviteForm() {
               clearTimeout(timeoutId);
               resolveSession({
                 sessionFound: false,
-                message: "Link de convite invalido ou expirado. Solicite um novo convite ao administrador.",
+                message: "Link invalido ou expirado. Solicite um novo link.",
               });
               return;
             }
@@ -172,7 +172,7 @@ export function AcceptInviteForm() {
     event.preventDefault();
 
     if (!hasSession) {
-      setErrorMessage(sessionMessage || "Link de convite invalido ou expirado.");
+      setErrorMessage(sessionMessage || "Link invalido ou expirado.");
       return;
     }
 
@@ -244,7 +244,7 @@ export function AcceptInviteForm() {
       <div className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
         <h1 className="text-xl font-semibold text-slate-900">Convite indisponivel</h1>
         <p className="mt-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {sessionMessage || "Link de convite invalido ou expirado."}
+          {sessionMessage || "Link invalido ou expirado."}
         </p>
         <Link
           href="/login"
@@ -260,7 +260,7 @@ export function AcceptInviteForm() {
     <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="space-y-1">
         <h1 className="text-xl font-semibold text-slate-900">Definir senha</h1>
-        <p className="text-sm text-slate-600">Crie sua senha para concluir o cadastro.</p>
+        <p className="text-sm text-slate-600">Crie sua senha para concluir o acesso.</p>
       </div>
 
       {errorMessage || successMessage ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -92,6 +93,12 @@ export function LoginForm({ redirectTo, infoMessage }: LoginFormProps) {
           disabled={pending}
         />
       </label>
+
+      <div className="-mt-2 flex justify-end">
+        <Link href="/auth/forgot-password" className="text-xs font-medium text-sky-700 transition hover:text-sky-800">
+          Esqueci minha senha
+        </Link>
+      </div>
 
       <button
         type="submit"
