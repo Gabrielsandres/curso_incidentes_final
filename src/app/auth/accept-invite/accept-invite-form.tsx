@@ -48,6 +48,9 @@ export function AcceptInviteForm() {
     const searchParams = new URLSearchParams(window.location.search);
     const tokenHash = searchParams.get("token_hash");
     const tokenType = searchParams.get("type");
+    const hashParams = new URLSearchParams(window.location.hash.startsWith("#") ? window.location.hash.slice(1) : "");
+    const accessTokenFromHash = hashParams.get("access_token");
+    const refreshTokenFromHash = hashParams.get("refresh_token");
 
     function resolveSession({
       sessionFound,
@@ -94,6 +97,22 @@ export function AcceptInviteForm() {
 
     async function bootstrapSessionValidation() {
       try {
+        if (accessTokenFromHash && refreshTokenFromHash) {
+          const { error: setSessionError } = await supabase.auth.setSession({
+            access_token: accessTokenFromHash,
+            refresh_token: refreshTokenFromHash,
+          });
+
+          if (!setSessionError) {
+            if (window.location.hash) {
+              window.history.replaceState(window.history.state, "", `${window.location.pathname}${window.location.search}`);
+            }
+            clearTimeout(timeoutId);
+            resolveSession({ sessionFound: true });
+            return;
+          }
+        }
+
         if (tokenHash && tokenType) {
           const allowedTypes: ReadonlySet<string> = new Set(["invite", "recovery", "magiclink", "email", "email_change"]);
           if (allowedTypes.has(tokenType)) {
