@@ -2,17 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { CourseManager } from "@/app/admin/course-manager";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { getUserDisplayName } from "@/lib/auth/user-display-name";
+import { fetchUserProfile } from "@/lib/auth/profiles";
 import { fetchUserRole } from "@/lib/auth/roles";
+import { getUserDisplayName } from "@/lib/auth/user-display-name";
+import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { UserManager } from "./user-manager";
 
 export const metadata: Metadata = {
-  title: "Admin | Gestao de Incidentes",
+  title: "Usuarios | Admin",
 };
 
-export default async function AdminPage() {
+export default async function AdminUsersPage() {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -20,29 +22,21 @@ export default async function AdminPage() {
   } = await supabase.auth.getUser();
 
   if (error) {
-    console.error("Failed to load authenticated session", error.message);
+    logger.error("Failed to load authenticated session on admin users page", error.message);
   }
 
   if (!user) {
-    const search = new URLSearchParams({ redirectTo: "/admin" });
+    const search = new URLSearchParams({ redirectTo: "/admin/usuarios" });
     redirect(`/login?${search.toString()}`);
   }
 
   const role = await fetchUserRole(supabase, user.id);
-
   if (role !== "admin") {
     redirect("/dashboard");
   }
 
-  const userName = getUserDisplayName(user);
-  const { data: courses, error: coursesError } = await supabase
-    .from("courses")
-    .select("id, slug, title, description, cover_image_url, created_at")
-    .order("created_at", { ascending: true });
-
-  if (coursesError) {
-    console.error("Failed to load courses for admin page", coursesError.message);
-  }
+  const profile = await fetchUserProfile(supabase, user.id);
+  const userName = getUserDisplayName(user, profile?.full_name);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
@@ -54,10 +48,10 @@ export default async function AdminPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link
-              href="/dashboard"
+              href="/admin"
               className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
             >
-              Voltar ao dashboard
+              Voltar ao admin
             </Link>
             <LogoutButton />
           </div>
@@ -67,21 +61,14 @@ export default async function AdminPage() {
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-6 py-10">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Admin</p>
-          <h1 className="mt-2 text-2xl font-semibold text-slate-900">Area administrativa</h1>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-900">Cadastrar usuarios</h1>
           <p className="mt-2 text-sm text-slate-600">
-            Gerencie cursos, incluindo capa de destaque, sem depender de ajustes manuais no banco.
+            Apenas administradores podem criar contas. O cadastro cria o usuario no Auth e sincroniza a tabela
+            `profiles` com nome completo e role.
           </p>
-          <div className="mt-4">
-            <Link
-              href="/admin/usuarios"
-              className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-            >
-              Cadastrar usuario
-            </Link>
-          </div>
         </div>
 
-        <CourseManager courses={courses ?? []} />
+        <UserManager />
       </main>
     </div>
   );

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { getUserDisplayName } from "@/lib/auth/user-display-name";
 import { fetchUserRole } from "@/lib/auth/roles";
 import { getAvailableCourses, getModulesForLessonForm } from "@/lib/courses/queries";
 import { logger } from "@/lib/logger";
@@ -45,6 +46,7 @@ export default async function NewLessonPage({ searchParams }: NewLessonPageProps
     redirect("/dashboard");
   }
 
+  const userName = getUserDisplayName(user);
   const modules = await getModulesForLessonForm(supabase);
   const courses = await getAvailableCourses(supabase);
 
@@ -54,7 +56,7 @@ export default async function NewLessonPage({ searchParams }: NewLessonPageProps
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex flex-col">
             <span className="text-base font-semibold text-slate-900">Gestão de Incidentes</span>
-            <span className="text-xs text-slate-500">Cadastro de aulas (admin)</span>
+            <span className="text-xs text-slate-500">Cadastro de aulas (admin) | Ola, {userName}</span>
           </div>
           <div className="flex items-center gap-3">
             <Link

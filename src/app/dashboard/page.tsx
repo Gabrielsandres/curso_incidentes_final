@@ -3,6 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { fetchUserProfile } from "@/lib/auth/profiles";
+import { getUserDisplayName } from "@/lib/auth/user-display-name";
 import { resolveCourseCoverUrl } from "@/lib/courses/covers";
 import { fetchUserRole } from "@/lib/auth/roles";
 import { getAvailableCourses } from "@/lib/courses/queries";
@@ -30,7 +32,9 @@ export default async function DashboardPage() {
   }
 
   const role = await fetchUserRole(supabase, user.id);
+  const profile = await fetchUserProfile(supabase, user.id);
   const courses = await getAvailableCourses(supabase, user.id);
+  const userName = getUserDisplayName(user, profile?.full_name);
   const totalLessons = courses.reduce((total, course) => total + course.totalLessons, 0);
   const completedLessons = courses.reduce((total, course) => total + course.completedLessons, 0);
   const overallPercentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
@@ -41,7 +45,7 @@ export default async function DashboardPage() {
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex flex-col">
             <span className="text-base font-semibold text-slate-900">Gestão de Incidentes</span>
-            <span className="text-xs text-slate-500">Ambiente do aluno</span>
+            <span className="text-xs text-slate-500">Ambiente do aluno • Ola, {userName}</span>
           </div>
           <LogoutButton />
         </div>
@@ -50,7 +54,7 @@ export default async function DashboardPage() {
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-6 py-12">
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Bem-vindo</p>
-          <h1 className="mt-2 text-2xl font-semibold text-slate-900">{user.email}</h1>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-900">Bem-vindo, {userName}!</h1>
           <p className="mt-2 text-sm text-slate-600">
             Utilize o painel abaixo para acessar os cursos liberados para sua conta. Todas as aulas e materiais so podem
             ser vistos apos entrar no curso.
@@ -96,6 +100,12 @@ export default async function DashboardPage() {
                 className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
               >
                 Criar módulo
+              </Link>
+              <Link
+                href="/admin/usuarios"
+                className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              >
+                Cadastrar usuario
               </Link>
             </div>
           </section>

@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { CourseOverview } from "@/components/course/course-overview";
 import { ModuleList } from "@/components/course/module-list";
+import { getUserDisplayName } from "@/lib/auth/user-display-name";
 import { getCourseWithContent } from "@/lib/courses/queries";
 import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -34,6 +35,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     redirect(`/login?${search.toString()}`);
   }
 
+  const userName = getUserDisplayName(user);
   const course = await getCourseWithContent(slug, supabase, user.id);
 
   if (!course) {
@@ -46,7 +48,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex flex-col">
             <span className="text-base font-semibold text-slate-900">Gestão de Incidentes</span>
-            <span className="text-xs text-slate-500">Conteúdo restrito</span>
+            <span className="text-xs text-slate-500">Conteudo restrito | Ola, {userName}</span>
           </div>
           <div className="flex items-center gap-3">
             <Link

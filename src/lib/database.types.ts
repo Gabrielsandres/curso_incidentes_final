@@ -198,18 +198,24 @@ export interface Database {
       profiles: {
         Row: {
           id: string;
+          full_name: string;
           role: Database["public"]["Enums"]["user_role"];
           created_at: string;
+          updated_at: string;
         };
         Insert: {
           id: string;
+          full_name: string;
           role?: Database["public"]["Enums"]["user_role"];
           created_at?: string;
+          updated_at?: string;
         };
         Update: {
           id?: string;
+          full_name?: string;
           role?: Database["public"]["Enums"]["user_role"];
           created_at?: string;
+          updated_at?: string;
         };
         Relationships: [
           {
