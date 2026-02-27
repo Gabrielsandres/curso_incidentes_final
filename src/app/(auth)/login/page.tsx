@@ -15,6 +15,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = searchParams ? await searchParams : {};
   const raw = Array.isArray(params.redirectTo) ? params.redirectTo[0] : params.redirectTo;
   const redirectTo = typeof raw === "string" ? raw : undefined;
+  const rawMessage = Array.isArray(params.message) ? params.message[0] : params.message;
+  const infoMessage = rawMessage === "password-set" ? "Senha definida com sucesso." : undefined;
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
@@ -28,7 +30,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       </header>
 
       <main className="flex flex-1 items-center justify-center px-4 py-16">
-        <LoginForm redirectTo={redirectTo} />
+        <LoginForm redirectTo={redirectTo} infoMessage={infoMessage} />
       </main>
     </div>
   );

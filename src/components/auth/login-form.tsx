@@ -7,9 +7,10 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type LoginFormProps = {
   redirectTo?: string;
+  infoMessage?: string;
 };
 
-export function LoginForm({ redirectTo }: LoginFormProps) {
+export function LoginForm({ redirectTo, infoMessage }: LoginFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -59,6 +60,10 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
         <h1 className="text-xl font-semibold text-slate-900">Acessar plataforma</h1>
         <p className="text-sm text-slate-500">Informe suas credenciais para entrar</p>
       </div>
+
+      {infoMessage ? (
+        <div className="rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{infoMessage}</div>
+      ) : null}
 
       {error ? <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div> : null}
 

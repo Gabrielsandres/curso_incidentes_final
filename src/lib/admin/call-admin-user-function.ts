@@ -1,10 +1,15 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type CreateAdminUserPayload = {
-  action: "create";
+  action: "invite" | "create";
   email: string;
-  password: string;
   full_name: string;
+};
+
+type ResendInvitePayload = {
+  action: "resend_invite";
+  email: string;
+  full_name?: string;
 };
 
 type DeleteAdminUserPayload = {
@@ -13,7 +18,7 @@ type DeleteAdminUserPayload = {
   soft?: boolean;
 };
 
-export type AdminUserFunctionPayload = CreateAdminUserPayload | DeleteAdminUserPayload;
+export type AdminUserFunctionPayload = CreateAdminUserPayload | ResendInvitePayload | DeleteAdminUserPayload;
 
 type AdminUserFunctionSuccess = {
   ok: true;
@@ -52,7 +57,7 @@ function getPublishableKey() {
 
 function getErrorMessageFromResponse(status: number, responseBody: unknown) {
   if (status === 403) {
-    return "Voce nao tem permissao para cadastrar usuarios.";
+    return "Voce nao tem permissao para convidar usuarios.";
   }
 
   if (status === 401) {

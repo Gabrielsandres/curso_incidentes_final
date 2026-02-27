@@ -8,13 +8,13 @@ import { fetchUserRole } from "@/lib/auth/roles";
 import { getUserDisplayName } from "@/lib/auth/user-display-name";
 import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { UserManager } from "./user-manager";
+import { ResendInviteManager } from "./resend-invite-manager";
 
 export const metadata: Metadata = {
-  title: "Usuarios | Admin",
+  title: "Reenviar convite | Admin",
 };
 
-export default async function AdminUsersPage() {
+export default async function ResendInvitePage() {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -22,11 +22,11 @@ export default async function AdminUsersPage() {
   } = await supabase.auth.getUser();
 
   if (error) {
-    logger.error("Failed to load authenticated session on admin users page", error.message);
+    logger.error("Failed to load authenticated session on resend invite page", error.message);
   }
 
   if (!user) {
-    const search = new URLSearchParams({ redirectTo: "/admin/usuarios" });
+    const search = new URLSearchParams({ redirectTo: "/admin/usuarios/reenviar-convite" });
     redirect(`/login?${search.toString()}`);
   }
 
@@ -48,10 +48,10 @@ export default async function AdminUsersPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link
-              href="/admin"
+              href="/admin/usuarios"
               className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
             >
-              Voltar ao admin
+              Voltar para usuarios
             </Link>
             <LogoutButton />
           </div>
@@ -60,25 +60,14 @@ export default async function AdminUsersPage() {
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-6 py-10">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Admin</p>
-              <h1 className="mt-2 text-2xl font-semibold text-slate-900">Cadastrar usuarios</h1>
-              <p className="mt-2 text-sm text-slate-600">
-                Apenas administradores podem convidar contas. O convite envia email para definicao de senha e sincroniza
-                a tabela `profiles` com nome completo e role.
-              </p>
-            </div>
-            <Link
-              href="/admin/usuarios/reenviar-convite"
-              className="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-            >
-              Reenviar convite
-            </Link>
-          </div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Admin</p>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-900">Reenviar convite</h1>
+          <p className="mt-2 text-sm text-slate-600">
+            Reenvie o email de convite para usuarios que ainda nao definiram senha.
+          </p>
         </div>
 
-        <UserManager />
+        <ResendInviteManager />
       </main>
     </div>
   );
