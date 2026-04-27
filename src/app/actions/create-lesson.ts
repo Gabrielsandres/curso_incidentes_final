@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { redirect } from "next/navigation";
 
@@ -40,6 +40,7 @@ export async function createLessonAction(
   formData: FormData,
 ): Promise<CreateLessonFormState> {
   const parsed = createLessonSchema.safeParse({
+    courseId: formData.get("course_id"),
     moduleId: formData.get("module_id"),
     title: formData.get("title"),
     description: formData.get("description"),
@@ -81,7 +82,7 @@ export async function createLessonAction(
   if (role !== "admin") {
     return {
       success: false,
-      message: "Você não tem permissão para cadastrar aulas.",
+      message: "VocÃª nÃ£o tem permissÃ£o para cadastrar aulas.",
     };
   }
 
@@ -102,13 +103,20 @@ export async function createLessonAction(
     .maybeSingle();
 
   if (moduleError) {
-    logger.error("Falha ao validar módulo para cadastro de aula", { error: moduleError.message });
+    logger.error("Falha ao validar mÃ³dulo para cadastro de aula", { error: moduleError.message });
   }
 
   if (!module) {
     return {
       success: false,
-      message: "O módulo selecionado não existe mais.",
+      message: "O mÃ³dulo selecionado nÃ£o existe mais.",
+    };
+  }
+
+  if (module.course_id !== parsed.data.courseId) {
+    return {
+      success: false,
+      message: "O modulo selecionado nao pertence ao curso informado. Selecione novamente.",
     };
   }
 
@@ -137,10 +145,10 @@ export async function createLessonAction(
     return {
       success: false,
       message: permissionDenied
-        ? "Você não tem permissão para cadastrar aulas (RLS)."
+        ? "VocÃª nÃ£o tem permissÃ£o para cadastrar aulas (RLS)."
         : networkFailure
-          ? "Falha de conexão com o Supabase. Verifique a rede e tente novamente."
-          : "Não foi possível salvar a aula. Tente novamente.",
+          ? "Falha de conexÃ£o com o Supabase. Verifique a rede e tente novamente."
+          : "NÃ£o foi possÃ­vel salvar a aula. Tente novamente.",
     };
   }
 

@@ -37,6 +37,7 @@ const materialSourceSchema = z.enum(["LINK", "UPLOAD"]);
 
 export const createLessonSchema = z
   .object({
+    courseId: z.string({ required_error: "Selecione um curso" }).uuid({ message: "Selecione um curso valido." }),
     moduleId: z.string({ required_error: "Selecione um modulo" }).uuid({ message: "Selecione um modulo valido." }),
     title: z
       .string({ required_error: "Informe um titulo" })

@@ -3,11 +3,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { MyCertificates } from "@/components/certificates/my-certificates";
 import { fetchUserProfile } from "@/lib/auth/profiles";
 import { getUserDisplayName } from "@/lib/auth/user-display-name";
 import { resolveCourseCoverUrl } from "@/lib/courses/covers";
 import { fetchUserRole } from "@/lib/auth/roles";
-import { getAvailableCourses } from "@/lib/courses/queries";
+import { getAvailableCourses, getUserCertificatesByCourseId } from "@/lib/courses/queries";
+import type { DashboardCourseCertificate } from "@/lib/courses/types";
 import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -34,6 +36,30 @@ export default async function DashboardPage() {
   const role = await fetchUserRole(supabase, user.id);
   const profile = await fetchUserProfile(supabase, user.id);
   const courses = await getAvailableCourses(supabase, user.id);
+  const certificatesByCourseId = role === "student" ? await getUserCertificatesByCourseId(user.id, supabase) : new Map();
+
+  const studentCertificates: DashboardCourseCertificate[] =
+    role === "student"
+      ? courses
+          .filter((course) => course.certificate_enabled)
+          .map((course) => {
+            const issuedCertificate = certificatesByCourseId.get(course.id);
+            const isEligible = course.totalLessons > 0 && course.completedLessons >= course.totalLessons;
+
+            return {
+              courseId: course.id,
+              courseSlug: course.slug,
+              courseTitle: course.title,
+              totalLessons: course.totalLessons,
+              completedLessons: course.completedLessons,
+              completionPercentage: course.completionPercentage,
+              status: issuedCertificate ? "ISSUED" : isEligible ? "ELIGIBLE" : "IN_PROGRESS",
+              issuedAt: issuedCertificate?.issued_at ?? null,
+              certificateCode: issuedCertificate?.certificate_code ?? null,
+            };
+          })
+      : [];
+
   const userName = getUserDisplayName(user, profile?.full_name);
   const totalLessons = courses.reduce((total, course) => total + course.totalLessons, 0);
   const completedLessons = courses.reduce((total, course) => total + course.completedLessons, 0);
@@ -90,12 +116,6 @@ export default async function DashboardPage() {
                 Gerenciar cursos
               </Link>
               <Link
-                href="/dashboard/aulas/nova"
-                className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
-              >
-                Cadastrar aula
-              </Link>
-              <Link
                 href="/dashboard/aulas/nova?createModule=1&askCreateLesson=1"
                 className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
               >
@@ -107,9 +127,17 @@ export default async function DashboardPage() {
               >
                 Cadastrar usuario
               </Link>
+              <Link
+                href="/dashboard/aulas/nova"
+                className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+              >
+                Cadastrar aula
+              </Link>
             </div>
           </section>
         ) : null}
+
+        {role !== "admin" ? <MyCertificates certificates={studentCertificates} /> : null}
 
         <section className="space-y-4">
           <div>

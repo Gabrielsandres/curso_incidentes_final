@@ -16,6 +16,11 @@ export interface Database {
           title: string;
           description: string | null;
           cover_image_url: string | null;
+          certificate_enabled: boolean;
+          certificate_template_url: string | null;
+          certificate_workload_hours: number | null;
+          certificate_signer_name: string | null;
+          certificate_signer_role: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -25,6 +30,11 @@ export interface Database {
           title: string;
           description?: string | null;
           cover_image_url?: string | null;
+          certificate_enabled?: boolean;
+          certificate_template_url?: string | null;
+          certificate_workload_hours?: number | null;
+          certificate_signer_name?: string | null;
+          certificate_signer_role?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -34,6 +44,11 @@ export interface Database {
           title?: string;
           description?: string | null;
           cover_image_url?: string | null;
+          certificate_enabled?: boolean;
+          certificate_template_url?: string | null;
+          certificate_workload_hours?: number | null;
+          certificate_signer_name?: string | null;
+          certificate_signer_role?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -333,6 +348,58 @@ export interface Database {
             foreignKeyName: "lesson_progress_lesson_id_fkey";
             columns: ["lesson_id"];
             referencedRelation: "lessons";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      course_certificates: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_id: string;
+          issued_at: string;
+          certificate_code: string;
+          file_bucket: string;
+          file_path: string;
+          mime_type: string;
+          file_size_bytes: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          course_id: string;
+          issued_at?: string;
+          certificate_code: string;
+          file_bucket: string;
+          file_path: string;
+          mime_type?: string;
+          file_size_bytes: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          course_id?: string;
+          issued_at?: string;
+          certificate_code?: string;
+          file_bucket?: string;
+          file_path?: string;
+          mime_type?: string;
+          file_size_bytes?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "course_certificates_course_id_fkey";
+            columns: ["course_id"];
+            referencedRelation: "courses";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "course_certificates_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
             referencedColumns: ["id"];
           },
         ];

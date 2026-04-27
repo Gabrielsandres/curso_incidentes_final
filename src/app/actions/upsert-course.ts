@@ -2,21 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
+import type { CourseFormState } from "@/app/actions/course-form-state";
 import { fetchUserRole } from "@/lib/auth/roles";
 import { createCourseSchema, updateCourseSchema } from "@/lib/courses/schema";
 import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-export type CourseFormState = {
-  success: boolean;
-  message: string;
-  fieldErrors?: Record<string, string[]>;
-};
-
-export const initialCourseFormState: CourseFormState = {
-  success: false,
-  message: "",
-};
 
 async function requireAdminUser() {
   const supabase = await createSupabaseServerClient();
@@ -46,12 +36,24 @@ function buildCoursePayload(parsedData: {
   title: string;
   description: string | null;
   coverImageUrl?: string;
+  certificateEnabled: boolean;
+  certificateTemplateUrl?: string;
+  certificateWorkloadHours?: number;
+  certificateSignerName?: string;
+  certificateSignerRole?: string;
 }) {
+  const isCertificateEnabled = parsedData.certificateEnabled;
+
   return {
     slug: parsedData.slug,
     title: parsedData.title,
     description: parsedData.description ?? null,
     cover_image_url: parsedData.coverImageUrl ?? null,
+    certificate_enabled: isCertificateEnabled,
+    certificate_template_url: isCertificateEnabled ? parsedData.certificateTemplateUrl ?? null : null,
+    certificate_workload_hours: isCertificateEnabled ? parsedData.certificateWorkloadHours ?? null : null,
+    certificate_signer_name: isCertificateEnabled ? parsedData.certificateSignerName ?? null : null,
+    certificate_signer_role: isCertificateEnabled ? parsedData.certificateSignerRole ?? null : null,
   };
 }
 
@@ -85,6 +87,11 @@ export async function createCourseAction(
     title: formData.get("title"),
     description: formData.get("description"),
     coverImageUrl: formData.get("cover_image_url"),
+    certificateEnabled: formData.get("certificate_enabled"),
+    certificateTemplateUrl: formData.get("certificate_template_url"),
+    certificateWorkloadHours: formData.get("certificate_workload_hours"),
+    certificateSignerName: formData.get("certificate_signer_name"),
+    certificateSignerRole: formData.get("certificate_signer_role"),
   });
 
   if (!parsed.success) {
@@ -125,6 +132,11 @@ export async function updateCourseAction(
     title: formData.get("title"),
     description: formData.get("description"),
     coverImageUrl: formData.get("cover_image_url"),
+    certificateEnabled: formData.get("certificate_enabled"),
+    certificateTemplateUrl: formData.get("certificate_template_url"),
+    certificateWorkloadHours: formData.get("certificate_workload_hours"),
+    certificateSignerName: formData.get("certificate_signer_name"),
+    certificateSignerRole: formData.get("certificate_signer_role"),
   });
 
   if (!parsed.success) {

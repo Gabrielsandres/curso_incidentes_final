@@ -1,5 +1,12 @@
 # Changelog
 
+## [Etapa 2] - Certificados por Curso
+- Adiciona configuracao de certificados por curso no admin (habilitacao, template, carga horaria e assinatura textual).
+- Implementa emissao automatica de certificado em PDF ao concluir 100% das aulas do curso.
+- Cria tabela `course_certificates` com RLS e persistencia de metadados do arquivo.
+- Disponibiliza secao "Meus Certificados" no dashboard de alunos com download seguro via URL assinada.
+- Inclui rota `POST /api/certificates/signed-url` para emitir sob demanda e baixar certificado.
+
 ## [Etapa 1] - Landing Page Comercial
 - Cria landing page completa na rota `/` com hero, secoes de valor, FAQ e CTA final.
 - Centraliza copy e estrutura em `src/lib/marketing/content.ts` e componentes em `src/components/marketing`.

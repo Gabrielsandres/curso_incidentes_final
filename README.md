@@ -43,6 +43,13 @@ Ajuste os valores em `.env.local` (modelo em `.env.example`).
    - `supabase/migrations/0002_roles_and_profiles.sql`
    - `supabase/migrations/0003_lessons_materials_admin_policies.sql`
    - `supabase/migrations/0004_institutional_leads_rls.sql`
+   - `supabase/migrations/0005_lesson_progress_rls.sql`
+   - `supabase/migrations/0006_course_cover_and_material_description.sql`
+   - `supabase/migrations/0007_materials_storage_uploads.sql`
+   - `supabase/migrations/0008_profiles_full_name_and_admin_users.sql`
+   - `supabase/migrations/0009_fix_auth_profile_trigger.sql`
+   - `supabase/migrations/0010_make_auth_profile_trigger_fail_safe.sql`
+   - `supabase/migrations/0011_courses_and_certificates.sql`
 3. Verifique se as tabelas, enums e policies foram criados conforme esperado.
 
 ## Autenticacao de teste

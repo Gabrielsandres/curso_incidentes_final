@@ -5,6 +5,7 @@ import { createLessonSchema } from "./schema";
 describe("createLessonSchema", () => {
   it("valida payload completo e normaliza descricao vazia", () => {
     const result = createLessonSchema.safeParse({
+      courseId: "22222222-2222-4222-8222-222222222222",
       moduleId: "11111111-1111-4111-8111-111111111111",
       title: "  Aula 1  ",
       description: "   ",
@@ -22,6 +23,7 @@ describe("createLessonSchema", () => {
 
   it("retorna erro quando moduleId nao eh uuid", () => {
     const result = createLessonSchema.safeParse({
+      courseId: "22222222-2222-4222-8222-222222222222",
       moduleId: "modulo-invalido",
       title: "Aula 1",
       videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
@@ -36,6 +38,7 @@ describe("createLessonSchema", () => {
 
   it("retorna erro quando posicao eh menor que 1", () => {
     const result = createLessonSchema.safeParse({
+      courseId: "22222222-2222-4222-8222-222222222222",
       moduleId: "11111111-1111-4111-8111-111111111111",
       title: "Aula 1",
       videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",

@@ -37,7 +37,9 @@ export default async function AdminPage() {
   const userName = getUserDisplayName(user);
   const { data: courses, error: coursesError } = await supabase
     .from("courses")
-    .select("id, slug, title, description, cover_image_url, created_at")
+    .select(
+      "id, slug, title, description, cover_image_url, certificate_enabled, certificate_template_url, certificate_workload_hours, certificate_signer_name, certificate_signer_role, created_at",
+    )
     .order("created_at", { ascending: true });
 
   if (coursesError) {

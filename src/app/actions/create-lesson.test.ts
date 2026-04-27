@@ -36,6 +36,7 @@ const initialState = {
 
 function makeValidFormData() {
   const formData = new FormData();
+  formData.set("course_id", "22222222-2222-4222-8222-222222222222");
   formData.set("module_id", "11111111-1111-4111-8111-111111111111");
   formData.set("title", "Aula de teste");
   formData.set("description", "");
@@ -133,5 +134,60 @@ describe("createLessonAction", () => {
       position: 1,
     });
     expect(redirect).toHaveBeenCalledWith("/curso/curso-seguro");
+  });
+
+  it("retorna erro quando modulo nao pertence ao curso selecionado", async () => {
+    const modulesQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: {
+          id: "11111111-1111-4111-8111-111111111111",
+          course_id: "33333333-3333-4333-8333-333333333333",
+          title: "Modulo 1",
+          position: 1,
+          courses: { slug: "curso-seguro" },
+        },
+        error: null,
+      }),
+    };
+
+    const lessonsQuery = {
+      insert: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      single: vi.fn(),
+    };
+
+    const supabase = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: { id: "admin-1" } },
+          error: null,
+        }),
+      },
+      from: vi.fn((table: string) => {
+        if (table === "modules") {
+          return modulesQuery;
+        }
+
+        if (table === "lessons") {
+          return lessonsQuery;
+        }
+
+        throw new Error(`Unexpected table ${table}`);
+      }),
+    };
+
+    vi.mocked(createSupabaseServerClient).mockResolvedValue(
+      supabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
+    );
+    vi.mocked(fetchUserRole).mockResolvedValue("admin");
+
+    const result = await createLessonAction(initialState, makeValidFormData());
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("nao pertence ao curso");
+    expect(lessonsQuery.insert).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
   });
 });

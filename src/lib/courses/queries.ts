@@ -4,6 +4,7 @@ import type { Database } from "@/lib/database.types";
 import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type {
+  CourseCertificateRow,
   CourseRow,
   CourseSummary,
   CourseWithContent,
@@ -98,6 +99,11 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
         title,
         description,
         cover_image_url,
+        certificate_enabled,
+        certificate_template_url,
+        certificate_workload_hours,
+        certificate_signer_name,
+        certificate_signer_role,
         created_at,
         updated_at,
         modules (
@@ -135,6 +141,11 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
       title: course.title,
       description: course.description,
       cover_image_url: course.cover_image_url,
+      certificate_enabled: course.certificate_enabled,
+      certificate_template_url: course.certificate_template_url,
+      certificate_workload_hours: course.certificate_workload_hours,
+      certificate_signer_name: course.certificate_signer_name,
+      certificate_signer_role: course.certificate_signer_role,
       created_at: course.created_at,
       updated_at: course.updated_at,
       ...buildProgressStats(lessonIds.length, completedLessons),
@@ -157,6 +168,11 @@ export async function getCourseWithContent(
         title,
         description,
         cover_image_url,
+        certificate_enabled,
+        certificate_template_url,
+        certificate_workload_hours,
+        certificate_signer_name,
+        certificate_signer_role,
         created_at,
         updated_at,
         modules (
@@ -342,7 +358,9 @@ export async function getLessonWithCourseContext(
 
   const courseResponse = await supabase
     .from("courses")
-    .select("id, slug, title, description, cover_image_url, created_at, updated_at")
+    .select(
+      "id, slug, title, description, cover_image_url, certificate_enabled, certificate_template_url, certificate_workload_hours, certificate_signer_name, certificate_signer_role, created_at, updated_at",
+    )
     .eq("id", lessonModule.course_id)
     .eq("slug", courseSlug)
     .maybeSingle();
@@ -382,4 +400,33 @@ export async function getLessonWithCourseContext(
     module: lessonModule,
     lesson: normalizedLesson,
   };
+}
+
+export async function getUserCertificatesByCourseId(
+  userId: string | undefined,
+  client?: SupabaseServerClient,
+): Promise<Map<string, CourseCertificateRow>> {
+  const certificatesByCourseId = new Map<string, CourseCertificateRow>();
+
+  if (!userId) {
+    return certificatesByCourseId;
+  }
+
+  const supabase = await resolveClient(client);
+  const { data, error } = await supabase
+    .from("course_certificates")
+    .select("id, user_id, course_id, issued_at, certificate_code, file_bucket, file_path, mime_type, file_size_bytes, created_at")
+    .eq("user_id", userId);
+
+  if (error) {
+    logger.error("Falha ao carregar certificados do usuario", { userId, error: error.message });
+    return certificatesByCourseId;
+  }
+
+  const certificates = (data as CourseCertificateRow[] | null) ?? [];
+  certificates.forEach((certificate) => {
+    certificatesByCourseId.set(certificate.course_id, certificate);
+  });
+
+  return certificatesByCourseId;
 }

@@ -4,11 +4,25 @@ import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 
-import { createCourseAction, initialCourseFormState, type CourseFormState, updateCourseAction } from "@/app/actions/upsert-course";
+import { initialCourseFormState, type CourseFormState } from "@/app/actions/course-form-state";
+import { createCourseAction, updateCourseAction } from "@/app/actions/upsert-course";
 import { resolveCourseCoverUrl } from "@/lib/courses/covers";
 import type { CourseRow } from "@/lib/courses/types";
 
-type AdminCourse = Pick<CourseRow, "id" | "slug" | "title" | "description" | "cover_image_url" | "created_at">;
+type AdminCourse = Pick<
+  CourseRow,
+  | "id"
+  | "slug"
+  | "title"
+  | "description"
+  | "cover_image_url"
+  | "certificate_enabled"
+  | "certificate_template_url"
+  | "certificate_workload_hours"
+  | "certificate_signer_name"
+  | "certificate_signer_role"
+  | "created_at"
+>;
 
 type CourseManagerProps = {
   courses: AdminCourse[];
@@ -94,6 +108,64 @@ export function CourseManager({ courses }: CourseManagerProps) {
             <FieldError errors={createState.fieldErrors?.coverImageUrl} />
             <p className="text-xs text-slate-500">Se vazio, o sistema usa `/capa_curso.png` automaticamente.</p>
           </label>
+
+          <section className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
+              <input type="checkbox" name="certificate_enabled" className="h-4 w-4 rounded border-slate-300" />
+              Emitir certificado neste curso
+            </label>
+            <FieldError errors={createState.fieldErrors?.certificateEnabled} />
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-700">Template do certificado</span>
+                <input
+                  type="text"
+                  name="certificate_template_url"
+                  placeholder="/certificado_teste.png ou https://..."
+                  className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                />
+                <FieldError errors={createState.fieldErrors?.certificateTemplateUrl} />
+              </label>
+
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-700">Carga horaria (horas)</span>
+                <input
+                  type="number"
+                  name="certificate_workload_hours"
+                  min={1}
+                  step={1}
+                  placeholder="60"
+                  className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                />
+                <FieldError errors={createState.fieldErrors?.certificateWorkloadHours} />
+              </label>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-700">Nome da assinatura</span>
+                <input
+                  type="text"
+                  name="certificate_signer_name"
+                  placeholder="Nome do responsavel"
+                  className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                />
+                <FieldError errors={createState.fieldErrors?.certificateSignerName} />
+              </label>
+
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-700">Cargo da assinatura</span>
+                <input
+                  type="text"
+                  name="certificate_signer_role"
+                  placeholder="Ex.: Coordenacao Pedagogica"
+                  className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                />
+                <FieldError errors={createState.fieldErrors?.certificateSignerRole} />
+              </label>
+            </div>
+          </section>
 
           {createState.message ? (
             <div
@@ -213,8 +285,75 @@ function CourseEditCard({ course }: { course: AdminCourse }) {
             className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
           />
           <FieldError errors={state.fieldErrors?.coverImageUrl} />
-          <p className="text-xs text-slate-500">Deixe em branco para usar a capa padrao do repositório.</p>
+          <p className="text-xs text-slate-500">Deixe em branco para usar a capa padrao do repositorio.</p>
         </label>
+
+        <section className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
+            <input
+              type="checkbox"
+              name="certificate_enabled"
+              defaultChecked={course.certificate_enabled}
+              className="h-4 w-4 rounded border-slate-300"
+            />
+            Emitir certificado neste curso
+          </label>
+          <FieldError errors={state.fieldErrors?.certificateEnabled} />
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-slate-700">Template do certificado</span>
+              <input
+                type="text"
+                name="certificate_template_url"
+                defaultValue={course.certificate_template_url ?? ""}
+                placeholder="/certificado_teste.png ou https://..."
+                className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+              />
+              <FieldError errors={state.fieldErrors?.certificateTemplateUrl} />
+            </label>
+
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-slate-700">Carga horaria (horas)</span>
+              <input
+                type="number"
+                name="certificate_workload_hours"
+                min={1}
+                step={1}
+                defaultValue={course.certificate_workload_hours ?? ""}
+                placeholder="60"
+                className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+              />
+              <FieldError errors={state.fieldErrors?.certificateWorkloadHours} />
+            </label>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-slate-700">Nome da assinatura</span>
+              <input
+                type="text"
+                name="certificate_signer_name"
+                defaultValue={course.certificate_signer_name ?? ""}
+                placeholder="Nome do responsavel"
+                className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+              />
+              <FieldError errors={state.fieldErrors?.certificateSignerName} />
+            </label>
+
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-slate-700">Cargo da assinatura</span>
+              <input
+                type="text"
+                name="certificate_signer_role"
+                defaultValue={course.certificate_signer_role ?? ""}
+                placeholder="Ex.: Coordenacao Pedagogica"
+                className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+              />
+              <FieldError errors={state.fieldErrors?.certificateSignerRole} />
+            </label>
+          </div>
+        </section>
 
         {state.message ? (
           <div

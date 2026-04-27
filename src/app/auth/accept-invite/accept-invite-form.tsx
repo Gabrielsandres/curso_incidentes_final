@@ -28,7 +28,7 @@ function getUpdatePasswordErrorMessage(message: string | undefined) {
     return "Link invalido ou expirado. Solicite um novo link.";
   }
 
-  return "Nao foi possivel definir a senha. Tente novamente.";
+  return "Não foi possivel definir a senha. Tente novamente.";
 }
 
 export function AcceptInviteForm() {
@@ -72,7 +72,7 @@ export function AcceptInviteForm() {
     const timeoutId = window.setTimeout(() => {
       resolveSession({
         sessionFound: false,
-        message: "Nao foi possivel validar o link. Solicite um novo link.",
+        message: "Não foi possível validar o link. Solicite um novo link.",
       });
     }, 7000);
 
@@ -125,7 +125,7 @@ export function AcceptInviteForm() {
               clearTimeout(timeoutId);
               resolveSession({
                 sessionFound: false,
-                message: "Link invalido ou expirado. Solicite um novo link.",
+                message: "Link inválido ou expirado. Solicite um novo link.",
               });
               return;
             }
@@ -141,7 +141,7 @@ export function AcceptInviteForm() {
           clearTimeout(timeoutId);
           resolveSession({
             sessionFound: false,
-            message: "Nao foi possivel validar o convite. Tente abrir o link novamente.",
+            message: "Não foi possível validar o convite. Tente abrir o link novamente.",
           });
           return;
         }
@@ -154,7 +154,7 @@ export function AcceptInviteForm() {
         clearTimeout(timeoutId);
         resolveSession({
           sessionFound: false,
-          message: "Nao foi possivel validar o convite. Tente novamente em alguns instantes.",
+          message: "Não foi possível validar o convite. Tente novamente em alguns instantes.",
         });
       }
     }
@@ -224,7 +224,7 @@ export function AcceptInviteForm() {
       router.refresh();
     } catch (error) {
       console.error("Erro inesperado ao definir senha no aceite de convite", error);
-      setErrorMessage("Nao foi possivel definir a senha. Tente novamente.");
+      setErrorMessage("Não foi possível definir a senha. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -242,9 +242,9 @@ export function AcceptInviteForm() {
   if (!hasSession) {
     return (
       <div className="w-full max-w-md rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-        <h1 className="text-xl font-semibold text-slate-900">Convite indisponivel</h1>
+        <h1 className="text-xl font-semibold text-slate-900">Convite indisponível</h1>
         <p className="mt-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {sessionMessage || "Link invalido ou expirado."}
+          {sessionMessage || "Link inválido ou expirado."}
         </p>
         <Link
           href="/login"

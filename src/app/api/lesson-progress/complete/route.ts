@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { ensureCourseCertificateIssued } from "@/lib/certificates/issuer";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -47,7 +48,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_lesson_id" }, { status: 400 });
   }
 
-  const { data: lesson, error: lessonError } = await supabase.from("lessons").select("id").eq("id", lessonId).maybeSingle();
+  const { data: lesson, error: lessonError } = await supabase
+    .from("lessons")
+    .select("id, module_id, modules!inner ( course_id )")
+    .eq("id", lessonId)
+    .maybeSingle();
 
   if (lessonError) {
     logger.error("Falha ao validar aula antes de marcar progresso", {
@@ -61,6 +66,15 @@ export async function POST(request: Request) {
 
   if (!lesson) {
     return NextResponse.json({ error: "lesson_not_found" }, { status: 404 });
+  }
+
+  const courseId = (lesson as { modules?: { course_id?: string } | null }).modules?.course_id;
+  if (!courseId) {
+    logger.error("Falha ao resolver curso da aula ao concluir progresso", {
+      userId: user.id,
+      lessonId,
+    });
+    return NextResponse.json({ error: "lesson_course_not_found" }, { status: 500 });
   }
 
   const now = new Date().toISOString();
@@ -78,6 +92,7 @@ export async function POST(request: Request) {
   );
 
   if (!error) {
+    await issueCertificateBestEffort(user.id, courseId);
     return NextResponse.json({ ok: true });
   }
 
@@ -91,6 +106,7 @@ export async function POST(request: Request) {
 
       if (!adminError) {
         logger.warn("Fallback com service role para atualizar progresso de aula", { userId: user.id, lessonId });
+        await issueCertificateBestEffort(user.id, courseId);
         return NextResponse.json({ ok: true });
       }
 
@@ -126,4 +142,20 @@ export async function POST(request: Request) {
     { error: "failed_to_complete_lesson", message: "Nao foi possivel salvar o progresso da aula." },
     { status: 500 },
   );
+}
+
+async function issueCertificateBestEffort(userId: string, courseId: string) {
+  try {
+    const result = await ensureCourseCertificateIssued({ userId, courseId });
+
+    if (result.status === "issued") {
+      logger.info("Certificado emitido automaticamente apos concluir aula", { userId, courseId, certificateId: result.certificate.id });
+    }
+  } catch (error) {
+    logger.warn("Falha no modo best effort para emissao de certificado", {
+      userId,
+      courseId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
