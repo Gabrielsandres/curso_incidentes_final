@@ -50,6 +50,8 @@ Ajuste os valores em `.env.local` (modelo em `.env.example`).
    - `supabase/migrations/0009_fix_auth_profile_trigger.sql`
    - `supabase/migrations/0010_make_auth_profile_trigger_fail_safe.sql`
    - `supabase/migrations/0011_courses_and_certificates.sql`
+   - `supabase/migrations/0012_add_institution_manager_role.sql`
+   - `supabase/migrations/0013_institutions_enrollments.sql`
 3. Verifique se as tabelas, enums e policies foram criados conforme esperado.
 
 ## Autenticacao de teste
