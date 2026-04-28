@@ -50,12 +50,16 @@ describe("assertUploadable", () => {
     // File extension is valid (.pdf) but MIME type is disallowed — tests the MIME check path
     const result = assertUploadable(makeFile(1 * 1024 * 1024, "application/zip", "disguised.pdf"));
     expect(result.ok).toBe(false);
-    expect(result.message).toMatch(/não suportado/i);
+    if (!result.ok) {
+      expect(result.message).toMatch(/não suportado/i);
+    }
   });
   it("rejects file exceeding 20MB even with valid MIME", () => {
     const result = assertUploadable(makeFile(25 * 1024 * 1024, "application/pdf"));
     expect(result.ok).toBe(false);
-    expect(result.message).toMatch(/20/);
+    if (!result.ok) {
+      expect(result.message).toMatch(/20/);
+    }
   });
   it("passes through when MIME is empty string (extension already validated)", () => {
     const result = assertUploadable(makeFile(1 * 1024 * 1024, "", "doc.pdf"));

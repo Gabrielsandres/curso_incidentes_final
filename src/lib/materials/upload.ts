@@ -1,9 +1,9 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import {
+  assertUploadable,
   buildLessonMaterialStoragePath,
   LESSON_MATERIALS_BUCKET,
-  validateMaterialFile,
 } from "@/lib/materials/storage";
 
 export type UploadedLessonMaterialMetadata = {
@@ -19,7 +19,7 @@ export async function uploadLessonMaterialFile(params: {
   courseId: string;
   lessonId: string;
 }) {
-  const validation = validateMaterialFile(params.file);
+  const validation = assertUploadable(params.file);
   if (!validation.ok) {
     return { success: false as const, message: validation.message };
   }

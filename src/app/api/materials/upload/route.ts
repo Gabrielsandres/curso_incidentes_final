@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { fetchUserRole } from "@/lib/auth/roles";
 import { logger } from "@/lib/logger";
 import { uploadLessonMaterialFile } from "@/lib/materials/upload";
+import { assertUploadable } from "@/lib/materials/storage";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -42,6 +43,11 @@ export async function POST(request: Request) {
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "file_required" }, { status: 400 });
+  }
+
+  const uploadValidation = assertUploadable(file);
+  if (!uploadValidation.ok) {
+    return NextResponse.json({ error: uploadValidation.message }, { status: 400 });
   }
 
   const { data: lesson, error: lessonError } = await supabase
