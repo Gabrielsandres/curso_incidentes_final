@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import * as Sentry from "@sentry/nextjs";
+import { captureException } from "@/lib/observability/sentry";
 
 type GlobalErrorProps = {
   error: Error & { digest?: string };
@@ -11,7 +11,7 @@ type GlobalErrorProps = {
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
-    Sentry.captureException(error);
+    captureException(error);
   }, [error]);
 
   return (

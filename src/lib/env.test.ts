@@ -49,3 +49,31 @@ describe("env helpers", () => {
     consoleSpy.mockRestore();
   });
 });
+
+describe("SUPABASE_SERVICE_ROLE_KEY prod refinement", () => {
+  it("throws when NODE_ENV=production and key is absent", () => {
+    const origNodeEnv = process.env.NODE_ENV;
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: "production",
+      configurable: true,
+    });
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    resetEnvCache();
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    expect(() => getEnv()).toThrowError();
+
+    consoleSpy.mockRestore();
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: origNodeEnv,
+      configurable: true,
+    });
+    resetEnvCache();
+  });
+
+  it("does not throw when NODE_ENV=test and key is absent", () => {
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    resetEnvCache();
+    expect(() => getEnv()).not.toThrow();
+  });
+});
