@@ -286,6 +286,10 @@ export interface Database {
           order_id: string | null;
           status: Database["public"]["Enums"]["enrollment_status"];
           created_at: string;
+          source: Database["public"]["Enums"]["enrollment_source"];
+          granted_at: string;
+          expires_at: string | null;
+          institution_id: string | null;
         };
         Insert: {
           id?: string;
@@ -294,6 +298,10 @@ export interface Database {
           order_id?: string | null;
           status?: Database["public"]["Enums"]["enrollment_status"];
           created_at?: string;
+          source?: Database["public"]["Enums"]["enrollment_source"];
+          granted_at?: string;
+          expires_at?: string | null;
+          institution_id?: string | null;
         };
         Update: {
           id?: string;
@@ -302,6 +310,10 @@ export interface Database {
           order_id?: string | null;
           status?: Database["public"]["Enums"]["enrollment_status"];
           created_at?: string;
+          source?: Database["public"]["Enums"]["enrollment_source"];
+          granted_at?: string;
+          expires_at?: string | null;
+          institution_id?: string | null;
         };
         Relationships: [
           {
@@ -314,6 +326,12 @@ export interface Database {
             foreignKeyName: "enrollments_order_id_fkey";
             columns: ["order_id"];
             referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "enrollments_institution_id_fkey";
+            columns: ["institution_id"];
+            referencedRelation: "institutions";
             referencedColumns: ["id"];
           },
         ];
@@ -404,6 +422,70 @@ export interface Database {
           },
         ];
       };
+      institutions: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          contact_email: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          contact_email?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          contact_email?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      institution_members: {
+        Row: {
+          id: string;
+          institution_id: string;
+          profile_id: string;
+          role: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          institution_id: string;
+          profile_id: string;
+          role?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          institution_id?: string;
+          profile_id?: string;
+          role?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "institution_members_institution_id_fkey";
+            columns: ["institution_id"];
+            referencedRelation: "institutions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "institution_members_profile_id_fkey";
+            columns: ["profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       institutional_leads: {
         Row: {
           id: string;
@@ -483,9 +565,10 @@ export interface Database {
     Enums: {
       order_status: "PENDING" | "PAID" | "FAILED" | "REFUNDED" | "CANCELLED";
       enrollment_status: "ACTIVE" | "INACTIVE" | "COMPLETED";
+      enrollment_source: "admin_grant" | "b2b_invite" | "b2c_purchase";
       lesson_progress_status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
       coupon_discount_type: "PERCENTAGE" | "FIXED";
-      user_role: "student" | "admin";
+      user_role: "admin" | "institution_manager" | "student";
     };
     CompositeTypes: {
       [_ in never]: never;
