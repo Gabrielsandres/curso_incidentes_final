@@ -12,7 +12,7 @@ Brownfield completion sprint that transforms the existing Next.js 16 + Supabase 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Schema migrations, enrollment model, ops hardening (service role key, UTC cert date, Sentry, Resend SMTP)
+- [x] **Phase 1: Foundation** - Schema migrations, enrollment model, ops hardening (service role key, UTC cert date, Sentry, Resend SMTP) (completed 2026-04-28)
 - [ ] **Phase 2: Catalog CRUD** - Multi-course admin UI: courses, modules, lessons, materials, publish/archive
 - [ ] **Phase 3: Progress & Certificates** - Student dashboard with % completion, auto-certificate on 100%, Meus certificados
 - [ ] **Phase 4: Video & Anti-Piracy** - VideoProvider abstraction (YouTube dev / Bunny prod), CSS watermark overlay
@@ -33,11 +33,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 5 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Env hardening (superRefine) + Sentry wrapper + global-error.tsx swap
-- [ ] 01-02-PLAN.md — Certificate timezone fix (America/Sao_Paulo) + ensureProfileExists guardrail
-- [ ] 01-03-PLAN.md — Schema migrations 0012/0013 + database.types.ts + README + [BLOCKING] SQL apply
-- [ ] 01-04-PLAN.md — Resend SMTP panel config + SPF/DKIM DNS + deliverability verification
-- [ ] 01-05-PLAN.md — Deploy checklist (docs/DEPLOY-CHECKLIST.md) + CI green verification
+- [x] 01-01-PLAN.md — Env hardening (superRefine) + Sentry wrapper + global-error.tsx swap
+- [x] 01-02-PLAN.md — Certificate timezone fix (America/Sao_Paulo) + ensureProfileExists guardrail
+- [x] 01-03-PLAN.md — Schema migrations 0012/0013 + database.types.ts + README + [BLOCKING] SQL apply
+- [x] 01-04-PLAN.md — Resend SMTP panel config + SPF/DKIM DNS + deliverability verification
+- [x] 01-05-PLAN.md — Deploy checklist (docs/DEPLOY-CHECKLIST.md) + CI green verification
 
 ### Phase 2: Catalog CRUD
 **Goal**: Admin da MDHE consegue criar e publicar um catalogo completo de cursos — com modulos, aulas e materiais — sem abrir o SQL Editor do Supabase.
@@ -100,7 +100,7 @@ Note: Phase 4 (Video) depends only on Phase 2 (Catalog). If capacity allows, Pha
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/5 | Not started | - |
+| 1. Foundation | 5/5 | Complete    | 2026-04-28 |
 | 2. Catalog CRUD | 0/TBD | Not started | - |
 | 3. Progress & Certificates | 0/TBD | Not started | - |
 | 4. Video & Anti-Piracy | 0/TBD | Not started | - |

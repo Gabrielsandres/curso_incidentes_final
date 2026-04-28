@@ -9,11 +9,11 @@ Requisitos para o "v1 lançável" — plataforma 100% funcional antes do redesig
 
 ### Foundation & Operations
 
-- [ ] **OPS-01**: `SUPABASE_SERVICE_ROLE_KEY` é validado como obrigatório em produção (passa a `.string().min(1)` no `serverSchema` do `src/lib/env.ts`) e a aplicação falha no boot sem ele
-- [ ] **OPS-02**: `formatCertificateDate` em `src/lib/certificates/pdf.ts` usa `timeZone: "America/Sao_Paulo"` (não `"UTC"`) ao formatar a data emitida no PDF
-- [ ] **OPS-03**: `SENTRY_DSN` é configurado em produção (Vercel env) e erros runtime são reportados ao Sentry; ausência do DSN é tratada como degradação (não crash)
-- [ ] **OPS-04**: CI (lint zero-warning + test:ci + build) passa green em `main` antes de qualquer deploy de produção
-- [ ] **OPS-05**: Pipeline de deploy de produção tem checklist documentado em `docs/` (env vars, migrações aplicadas, smoke test pós-deploy)
+- [x] **OPS-01**: `SUPABASE_SERVICE_ROLE_KEY` é validado como obrigatório em produção (passa a `.string().min(1)` no `serverSchema` do `src/lib/env.ts`) e a aplicação falha no boot sem ele
+- [x] **OPS-02**: `formatCertificateDate` em `src/lib/certificates/pdf.ts` usa `timeZone: "America/Sao_Paulo"` (não `"UTC"`) ao formatar a data emitida no PDF
+- [x] **OPS-03**: `SENTRY_DSN` é configurado em produção (Vercel env) e erros runtime são reportados ao Sentry; ausência do DSN é tratada como degradação (não crash)
+- [x] **OPS-04**: CI (lint zero-warning + test:ci + build) passa green em `main` antes de qualquer deploy de produção
+- [x] **OPS-05**: Pipeline de deploy de produção tem checklist documentado em `docs/` (env vars, migrações aplicadas, smoke test pós-deploy)
 
 ### Catalog (Multi-Course CRUD)
 
@@ -27,10 +27,10 @@ Requisitos para o "v1 lançável" — plataforma 100% funcional antes do redesig
 
 ### Enrollment & Access (B2C + B2B)
 
-- [ ] **ENR-01**: Existe entidade `enrollments` ligando aluno↔curso, com `granted_at`, `expires_at` (nullable, para B2C vitalício) e `source` (`b2c_purchase` | `b2b_invite` | `admin_grant`)
-- [ ] **ENR-02**: Aluno só consegue abrir aulas de cursos onde tem `enrollment` ativo (não expirado); RLS aplica esta regra
+- [x] **ENR-01**: Existe entidade `enrollments` ligando aluno↔curso, com `granted_at`, `expires_at` (nullable, para B2C vitalício) e `source` (`b2c_purchase` | `b2b_invite` | `admin_grant`)
+- [x] **ENR-02**: Aluno só consegue abrir aulas de cursos onde tem `enrollment` ativo (não expirado); RLS aplica esta regra
 - [ ] **ENR-03**: Admin concede acesso a um curso para um aluno individual (B2C) ou para um aluno vinculado a uma instituição (B2B) com data de expiração opcional
-- [ ] **ENR-04**: Quando `expires_at` passa, aluno perde acesso ao player mas mantém histórico de progresso e certificado já emitido
+- [x] **ENR-04**: Quando `expires_at` passa, aluno perde acesso ao player mas mantém histórico de progresso e certificado já emitido
 
 ### Student Player & Progress
 
@@ -64,10 +64,10 @@ Requisitos para o "v1 lançável" — plataforma 100% funcional antes do redesig
 
 ### B2B Institution & Manager Dashboard
 
-- [ ] **INST-01**: Existe tabela `institutions` (nome, slug, contato) e migração que adiciona valor `institution_manager` ao enum `user_role` em **migração separada** da que cria as policies
-- [ ] **INST-02**: Existe `institution_members` ligando `profiles.id ↔ institutions.id` com role local (`student` | `manager`)
-- [ ] **INST-03**: Função SQL `is_member_of_institution(institution_id)` é `SECURITY DEFINER STABLE` e usada em policies RLS para evitar recursão
-- [ ] **INST-04**: Toda nova RLS de instituição inclui cláusulas `USING` **e** `WITH CHECK` em INSERT/UPDATE
+- [x] **INST-01**: Existe tabela `institutions` (nome, slug, contato) e migração que adiciona valor `institution_manager` ao enum `user_role` em **migração separada** da que cria as policies
+- [x] **INST-02**: Existe `institution_members` ligando `profiles.id ↔ institutions.id` com role local (`student` | `manager`)
+- [x] **INST-03**: Função SQL `is_member_of_institution(institution_id)` é `SECURITY DEFINER STABLE` e usada em policies RLS para evitar recursão
+- [x] **INST-04**: Toda nova RLS de instituição inclui cláusulas `USING` **e** `WITH CHECK` em INSERT/UPDATE
 - [ ] **INST-05**: `middleware.ts` tem novo array `GESTOR_ROUTES = ["/gestor"]` e o matcher inclui `/gestor/:path*`; usuários sem role `institution_manager` ou `admin` são redirecionados
 - [ ] **INST-06**: Gestor de instituição loga em `/gestor` e vê apenas alunos/enrollments da sua própria instituição (validado por RLS, não só por filtro de aplicação)
 - [ ] **INST-07**: Dashboard do gestor mostra: lista de alunos vinculados, % de progresso por curso, certificados emitidos com link para visualizar (sem download direto — apresenta metadata: nome do curso, data, código)
@@ -77,12 +77,12 @@ Requisitos para o "v1 lançável" — plataforma 100% funcional antes do redesig
 
 - [ ] **MKT-01**: Landing comercial `/` permanece operacional com 11 seções e CTAs (já existe — preservar)
 - [ ] **MKT-02**: Form institucional grava em `institutional_leads` via service-role, com captura adicional de `utm_source`, `utm_medium`, `utm_campaign` (opcionais) na URL → schema Zod estendido
-- [ ] **MKT-03**: Página `/health` retorna `{status, uptime, timestamp, version}` em produção (já existe — preservar e validar)
+- [x] **MKT-03**: Página `/health` retorna `{status, uptime, timestamp, version}` em produção (já existe — preservar e validar)
 
 ### Email & Communications
 
-- [ ] **EMAIL-01**: Supabase Auth está configurado com SMTP do **Resend** (custom SMTP no painel) — emails de confirmação, recuperação e convite passam a sair via Resend
-- [ ] **EMAIL-02**: Domínio de envio (`EMAIL_FROM`) tem SPF/DKIM configurados; entrega validada com inbox de teste em Gmail e Outlook
+- [ ] **EMAIL-01** *(deferred — P0 pré-prod, aguardando domínio MDHE; ver `01-04-SUMMARY.md`)*: Supabase Auth está configurado com SMTP do **Resend** (custom SMTP no painel) — emails de confirmação, recuperação e convite passam a sair via Resend
+- [ ] **EMAIL-02** *(deferred — P0 pré-prod, aguardando domínio MDHE; ver `01-04-SUMMARY.md`)*: Domínio de envio (`EMAIL_FROM`) tem SPF/DKIM configurados; entrega validada com inbox de teste em Gmail e Outlook
 - [ ] **EMAIL-03**: Convite institucional dispara com template pt-BR (assunto + corpo) que menciona a instituição contratante
 
 ## v2 Requirements
@@ -133,11 +133,11 @@ Mapeamento preenchido durante a criação do roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| OPS-01 | Phase 1 | Pending |
-| OPS-02 | Phase 1 | Pending |
-| OPS-03 | Phase 1 | Pending |
-| OPS-04 | Phase 1 | Pending |
-| OPS-05 | Phase 1 | Pending |
+| OPS-01 | Phase 1 | Complete |
+| OPS-02 | Phase 1 | Complete |
+| OPS-03 | Phase 1 | Complete |
+| OPS-04 | Phase 1 | Complete |
+| OPS-05 | Phase 1 | Complete |
 | CAT-01 | Phase 2 | Pending |
 | CAT-02 | Phase 2 | Pending |
 | CAT-03 | Phase 2 | Pending |
@@ -145,10 +145,10 @@ Mapeamento preenchido durante a criação do roadmap.
 | CAT-05 | Phase 2 | Pending |
 | CAT-06 | Phase 2 | Pending |
 | CAT-07 | Phase 2 | Pending |
-| ENR-01 | Phase 1 | Pending |
-| ENR-02 | Phase 1 | Pending |
+| ENR-01 | Phase 1 | Complete |
+| ENR-02 | Phase 1 | Complete |
 | ENR-03 | Phase 2 | Pending |
-| ENR-04 | Phase 1 | Pending |
+| ENR-04 | Phase 1 | Complete |
 | PROG-01 | Phase 3 | Pending |
 | PROG-02 | Phase 3 | Pending |
 | PROG-03 | Phase 3 | Pending |
@@ -167,17 +167,17 @@ Mapeamento preenchido durante a criação do roadmap.
 | AP-02 | Phase 4 | Pending |
 | AP-03 | Phase 4 | Pending |
 | AP-04 | Phase 4 | Pending |
-| INST-01 | Phase 1 | Pending |
-| INST-02 | Phase 1 | Pending |
-| INST-03 | Phase 1 | Pending |
-| INST-04 | Phase 1 | Pending |
+| INST-01 | Phase 1 | Complete |
+| INST-02 | Phase 1 | Complete |
+| INST-03 | Phase 1 | Complete |
+| INST-04 | Phase 1 | Complete |
 | INST-05 | Phase 5 | Pending |
 | INST-06 | Phase 5 | Pending |
 | INST-07 | Phase 5 | Pending |
 | INST-08 | Phase 5 | Pending |
 | MKT-01 | Phase 2 | Pending |
 | MKT-02 | Phase 2 | Pending |
-| MKT-03 | Phase 1 | Pending |
+| MKT-03 | Phase 1 | Complete |
 | EMAIL-01 | Phase 1 | Deferred (P0 pré-prod — aguardando domínio MDHE; ver 01-04-SUMMARY.md) |
 | EMAIL-02 | Phase 1 | Deferred (P0 pré-prod — aguardando domínio MDHE; ver 01-04-SUMMARY.md) |
 | EMAIL-03 | Phase 5 | Pending |

@@ -131,4 +131,25 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-27 after initialization*
+*Last updated: 2026-04-28 after Phase 1 (Foundation) completion*
+
+## Phase Completion Log
+
+### Phase 1 — Foundation (2026-04-28)
+
+**Status:** Complete (4/5 plans + 1 deferred com bloqueador documentado)
+
+**Validated requirements (13/15):** OPS-01, OPS-02, OPS-03, OPS-04, OPS-05, ENR-01, ENR-02, ENR-04, INST-01, INST-02, INST-03, INST-04, MKT-03
+
+**Deferred requirements (2/15):** EMAIL-01, EMAIL-02 — Plan 01-04 aguardando aquisição de domínio MDHE; bloqueador P0 pré-prod registrado em `docs/DEPLOY-CHECKLIST.md` §4 e em `.planning/phases/01-foundation/01-04-SUMMARY.md`
+
+**Key deliverables shipped:**
+- `src/lib/env.ts` — `superRefine` prod-strict para `SUPABASE_SERVICE_ROLE_KEY`
+- `src/lib/observability/sentry.ts` — wrapper com no-op quando DSN ausente; `src/app/global-error.tsx` migrado
+- `src/lib/certificates/pdf.ts` — `formatCertificateDate` exportada com `America/Sao_Paulo`
+- `src/lib/auth/profiles.ts` — `ensureProfileExists` guardrail wired em `src/app/dashboard/page.tsx` com `captureMessage` para visibilidade de drift
+- `supabase/migrations/0012_*.sql` + `0013_*.sql` aplicadas (institutions, institution_members, enrollments aditivo, helper SECURITY DEFINER STABLE, 11 RLS policies, backfill 8 admins)
+- `docs/DEPLOY-CHECKLIST.md` — checklist pt-BR com env vars, ordem de migrações, smoke tests pós-deploy
+- 38 testes Vitest passando; lint zero-warning; typecheck limpo
+
+**Decisão de orquestração:** EMAIL-01/02 deferred tratado como verification debt explicitamente documentada, não gap silencioso. Phase 2 (Catalog CRUD) pode iniciar.
