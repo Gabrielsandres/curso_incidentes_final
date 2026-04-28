@@ -10,7 +10,7 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
-import { getAvailableCourses, getCourseWithContent, getLessonWithCourseContext } from "./queries";
+import { getAdminCourseList, getAvailableCourses, getCourseWithContent, getLessonWithCourseContext } from "./queries";
 import type { Database } from "@/lib/database.types";
 
 function makeQuery(response: unknown) {
@@ -26,6 +26,8 @@ describe("courses queries helpers", () => {
   it("retorna lista vazia quando getAvailableCourses recebe erro", async () => {
     const coursesQuery = {
       select: vi.fn().mockReturnThis(),
+      not: vi.fn().mockReturnThis(),
+      is: vi.fn().mockReturnThis(),
       order: vi.fn().mockResolvedValue({
         data: null,
         error: { message: "db down" },
@@ -38,6 +40,105 @@ describe("courses queries helpers", () => {
 
     const result = await getAvailableCourses(client);
     expect(result).toEqual([]);
+  });
+
+  it("getAvailableCourses filtra cursos nao publicados e arquivados", async () => {
+    const publishedCourse = {
+      id: "course-pub",
+      slug: "curso-publicado",
+      title: "Curso Publicado",
+      description: null,
+      cover_image_url: null,
+      certificate_enabled: false,
+      certificate_template_url: null,
+      certificate_workload_hours: null,
+      certificate_signer_name: null,
+      certificate_signer_role: null,
+      published_at: "2025-01-01T00:00:00.000Z",
+      archived_at: null,
+      created_at: "2025-01-01T00:00:00.000Z",
+      updated_at: "2025-01-01T00:00:00.000Z",
+      modules: [],
+    };
+
+    const coursesQuery = {
+      select: vi.fn().mockReturnThis(),
+      not: vi.fn().mockReturnThis(),
+      is: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({
+        data: [publishedCourse],
+        error: null,
+      }),
+    };
+
+    const client = {
+      from: vi.fn(() => coursesQuery),
+    } as unknown as SupabaseClient<Database>;
+
+    const result = await getAvailableCourses(client);
+    expect(result).toHaveLength(1);
+    expect(result[0].slug).toBe("curso-publicado");
+    // Verify filters were applied
+    expect(coursesQuery.not).toHaveBeenCalledWith("published_at", "is", null);
+    expect(coursesQuery.is).toHaveBeenCalledWith("archived_at", null);
+  });
+
+  it("getAdminCourseList retorna todos os cursos sem filtro de status", async () => {
+    const allCourses = [
+      {
+        id: "course-1",
+        slug: "curso-rascunho",
+        title: "Curso Rascunho",
+        description: null,
+        cover_image_url: null,
+        certificate_enabled: false,
+        published_at: null,
+        archived_at: null,
+        created_at: "2025-01-01T00:00:00.000Z",
+        updated_at: "2025-01-01T00:00:00.000Z",
+      },
+      {
+        id: "course-2",
+        slug: "curso-publicado",
+        title: "Curso Publicado",
+        description: null,
+        cover_image_url: null,
+        certificate_enabled: false,
+        published_at: "2025-01-02T00:00:00.000Z",
+        archived_at: null,
+        created_at: "2025-01-02T00:00:00.000Z",
+        updated_at: "2025-01-02T00:00:00.000Z",
+      },
+      {
+        id: "course-3",
+        slug: "curso-arquivado",
+        title: "Curso Arquivado",
+        description: null,
+        cover_image_url: null,
+        certificate_enabled: false,
+        published_at: "2025-01-01T00:00:00.000Z",
+        archived_at: "2025-01-03T00:00:00.000Z",
+        created_at: "2025-01-01T00:00:00.000Z",
+        updated_at: "2025-01-03T00:00:00.000Z",
+      },
+    ];
+
+    const coursesQuery = {
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({
+        data: allCourses,
+        error: null,
+      }),
+    };
+
+    const client = {
+      from: vi.fn(() => coursesQuery),
+    } as unknown as SupabaseClient<Database>;
+
+    const result = await getAdminCourseList(client);
+    expect(result).toHaveLength(3);
+    // Verify no published_at/archived_at filter was applied (no .not() or .is() calls)
+    expect(coursesQuery.order).toHaveBeenCalled();
   });
 
   it("normaliza materiais nulos em getCourseWithContent", async () => {

@@ -116,6 +116,8 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
         )
       `,
     )
+    .not("published_at", "is", null)
+    .is("archived_at", null)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -435,4 +437,21 @@ export async function getUserCertificatesByCourseId(
   });
 
   return certificatesByCourseId;
+}
+
+export async function getAdminCourseList(client?: SupabaseServerClient): Promise<CourseRow[]> {
+  const supabase = await resolveClient(client);
+  const { data, error } = await supabase
+    .from("courses")
+    .select(
+      "id, slug, title, description, cover_image_url, published_at, archived_at, certificate_enabled, created_at, updated_at",
+    )
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    logger.error("Falha ao carregar cursos para admin", { error: error.message });
+    return [];
+  }
+
+  return (data as CourseRow[]) ?? [];
 }
