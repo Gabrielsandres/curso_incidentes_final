@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import type { EmailOtpType } from "@supabase/supabase-js";
 
+import { convertPendingEnrollmentsForEmail } from "@/app/actions/manage-pending-enrollment";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type PasswordFieldErrors = Partial<Record<"password" | "confirm_password", string>>;
@@ -211,6 +212,16 @@ export function AcceptInviteForm() {
         console.error("Erro ao definir senha no aceite de convite", updateError);
         setErrorMessage(getUpdatePasswordErrorMessage(updateError.message));
         return;
+      }
+
+      // Fire-and-forget: convert any pending enrollments for this user
+      try {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (currentUser?.email) {
+          void convertPendingEnrollmentsForEmail(currentUser.email);
+        }
+      } catch {
+        // Intentionally silent — pending enrollment conversion failure must not block UX
       }
 
       setSuccessMessage("Senha definida com sucesso. Redirecionando para o login...");
