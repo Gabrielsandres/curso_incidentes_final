@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { MyCertificates } from "@/components/certificates/my-certificates";
-import { fetchUserProfile } from "@/lib/auth/profiles";
+import { ensureProfileExists, fetchUserProfile } from "@/lib/auth/profiles";
 import { getUserDisplayName } from "@/lib/auth/user-display-name";
 import { resolveCourseCoverUrl } from "@/lib/courses/covers";
 import { fetchUserRole } from "@/lib/auth/roles";
@@ -32,6 +32,9 @@ export default async function DashboardPage() {
     const search = new URLSearchParams({ redirectTo: "/dashboard" });
     redirect(`/login?${search.toString()}`);
   }
+
+  // Guardrail: ensure profile row exists (catches silent auth trigger failures — D-14)
+  void ensureProfileExists(user.id);
 
   const role = await fetchUserRole(supabase, user.id);
   const profile = await fetchUserProfile(supabase, user.id);
