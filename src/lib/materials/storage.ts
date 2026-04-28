@@ -9,11 +9,29 @@ export const ALLOWED_MATERIAL_EXTENSIONS = new Set([
   "xlsx",
   "ppt",
   "pptx",
-  "zip",
   "png",
   "jpg",
   "jpeg",
 ]);
+
+// D-08: Whitelist of allowed MIME types for material uploads (mirrors ALLOWED_MATERIAL_EXTENSIONS).
+// Note: file.type in FormData is client-supplied and can be spoofed. This is a defense-in-depth
+// layer over Supabase Storage's own restrictions — not the sole gate.
+export const ALLOWED_MATERIAL_MIME_TYPES = new Set([
+  "application/pdf",
+  "application/msword", // .doc
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+  "application/vnd.ms-excel", // .xls
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+  "application/vnd.ms-powerpoint", // .ppt
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx
+  "image/png",
+  "image/jpeg",
+]);
+
+export function isAllowedMaterialMimeType(mime: string): boolean {
+  return ALLOWED_MATERIAL_MIME_TYPES.has(mime);
+}
 
 export type MaterialUploadValidationResult =
   | { ok: true; extension: string; safeFileName: string }
@@ -63,6 +81,28 @@ export function validateMaterialFile(file: File): MaterialUploadValidationResult
   const safeFileName = sanitizeFileName(originalName) || `arquivo.${extension}`;
 
   return { ok: true, extension, safeFileName };
+}
+
+/**
+ * assertUploadable — validates both size/extension AND MIME type.
+ * Use this in the upload route instead of validateMaterialFile directly.
+ * Empty MIME (some browsers) skips the MIME check — extension already validated by validateMaterialFile.
+ */
+export function assertUploadable(file: File): MaterialUploadValidationResult {
+  // First: run existing size + extension check
+  const baseResult = validateMaterialFile(file);
+  if (!baseResult.ok) return baseResult;
+
+  // Second: MIME type check (skip if browser did not provide MIME — rely on extension)
+  if (file.type && !ALLOWED_MATERIAL_MIME_TYPES.has(file.type)) {
+    return {
+      ok: false,
+      message:
+        "Tipo de arquivo não suportado. Tipos aceitos: PDF, Word, Excel, PowerPoint, PNG, JPEG.",
+    };
+  }
+
+  return baseResult;
 }
 
 export function buildLessonMaterialStoragePath(params: {
