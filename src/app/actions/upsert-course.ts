@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import type { CourseFormState } from "@/app/actions/course-form-state";
 import { fetchUserRole } from "@/lib/auth/roles";
@@ -123,10 +124,10 @@ export async function createCourseAction(
 
   revalidateCoursePages();
 
-  return {
-    success: true,
-    message: "Curso criado com sucesso.",
-  };
+  // Redirect to the edit page so admin can immediately add modules/lessons or publish.
+  // redirect() throws — execution stops here; the return below is unreachable but
+  // kept to satisfy CourseFormState return type if redirect ever fails.
+  redirect(`/admin/cursos/${parsed.data.slug}`);
 }
 
 export async function updateCourseAction(
