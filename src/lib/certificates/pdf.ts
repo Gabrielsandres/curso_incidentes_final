@@ -97,12 +97,12 @@ export async function buildCourseCertificatePdf(params: BuildCourseCertificatePd
   return document.save();
 }
 
-function formatCertificateDate(value: Date) {
+export function formatCertificateDate(value: Date) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: "America/Sao_Paulo",
   }).format(value);
 }
 
