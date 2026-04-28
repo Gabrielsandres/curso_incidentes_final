@@ -157,6 +157,7 @@ describe("courses queries helpers", () => {
             title: "Modulo 1",
             description: null,
             position: 1,
+            deleted_at: null,
             created_at: "2025-01-01T00:00:00.000Z",
             lessons: [
               {
@@ -166,6 +167,7 @@ describe("courses queries helpers", () => {
                 description: null,
                 video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                 position: 1,
+                deleted_at: null,
                 created_at: "2025-01-01T00:00:00.000Z",
                 materials: null,
               },
@@ -184,6 +186,79 @@ describe("courses queries helpers", () => {
 
     expect(result).not.toBeNull();
     expect(result?.modules[0].lessons[0].materials).toEqual([]);
+  });
+
+  it("getCourseWithContent filtra modulos e aulas com deleted_at (T-02-T3)", async () => {
+    const coursesQuery = makeQuery({
+      data: {
+        id: "course-2",
+        slug: "curso-2",
+        title: "Curso 2",
+        description: null,
+        created_at: "2025-01-01T00:00:00.000Z",
+        updated_at: "2025-01-01T00:00:00.000Z",
+        modules: [
+          {
+            id: "module-active",
+            course_id: "course-2",
+            title: "Modulo Ativo",
+            description: null,
+            position: 1,
+            deleted_at: null,
+            created_at: "2025-01-01T00:00:00.000Z",
+            lessons: [
+              {
+                id: "lesson-active",
+                module_id: "module-active",
+                title: "Aula Ativa",
+                description: null,
+                video_url: null,
+                position: 1,
+                deleted_at: null,
+                created_at: "2025-01-01T00:00:00.000Z",
+                materials: [],
+              },
+              {
+                id: "lesson-deleted",
+                module_id: "module-active",
+                title: "Aula Removida",
+                description: null,
+                video_url: null,
+                position: 2,
+                deleted_at: "2025-02-01T00:00:00.000Z",
+                created_at: "2025-01-01T00:00:00.000Z",
+                materials: [],
+              },
+            ],
+          },
+          {
+            id: "module-deleted",
+            course_id: "course-2",
+            title: "Modulo Removido",
+            description: null,
+            position: 2,
+            deleted_at: "2025-02-01T00:00:00.000Z",
+            created_at: "2025-01-01T00:00:00.000Z",
+            lessons: [],
+          },
+        ],
+      },
+      error: null,
+    });
+
+    const client = {
+      from: vi.fn(() => coursesQuery),
+    } as unknown as SupabaseClient<Database>;
+
+    const result = await getCourseWithContent("curso-2", client);
+
+    expect(result).not.toBeNull();
+    // Only active module visible
+    expect(result?.modules).toHaveLength(1);
+    expect(result?.modules[0].id).toBe("module-active");
+    // Only active lesson visible in that module
+    expect(result?.modules[0].lessons).toHaveLength(1);
+    expect(result?.modules[0].lessons[0].id).toBe("lesson-active");
   });
 
   it("retorna contexto completo da aula e normaliza materiais", async () => {

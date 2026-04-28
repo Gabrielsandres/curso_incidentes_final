@@ -109,12 +109,21 @@ export const createLessonSchema = z
 export type CreateLessonInput = z.infer<typeof createLessonSchema>;
 
 // --- Phase 2: update / delete / restore / reorder schemas ---
+const nullableOptionalString = z.preprocess(
+  (v) => (v === null || v === undefined ? undefined : v),
+  z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : null)),
+);
+
 export const updateLessonSchema = z.object({
   lessonId: z.string().uuid({ message: "Aula inválida." }),
   title: z.string().trim().min(1, { message: "Título da aula é obrigatório." }),
-  description: z.string().trim().optional().transform((v) => (v?.length ? v : null)),
-  videoProvider: z.string().trim().optional().transform((v) => (v?.length ? v : null)),
-  videoExternalId: z.string().trim().optional().transform((v) => (v?.length ? v : null)),
+  description: nullableOptionalString,
+  videoProvider: nullableOptionalString,
+  videoExternalId: nullableOptionalString,
   workloadMinutes: z.preprocess(
     (v) => (v === "" || v == null ? undefined : Number(v)),
     z.number().int().positive().optional(),

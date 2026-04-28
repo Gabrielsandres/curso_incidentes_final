@@ -40,7 +40,14 @@ export type CreateModuleInput = z.infer<typeof createModuleSchema>;
 export const updateModuleSchema = z.object({
   moduleId: z.string().uuid({ message: "Módulo inválido." }),
   title: z.string().trim().min(1, { message: "Nome do módulo é obrigatório." }),
-  description: z.string().trim().optional().transform((v) => (v?.length ? v : null)),
+  description: z.preprocess(
+    (v) => (v === null || v === undefined ? undefined : v),
+    z
+      .string()
+      .trim()
+      .optional()
+      .transform((v) => (v && v.length > 0 ? v : null)),
+  ),
 });
 
 export const deleteModuleSchema = z.object({

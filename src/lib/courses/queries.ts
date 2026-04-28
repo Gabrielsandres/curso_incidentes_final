@@ -189,6 +189,7 @@ export async function getCourseWithContent(
           title,
           description,
           position,
+          deleted_at,
           created_at,
           lessons (
             id,
@@ -197,6 +198,7 @@ export async function getCourseWithContent(
             description,
             video_url,
             position,
+            deleted_at,
             created_at,
             materials (
               id,
@@ -236,16 +238,21 @@ export async function getCourseWithContent(
   const lessonIds = (course.modules ?? []).flatMap((module) => (module.lessons ?? []).map((lesson) => lesson.id));
   const progressByLessonId = await getLessonProgressByLessonId(supabase, userId, lessonIds);
 
-  const modules = (course.modules ?? []).map((module) => ({
-    ...module,
-    lessons: (module.lessons ?? []).map((lesson) => ({
-      ...lesson,
-      materials: lesson.materials ?? [],
-      progressStatus: (progressByLessonId.get(lesson.id)?.status ?? "NOT_STARTED") as LessonProgressStatus,
-      completedAt: progressByLessonId.get(lesson.id)?.completed_at ?? null,
-      isCompleted: progressByLessonId.get(lesson.id)?.status === "COMPLETED",
-    })),
-  })) as ModuleWithLessons[];
+  // Filter soft-deleted modules and lessons on the student-facing path (T-02-T3 mitigation)
+  const modules = (course.modules ?? [])
+    .filter((module) => !module.deleted_at)
+    .map((module) => ({
+      ...module,
+      lessons: (module.lessons ?? [])
+        .filter((lesson) => !lesson.deleted_at)
+        .map((lesson) => ({
+          ...lesson,
+          materials: lesson.materials ?? [],
+          progressStatus: (progressByLessonId.get(lesson.id)?.status ?? "NOT_STARTED") as LessonProgressStatus,
+          completedAt: progressByLessonId.get(lesson.id)?.completed_at ?? null,
+          isCompleted: progressByLessonId.get(lesson.id)?.status === "COMPLETED",
+        })),
+    })) as ModuleWithLessons[];
 
   const completedLessons = modules.reduce(
     (total, module) => total + module.lessons.reduce((moduleTotal, lesson) => moduleTotal + (lesson.isCompleted ? 1 : 0), 0),
