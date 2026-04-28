@@ -30,7 +30,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Erros de runtime em producao aparecem no painel do Sentry; ausencia do DSN nao crasha a aplicacao
   4. Emails de confirmacao, recuperacao de senha e convite saem via Resend (nao pelo SMTP padrao do Supabase) e chegam a inboxes de Gmail e Outlook
   5. Tabelas `institutions`, `institution_members` e coluna `enrollments.institution_id` existem no banco com RLS habilitada e helpers SECURITY DEFINER criados; aluno sem enrollment ativo nao consegue abrir nenhuma aula
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Env hardening (superRefine) + Sentry wrapper + global-error.tsx swap
+- [ ] 01-02-PLAN.md — Certificate timezone fix (America/Sao_Paulo) + ensureProfileExists guardrail
+- [ ] 01-03-PLAN.md — Schema migrations 0012/0013 + database.types.ts + README + [BLOCKING] SQL apply
+- [ ] 01-04-PLAN.md — Resend SMTP panel config + SPF/DKIM DNS + deliverability verification
+- [ ] 01-05-PLAN.md — Deploy checklist (docs/DEPLOY-CHECKLIST.md) + CI green verification
 
 ### Phase 2: Catalog CRUD
 **Goal**: Admin da MDHE consegue criar e publicar um catalogo completo de cursos — com modulos, aulas e materiais — sem abrir o SQL Editor do Supabase.
@@ -93,7 +100,7 @@ Note: Phase 4 (Video) depends only on Phase 2 (Catalog). If capacity allows, Pha
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/TBD | Not started | - |
+| 1. Foundation | 0/5 | Not started | - |
 | 2. Catalog CRUD | 0/TBD | Not started | - |
 | 3. Progress & Certificates | 0/TBD | Not started | - |
 | 4. Video & Anti-Piracy | 0/TBD | Not started | - |
