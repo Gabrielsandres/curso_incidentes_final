@@ -109,7 +109,17 @@ Todos os quatro campos (`status`, `uptime`, `timestamp`, `version`) devem estar 
 
 ## 4. Configuração de Email (Resend SMTP)
 
-<!-- Plan 01-04 fills this -->
+> **⚠ BLOQUEADOR DE PRODUÇÃO — P0**
+>
+> Plan 01-04 está **deferred** (ver `.planning/phases/01-foundation/01-04-SUMMARY.md`). Aguardando aquisição de domínio MDHE.
+>
+> **NÃO promover para produção sem completar esta seção.** O SMTP padrão do Supabase tem rate limit de ~4 emails/hora — incompatível com onboarding B2B real (convites a funcionários falhariam em escala).
+>
+> Em dev/staging, o SMTP padrão do Supabase continua funcionando para testes manuais ocasionais.
+>
+> **Para retomar:** adquirir domínio (ex: `mdhe.com.br` no Registro.br) → executar `/gsd-execute-phase 1 --wave 4` ou seguir o runbook em `.planning/phases/01-foundation/01-04-PLAN.md`.
+
+<!-- Plan 01-04 fills this once domain is acquired -->
 
 Status: `[ ]` Domínio verificado no Resend (SPF + DKIM verdes)
 

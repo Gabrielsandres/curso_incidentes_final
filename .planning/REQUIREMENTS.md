@@ -178,8 +178,8 @@ Mapeamento preenchido durante a criação do roadmap.
 | MKT-01 | Phase 2 | Pending |
 | MKT-02 | Phase 2 | Pending |
 | MKT-03 | Phase 1 | Pending |
-| EMAIL-01 | Phase 1 | Pending |
-| EMAIL-02 | Phase 1 | Pending |
+| EMAIL-01 | Phase 1 | Deferred (P0 pré-prod — aguardando domínio MDHE; ver 01-04-SUMMARY.md) |
+| EMAIL-02 | Phase 1 | Deferred (P0 pré-prod — aguardando domínio MDHE; ver 01-04-SUMMARY.md) |
 | EMAIL-03 | Phase 5 | Pending |
 
 **Coverage:**
