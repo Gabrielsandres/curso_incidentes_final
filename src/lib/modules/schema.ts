@@ -35,3 +35,22 @@ export const createModuleSchema = z.object({
 });
 
 export type CreateModuleInput = z.infer<typeof createModuleSchema>;
+
+// --- Phase 2: update / delete / reorder schemas ---
+export const updateModuleSchema = z.object({
+  moduleId: z.string().uuid({ message: "Módulo inválido." }),
+  title: z.string().trim().min(1, { message: "Nome do módulo é obrigatório." }),
+  description: z.string().trim().optional().transform((v) => (v?.length ? v : null)),
+});
+
+export const deleteModuleSchema = z.object({
+  moduleId: z.string().uuid({ message: "Módulo inválido." }),
+});
+
+export const reorderModuleSchema = z.object({
+  moduleId: z.string().uuid({ message: "Módulo inválido." }),
+  direction: z.enum(["up", "down"]),
+});
+
+export type UpdateModuleInput = z.infer<typeof updateModuleSchema>;
+export type ReorderModuleInput = z.infer<typeof reorderModuleSchema>;

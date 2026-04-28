@@ -107,3 +107,31 @@ export const createLessonSchema = z
   });
 
 export type CreateLessonInput = z.infer<typeof createLessonSchema>;
+
+// --- Phase 2: update / delete / restore / reorder schemas ---
+export const updateLessonSchema = z.object({
+  lessonId: z.string().uuid({ message: "Aula inválida." }),
+  title: z.string().trim().min(1, { message: "Título da aula é obrigatório." }),
+  description: z.string().trim().optional().transform((v) => (v?.length ? v : null)),
+  videoProvider: z.string().trim().optional().transform((v) => (v?.length ? v : null)),
+  videoExternalId: z.string().trim().optional().transform((v) => (v?.length ? v : null)),
+  workloadMinutes: z.preprocess(
+    (v) => (v === "" || v == null ? undefined : Number(v)),
+    z.number().int().positive().optional(),
+  ),
+});
+
+export const deleteLessonSchema = z.object({
+  lessonId: z.string().uuid({ message: "Aula inválida." }),
+});
+
+export const restoreLessonSchema = z.object({
+  lessonId: z.string().uuid({ message: "Aula inválida." }),
+});
+
+export const reorderLessonSchema = z.object({
+  lessonId: z.string().uuid({ message: "Aula inválida." }),
+  direction: z.enum(["up", "down"]),
+});
+
+export type UpdateLessonInput = z.infer<typeof updateLessonSchema>;
