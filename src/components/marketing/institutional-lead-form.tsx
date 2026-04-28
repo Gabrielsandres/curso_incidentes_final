@@ -28,7 +28,13 @@ function getFieldError(state: InstitutionalLeadFormState, field: string) {
   return state.fieldErrors?.[field]?.[0];
 }
 
-export function InstitutionalLeadForm() {
+interface InstitutionalLeadFormProps {
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+}
+
+export function InstitutionalLeadForm({ utmSource, utmMedium, utmCampaign }: InstitutionalLeadFormProps = {}) {
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, isPending] = useActionState(submitInstitutionalLead, initialInstitutionalLeadState);
 
@@ -51,6 +57,10 @@ export function InstitutionalLeadForm() {
       className="grid gap-6 rounded-[28px] border border-[#e2e8ff] bg-white p-8 text-[#0f1c3d] shadow-[0_18px_45px_rgba(15,23,42,0.15)]"
       aria-describedby="institutional-form-feedback"
     >
+      <input type="hidden" name="utmSource" defaultValue={utmSource ?? ""} />
+      <input type="hidden" name="utmMedium" defaultValue={utmMedium ?? ""} />
+      <input type="hidden" name="utmCampaign" defaultValue={utmCampaign ?? ""} />
+
       <div className="space-y-2 text-sm text-[#23407a]">
         <p>
           Preencha o formulário com os dados da sua escola ou rede. Nosso time retorna em até 24 horas úteis

@@ -43,7 +43,16 @@ function resolvePlanCta(plan: PlanItem) {
   return { href: "#cta-final" };
 }
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const resolvedParams = await searchParams;
+  const utmSource = typeof resolvedParams.utm_source === "string" ? resolvedParams.utm_source : "";
+  const utmMedium = typeof resolvedParams.utm_medium === "string" ? resolvedParams.utm_medium : "";
+  const utmCampaign = typeof resolvedParams.utm_campaign === "string" ? resolvedParams.utm_campaign : "";
+
   const {
     hero,
     audience,
@@ -305,7 +314,7 @@ export default function Home() {
           />
           <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,0.65fr),minmax(0,0.35fr)]">
             <div className="rounded-[32px] border border-white/10 bg-white/[0.04] p-8 shadow-[0_18px_45px_rgba(15,23,42,0.6)]">
-              <InstitutionalLeadForm />
+              <InstitutionalLeadForm utmSource={utmSource} utmMedium={utmMedium} utmCampaign={utmCampaign} />
               <p className="mt-4 text-sm text-white/80">{institutional.footnote}</p>
             </div>
             <div className="rounded-[32px] border border-white/10 bg-gradient-to-b from-[#0b1f45] to-[#051027] p-8 text-sm text-white shadow-[0_18px_45px_rgba(15,23,42,0.6)]">
