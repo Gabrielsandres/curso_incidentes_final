@@ -21,6 +21,11 @@ export async function submitInstitutionalLead(
   _prevState: InstitutionalLeadFormState,
   formData: FormData,
 ): Promise<InstitutionalLeadFormState> {
+  // formData.get() returns null when a field is absent from the form submission.
+  // Optional fields that may be absent (UTMs) are coerced to undefined so Zod
+  // treats them as "not provided" rather than failing the string type check.
+  const getString = (key: string) => formData.get(key) ?? undefined;
+
   const rawInput = {
     organization: formData.get("organization"),
     contactName: formData.get("contactName"),
@@ -28,6 +33,9 @@ export async function submitInstitutionalLead(
     phone: formData.get("phone"),
     headcount: formData.get("headcount"),
     message: formData.get("message"),
+    utmSource: getString("utmSource"),
+    utmMedium: getString("utmMedium"),
+    utmCampaign: getString("utmCampaign"),
   };
 
   const parsed = institutionalLeadSchema.safeParse(rawInput);
@@ -50,6 +58,9 @@ export async function submitInstitutionalLead(
       phone: parsed.data.phone,
       headcount: parsed.data.headcount,
       message: parsed.data.message,
+      utm_source: parsed.data.utmSource ?? null,
+      utm_medium: parsed.data.utmMedium ?? null,
+      utm_campaign: parsed.data.utmCampaign ?? null,
     });
 
     if (error) {
