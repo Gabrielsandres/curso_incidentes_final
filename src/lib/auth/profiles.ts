@@ -2,9 +2,8 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/database.types";
 import { logger } from "@/lib/logger";
+import { captureMessage } from "@/lib/observability/sentry";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-// TODO(01-01 merge): once src/lib/observability/sentry.ts exists, uncomment and use captureMessage for Sentry breadcrumb visibility
-// import { captureMessage } from "@/lib/observability/sentry";
 
 export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 export type ProfileRole = Database["public"]["Enums"]["user_role"];
@@ -52,8 +51,7 @@ export async function fetchAuthenticatedUserProfile(client: SupabaseClient<Datab
  * RLS bypass rationale: reading/writing own profile row on behalf of the authenticated
  * user who just completed the auth flow.
  *
- * TODO(01-01 merge): add captureMessage("auth_profile_trigger_gap_detected", "warning", { userId })
- * once src/lib/observability/sentry.ts is available.
+ * When the guardrail fires, emits a Sentry breadcrumb so production drift is observable.
  */
 export async function ensureProfileExists(
   userId: string,
@@ -80,6 +78,7 @@ export async function ensureProfileExists(
 
   // Guardrail fires: DB trigger must have failed silently
   logger.warn("ensureProfileExists: profile row missing, inserting fallback", { userId });
+  captureMessage("auth_profile_trigger_gap_detected", "warning", { userId });
 
   const { error: insertError } = await adminClient.from("profiles").insert({
     id: userId,

@@ -5,13 +5,17 @@ vi.mock("@/lib/supabase/admin", () => ({
   createSupabaseAdminClient: vi.fn(),
 }));
 
-// TODO(01-01 merge): once src/lib/observability/sentry.ts exists, restore captureMessage assertions
 vi.mock("@/lib/logger", () => ({
   logger: {
     warn: vi.fn(),
     error: vi.fn(),
     info: vi.fn(),
   },
+}));
+
+vi.mock("@/lib/observability/sentry", () => ({
+  captureMessage: vi.fn(),
+  captureException: vi.fn(),
 }));
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
