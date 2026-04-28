@@ -156,3 +156,16 @@ export const updateCourseSchema = baseCourseSchema
 
 export type CreateCourseInput = z.infer<typeof createCourseSchema>;
 export type UpdateCourseInput = z.infer<typeof updateCourseSchema>;
+
+// --- Phase 2: lifecycle schemas ---
+
+export const publishCourseSchema = z.object({
+  courseId: z
+    .string({ required_error: "Curso é obrigatório." })
+    .uuid({ message: "Identificador de curso inválido." }),
+});
+
+export const archiveCourseSchema = publishCourseSchema;
+export const unpublishCourseSchema = publishCourseSchema;
+
+export type PublishCourseInput = z.infer<typeof publishCourseSchema>;
