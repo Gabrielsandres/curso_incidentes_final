@@ -29,7 +29,21 @@ const clientSchema = z.object({
 -------------------------------------------------------- */
 
 const serverSchema = clientSchema.extend({
-  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  // Prod-required; stays optional in dev/test so local devs don't need the secret.
+  // superRefine fires inside safeParse — getEnv() throws on cold boot in production
+  // if the key is absent, same throw semantics as the rest of serverSchema.
+  SUPABASE_SERVICE_ROLE_KEY: z
+    .string()
+    .optional()
+    .superRefine((v, ctx) => {
+      if (process.env.NODE_ENV === "production" && !v) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "SUPABASE_SERVICE_ROLE_KEY is required in production. Set it in your Vercel environment variables.",
+        });
+      }
+    }),
   SUPABASE_JWT_SECRET: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
