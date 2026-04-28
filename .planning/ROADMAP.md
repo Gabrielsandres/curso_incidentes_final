@@ -49,8 +49,16 @@ Plans:
   3. Admin anexa um PDF a uma aula e o arquivo fica disponivel para download autenticado; remover o material nao quebra aulas existentes
   4. Ao tentar criar um curso com slug ja existente, o admin ve uma mensagem de erro clara sobre colisao de slug (sem stack trace exposto)
   5. Admin marca um curso como "arquivado" e ele some da visao do aluno, mas certificados e progresso anteriores permanecem intactos
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 7 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Schema migration 0014 (lifecycle timestamps, soft delete, UTMs, pending_enrollments) + database.types.ts + [BLOCKING] SQL apply
+- [ ] 02-02-PLAN.md — Course CRUD server actions (create/update/publish/archive/unpublish) + slug collision handling + queries extension
+- [ ] 02-03-PLAN.md — Module + Lesson CRUD server actions (create/update/delete soft/reorder) + schema extensions
+- [ ] 02-04-PLAN.md — Materials MIME whitelist (server + client) + material-upload component
+- [ ] 02-05-PLAN.md — Admin RSC page tree (/admin/cursos hierarchy) + 4 shared UI components (Breadcrumb, StatusBadge, ReorderButtons, ConfirmationDialog)
+- [ ] 02-06-PLAN.md — ENR-03: grant-enrollment server actions (lookup + direct + invite) + pending enrollment reconciliation + /admin/cursos/[slug]/alunos page + GrantEnrollmentDialog
+- [ ] 02-07-PLAN.md — MKT-02: UTM capture (schema extension + action + landing page hidden inputs) + MKT-01 landing preservation
 
 ### Phase 3: Progress & Certificates
 **Goal**: Aluno consegue acompanhar seu progresso por curso, retomar de onde parou, e receber o certificado em PDF automaticamente ao concluir 100% das aulas.
@@ -101,7 +109,7 @@ Note: Phase 4 (Video) depends only on Phase 2 (Catalog). If capacity allows, Pha
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete    | 2026-04-28 |
-| 2. Catalog CRUD | 0/TBD | Not started | - |
+| 2. Catalog CRUD | 0/7 | Not started | - |
 | 3. Progress & Certificates | 0/TBD | Not started | - |
 | 4. Video & Anti-Piracy | 0/TBD | Not started | - |
 | 5. B2B Institution Manager | 0/TBD | Not started | - |
