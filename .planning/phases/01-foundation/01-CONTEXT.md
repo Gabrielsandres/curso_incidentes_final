@@ -22,7 +22,7 @@ Schema prerequisites (institutions, institution_members, enrollments + B2B link,
 
 ### Sentry hardening (OPS-03)
 
-- **D-03:** Add a wrapper module at `src/lib/observability/sentry.ts` exporting `captureException(err, ctx?)` and `captureMessage(msg, level?)`. Wrapper checks `getEnv().SENTRY_DSN` once and no-ops when absent.
+- **D-03 (REVISED 2026-04-27 after research):** Add a wrapper module at `src/lib/observability/sentry.ts` exporting `captureException(err, ctx?)` and `captureMessage(msg, level?)`. Wrapper checks `process.env.SENTRY_DSN` directly (NOT `getEnv()`) and no-ops when absent. **Rationale:** `src/app/global-error.tsx` is a `"use client"` component and must be able to import the wrapper. `getEnv()` lives in a server-only module (`src/lib/env.ts` reads `process.env` synchronously and depends on `next/headers` consumers); importing it from the wrapper would pull server-only code into the client bundle and break the build. This is the documented exception to the CLAUDE.md rule "never read process.env directly in feature code" — see RESEARCH Q2.
 - **D-04:** Replace direct `Sentry.*` call sites — at minimum `src/app/global-error.tsx` — with the wrapper. Leave `sentry.{client,server,edge}.config.ts` and `instrumentation.ts` alone (those are SDK init, not call sites).
 - **D-05:** Wrapper is the single place to add tags/release/user context later; planner should make it minimal but extensible.
 

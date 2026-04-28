@@ -850,12 +850,15 @@ Se qualquer smoke test falhar:
 
 ### Pitfall 5: Old `enrollments` Table in `database.types.ts` Conflicts with New Schema
 
-**What goes wrong:** The current `database.types.ts` already has an `enrollments` table (lines 282–320) with different columns (`status`, `order_id`). [VERIFIED: codebase read] The new `enrollments` table in 0013 replaces this entirely.
-**Why it happens:** The existing enrollment model was a simpler schema; Phase 1 replaces it with the multi-source model per ENR-01/D-08.
-**How to avoid:** The migration must either `DROP TABLE IF EXISTS public.enrollments` first and then `CREATE TABLE`, OR `ALTER TABLE` to add/remove columns. Using `DROP + CREATE` is cleaner for a schema this different. The `database.types.ts` update must replace the old `enrollments` type entirely.
-**Warning signs:** Old `enrollment_status` enum reference in TypeScript types after the migration.
+**What goes wrong:** The current `database.types.ts` already has an `enrollments` table (lines 282–320) with different columns (`status`, `order_id`). [VERIFIED: codebase read]
 
-> **Note for planner:** This is the most subtle dependency in the entire phase. The existing `enrollments` table has a different shape. Confirm the migration strategy (drop+recreate vs. alter) before writing 0013. The backfill in D-07 assumes no existing non-admin enrollments need to be preserved; document this assumption in the migration comment.
+**RESOLVED by D-20 (2026-04-27, after this research was written):** Use **additive `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`**. **Do NOT use DROP + CREATE.** The legacy columns `status` (enum `enrollment_status`) and `order_id` (FK orders) are PRESERVED in the table; the new columns (`source`, `granted_at`, `expires_at`, `institution_id`) are added alongside. The `database.types.ts` update merges the new columns into the existing `enrollments` type — it does NOT remove `status` or `order_id`. RLS policies in 0013 reference only the new columns; ENR-02 active-enrollment check uses `expires_at IS NULL OR expires_at > now()`, never the legacy `status`.
+
+**Rationale for ADD over DROP+CREATE:** zero risk of data loss in environments we haven't audited; preserves the existing UNIQUE `(user_id, course_id)` constraint and the FK to `courses`; legacy code that may still read `status` continues to work; the `orders` table referenced by `order_id` still exists from 0001 (out-of-scope for v1 but no need to break the FK).
+
+**~~Old guidance (SUPERSEDED by D-20):~~** ~~Use DROP + CREATE for cleaner schema.~~ Do not follow this — use additive ALTER.
+
+**Warning signs if you accidentally DROP+CREATE:** any test or piece of code that imports `Database["public"]["Enums"]["enrollment_status"]` will break the build.
 
 ### Pitfall 6: `is_member_of_institution` Created After Policies That Reference It
 
@@ -956,7 +959,7 @@ Se qualquer smoke test falhar:
 | A1 | Creating a new enum type (`enrollment_source`) and using it in CREATE TABLE in the same transaction is allowed (only ADD VALUE to existing enum triggers the restriction) | Q3 | If wrong: 0013 would need a third migration for `enrollment_source` |
 | A2 | Supabase SQL Editor opens a new session/transaction per query execution (so 0012 is committed before 0013 begins) | Q3 | If wrong: instructions in deploy checklist need explicit guidance on using separate sessions |
 | A3 | `institution_members` FK column to `profiles` is named `profile_id` | Q4 | If wrong: planner must rename in SQL and TypeScript types |
-| A4 | No existing non-admin enrollment rows need to be preserved from the current `enrollments` table | Q5 | If wrong: migration must migrate existing data before DROP+CREATE |
+| A4 | (RESOLVED by D-20) Additive ALTER strategy preserves all existing rows; assumption no longer relevant. Legacy `status` and `order_id` columns stay in the table. | Q5 | n/a |
 | A5 | Resend SMTP routes via AWS SES global infrastructure (Brazil latency 80–200ms) | Q6 | If wrong: latency may be higher; no practical fix available in Phase 1 |
 | A6 | `ensureProfileExists` admin client call is ~2ms for existing profiles | Q8 | If wrong: higher latency; may need caching |
 
