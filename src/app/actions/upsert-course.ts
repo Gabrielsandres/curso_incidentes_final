@@ -4,7 +4,13 @@ import { revalidatePath } from "next/cache";
 
 import type { CourseFormState } from "@/app/actions/course-form-state";
 import { fetchUserRole } from "@/lib/auth/roles";
-import { createCourseSchema, updateCourseSchema } from "@/lib/courses/schema";
+import {
+  archiveCourseSchema,
+  createCourseSchema,
+  publishCourseSchema,
+  unpublishCourseSchema,
+  updateCourseSchema,
+} from "@/lib/courses/schema";
 import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -74,6 +80,7 @@ function formatSupabaseInsertOrUpdateError(error: { code?: string | null; messag
 
 function revalidateCoursePages() {
   revalidatePath("/admin");
+  revalidatePath("/admin/cursos");
   revalidatePath("/dashboard");
   revalidatePath("/curso/[slug]", "page");
 }
@@ -170,4 +177,88 @@ export async function updateCourseAction(
     success: true,
     message: "Curso atualizado com sucesso.",
   };
+}
+
+export async function publishCourseAction(
+  _prevState: CourseFormState,
+  formData: FormData,
+): Promise<CourseFormState> {
+  const parsed = publishCourseSchema.safeParse({ courseId: formData.get("course_id") });
+  if (!parsed.success) {
+    return { success: false, message: "Identificador de curso inválido." };
+  }
+
+  const auth = await requireAdminUser();
+  if (auth.errorMessage) {
+    return { success: false, message: auth.errorMessage };
+  }
+
+  const { error } = await auth.supabase
+    .from("courses")
+    .update({ published_at: new Date().toISOString(), archived_at: null })
+    .eq("id", parsed.data.courseId);
+
+  if (error) {
+    logger.error("Falha ao publicar curso", { error: error.message, code: error.code });
+    return { success: false, message: "Não foi possível publicar o curso. Tente novamente." };
+  }
+
+  revalidateCoursePages();
+  return { success: true, message: "Curso publicado. Agora está visível para alunos matriculados." };
+}
+
+export async function unpublishCourseAction(
+  _prevState: CourseFormState,
+  formData: FormData,
+): Promise<CourseFormState> {
+  const parsed = unpublishCourseSchema.safeParse({ courseId: formData.get("course_id") });
+  if (!parsed.success) {
+    return { success: false, message: "Identificador de curso inválido." };
+  }
+
+  const auth = await requireAdminUser();
+  if (auth.errorMessage) {
+    return { success: false, message: auth.errorMessage };
+  }
+
+  const { error } = await auth.supabase
+    .from("courses")
+    .update({ published_at: null })
+    .eq("id", parsed.data.courseId);
+
+  if (error) {
+    logger.error("Falha ao despublicar curso", { error: error.message, code: error.code });
+    return { success: false, message: "Não foi possível despublicar o curso. Tente novamente." };
+  }
+
+  revalidateCoursePages();
+  return { success: true, message: "Curso movido para rascunho. Não está mais visível para alunos." };
+}
+
+export async function archiveCourseAction(
+  _prevState: CourseFormState,
+  formData: FormData,
+): Promise<CourseFormState> {
+  const parsed = archiveCourseSchema.safeParse({ courseId: formData.get("course_id") });
+  if (!parsed.success) {
+    return { success: false, message: "Identificador de curso inválido." };
+  }
+
+  const auth = await requireAdminUser();
+  if (auth.errorMessage) {
+    return { success: false, message: auth.errorMessage };
+  }
+
+  const { error } = await auth.supabase
+    .from("courses")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", parsed.data.courseId);
+
+  if (error) {
+    logger.error("Falha ao arquivar curso", { error: error.message, code: error.code });
+    return { success: false, message: "Não foi possível arquivar o curso. Tente novamente." };
+  }
+
+  revalidateCoursePages();
+  return { success: true, message: "Curso arquivado. Progresso e certificados de alunos preservados." };
 }
