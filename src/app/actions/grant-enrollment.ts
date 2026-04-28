@@ -66,21 +66,41 @@ export async function lookupProfileByEmailAction(
   const email = rawEmail.toLowerCase();
 
   const adminClient = createSupabaseAdminClient();
-  const { data: profile, error } = await adminClient
-    .from("profiles")
-    .select("id, full_name, email")
-    .eq("email", email)
-    .maybeSingle();
 
-  if (error) {
-    logger.error("Falha ao buscar perfil por email", { email, error: error.message });
-    captureException(new Error("Supabase query error (profiles lookup)"), {
-      extra: { message: error.message, code: error.code },
+  // profiles table does not store email — look up via auth.admin.listUsers filtered by email
+  const { data: usersData, error: listError } = await adminClient.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+
+  if (listError) {
+    logger.error("Falha ao listar usuários para lookup por email", { email, error: listError.message });
+    captureException(new Error("Supabase auth.admin.listUsers error"), {
+      extra: { message: listError.message },
     });
     return { success: false, message: "Não foi possível buscar o aluno. Tente novamente." };
   }
 
+  const authUser = usersData.users.find((u) => u.email?.toLowerCase() === email);
+
+  if (!authUser) {
+    return { success: false, message: "", foundProfile: null };
+  }
+
+  // Fetch profile for this auth user
+  const { data: profile, error: profileError } = await adminClient
+    .from("profiles")
+    .select("id, full_name")
+    .eq("id", authUser.id)
+    .maybeSingle();
+
+  if (profileError) {
+    logger.error("Falha ao buscar perfil por id", { userId: authUser.id, error: profileError.message });
+    return { success: false, message: "Não foi possível buscar o aluno. Tente novamente." };
+  }
+
   if (!profile) {
+    // Auth user exists but no profile yet (race condition — treat as not found)
     return { success: false, message: "", foundProfile: null };
   }
 
@@ -90,7 +110,7 @@ export async function lookupProfileByEmailAction(
     foundProfile: {
       id: profile.id,
       fullName: profile.full_name,
-      email: profile.email ?? email,
+      email,
     },
   };
 }

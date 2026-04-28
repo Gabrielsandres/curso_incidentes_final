@@ -22,16 +22,27 @@ type ProfileRow = { id: string } | null;
 type InsertResult = { data: null; error: { code: string; message: string } | null };
 type DeleteResult = { data: null; error: null };
 
+// Default email used in all tests when a user is found
+const TEST_EMAIL = "aluno@example.com";
+
 function makeAdminClient(overrides: {
   pendingRows?: PendingRow[];
+  // authUserFound: whether listUsers returns a user matching TEST_EMAIL
+  authUserFound?: boolean;
   profileData?: ProfileRow;
   insertResults?: InsertResult[];
   deleteResult?: DeleteResult;
 }) {
   const pendingRows = overrides.pendingRows ?? [];
+  const authUserFound = overrides.authUserFound !== false; // default true
   const profileData = overrides.profileData ?? null;
   const insertResults = overrides.insertResults ?? [{ data: null, error: null }];
   let insertCallCount = 0;
+
+  // listUsers returns the auth user when authUserFound, otherwise empty
+  const listUsersData = authUserFound
+    ? { users: [{ id: "profile-xyz", email: TEST_EMAIL }], total: 1 }
+    : { users: [], total: 0 };
 
   const deleteQuery = {
     eq: vi.fn().mockResolvedValue({ data: null, error: null }),
@@ -61,10 +72,13 @@ function makeAdminClient(overrides: {
   };
 
   const adminClient = {
+    auth: {
+      admin: {
+        listUsers: vi.fn().mockResolvedValue({ data: listUsersData, error: null }),
+      },
+    },
     from: vi.fn((table: string) => {
       if (table === "pending_enrollments") {
-        // Return different object for select vs delete based on call order
-        // We need to detect if it's being used for select or delete
         return {
           select: pendingSelectQuery.select,
           delete: pendingDeleteQuery.delete,
@@ -99,6 +113,7 @@ describe("convertPendingEnrollmentsForEmail", () => {
   it("T2: loga erro e retorna quando perfil não encontrado após aceite de convite", async () => {
     const { adminClient, enrollmentsInsertQuery } = makeAdminClient({
       pendingRows: [{ id: "pending-1", course_id: "course-abc", expires_at: null }],
+      authUserFound: false,
       profileData: null,
     });
     vi.mocked(createSupabaseAdminClient).mockReturnValue(

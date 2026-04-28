@@ -20,11 +20,33 @@ export async function convertPendingEnrollmentsForEmail(email: string): Promise<
 
   if (!pending || pending.length === 0) return;
 
-  // 2. Look up the newly created profile
+  // 2. Look up the user's profile by email via auth.admin.listUsers
+  // profiles table does not store email — must resolve via auth layer
+  const { data: usersData, error: listError } = await supabase.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+
+  if (listError) {
+    logger.error("Falha ao buscar usuário por email ao converter pending_enrollments", {
+      email: normalizedEmail,
+      error: listError.message,
+    });
+    return;
+  }
+
+  const authUser = usersData.users.find((u) => u.email?.toLowerCase() === normalizedEmail);
+
+  if (!authUser) {
+    logger.error("Perfil não encontrado ao converter pending_enrollments", { email: normalizedEmail });
+    return;
+  }
+
+  // 3. Fetch the profile row by auth user ID
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
-    .eq("email", normalizedEmail)
+    .eq("id", authUser.id)
     .maybeSingle();
 
   if (!profile) {
@@ -32,7 +54,7 @@ export async function convertPendingEnrollmentsForEmail(email: string): Promise<
     return;
   }
 
-  // 3. Convert each pending row
+  // 4. Convert each pending row
   for (const row of pending) {
     const { error: insertError } = await supabase.from("enrollments").insert({
       user_id: profile.id,

@@ -60,15 +60,28 @@ function makeServerSupabase(overrides?: Partial<{ userId: string; role?: string 
 }
 
 function makeAdminClientChain(overrides?: {
-  profileData?: { id: string; full_name: string; email: string } | null;
+  // authUser: the user returned by listUsers (matched by email)
+  authUser?: { id: string; email: string } | null;
+  // profileData: the profiles row (id + full_name, no email)
+  profileData?: { id: string; full_name: string } | null;
   enrollmentError?: { code: string; message: string } | null;
   pendingError?: { code: string; message: string } | null;
   inviteError?: { message: string } | null;
 }) {
-  const profileData = overrides?.profileData !== undefined ? overrides.profileData : null;
+  // authUser defaults to a found user matching "joao@example.com"
+  const authUser = overrides?.authUser !== undefined
+    ? overrides.authUser
+    : { id: "profile-id-123", email: "joao@example.com" };
+  const profileData = overrides?.profileData !== undefined
+    ? overrides.profileData
+    : { id: "profile-id-123", full_name: "João Silva" };
   const enrollmentError = overrides?.enrollmentError !== undefined ? overrides.enrollmentError : null;
   const pendingError = overrides?.pendingError !== undefined ? overrides.pendingError : null;
   const inviteError = overrides?.inviteError !== undefined ? overrides.inviteError : null;
+
+  const listUsersData = authUser
+    ? { users: [{ id: authUser.id, email: authUser.email }], total: 1 }
+    : { users: [], total: 0 };
 
   const profileQuery = {
     select: vi.fn().mockReturnThis(),
@@ -87,6 +100,7 @@ function makeAdminClientChain(overrides?: {
   const adminClient = {
     auth: {
       admin: {
+        listUsers: vi.fn().mockResolvedValue({ data: listUsersData, error: null }),
         inviteUserByEmail: vi.fn().mockResolvedValue({
           data: inviteError ? null : { user: { id: "new-user-id", email: "test@example.com" } },
           error: inviteError,
@@ -157,7 +171,8 @@ describe("lookupProfileByEmailAction", () => {
     vi.mocked(fetchUserRole).mockResolvedValue("admin");
 
     const { adminClient } = makeAdminClientChain({
-      profileData: { id: "profile-id-123", full_name: "João Silva", email: "joao@example.com" },
+      authUser: { id: "profile-id-123", email: "joao@example.com" },
+      profileData: { id: "profile-id-123", full_name: "João Silva" },
     });
     vi.mocked(createSupabaseAdminClient).mockReturnValue(
       adminClient as unknown as ReturnType<typeof createSupabaseAdminClient>,
@@ -177,14 +192,15 @@ describe("lookupProfileByEmailAction", () => {
     });
   });
 
-  it("T4: retorna foundProfile null quando perfil não existe", async () => {
+  it("T4: retorna foundProfile null quando perfil não existe (auth user não encontrado)", async () => {
     const serverSupabase = makeServerSupabase();
     vi.mocked(createSupabaseServerClient).mockResolvedValue(
       serverSupabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
     );
     vi.mocked(fetchUserRole).mockResolvedValue("admin");
 
-    const { adminClient } = makeAdminClientChain({ profileData: null });
+    // authUser: null means listUsers returns empty array — no user with this email
+    const { adminClient } = makeAdminClientChain({ authUser: null, profileData: null });
     vi.mocked(createSupabaseAdminClient).mockReturnValue(
       adminClient as unknown as ReturnType<typeof createSupabaseAdminClient>,
     );
