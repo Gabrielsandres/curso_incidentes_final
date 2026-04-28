@@ -1367,7 +1367,9 @@ const STATUS_LABEL: Record<CourseStatus, string> = {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+> Todas as questões abaixo foram endereçadas pelo orchestrator antes do planning. Ver "## Resolved Open Questions" mais abaixo (apêndice) para evidência verificada no codebase.
 
 1. **RLS existente em `courses` para leitura de aluno autenticado**
    - O que sabemos: migrations 0001–0013 estão no projeto; 0003 adiciona policies para `materials`; não foi possível ler 0003–0010 nesta sessão
