@@ -52,6 +52,7 @@ Ajuste os valores em `.env.local` (modelo em `.env.example`).
    - `supabase/migrations/0011_courses_and_certificates.sql`
    - `supabase/migrations/0012_add_institution_manager_role.sql`
    - `supabase/migrations/0013_institutions_enrollments.sql`
+   - `supabase/migrations/0014_catalog_metadata.sql` — Lifecycle timestamps em courses (published_at/archived_at), soft delete em modules/lessons (deleted_at), video metadata em lessons (video_provider/video_external_id/workload_minutes), relaxamento de NOT NULL em lessons.video_url, UTMs em institutional_leads, tabela pending_enrollments, índices de performance.
 3. Verifique se as tabelas, enums e policies foram criados conforme esperado.
 
 ## Autenticacao de teste
