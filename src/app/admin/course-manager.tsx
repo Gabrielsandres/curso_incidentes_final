@@ -1,3 +1,9 @@
+/**
+ * @deprecated Superseded by /admin/cursos/* page tree (plan 02-05).
+ * Course creation: /admin/cursos/novo
+ * Course editing:  /admin/cursos/[slug]
+ * This file is kept for reference only and is no longer imported anywhere.
+ */
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";

@@ -462,3 +462,145 @@ export async function getAdminCourseList(client?: SupabaseServerClient): Promise
 
   return (data as CourseRow[]) ?? [];
 }
+
+// Admin-specific query: full course row (all fields) + modules (not filtered by deleted_at)
+type AdminCourseWithModules = CourseRow & {
+  modules: (ModuleRow & { lessons: Pick<LessonRow, "id" | "deleted_at">[] | null })[] | null;
+};
+
+export async function getAdminCourseBySlug(
+  slug: string,
+  client?: SupabaseServerClient,
+): Promise<AdminCourseWithModules | null> {
+  const supabase = await resolveClient(client);
+  const { data, error } = await supabase
+    .from("courses")
+    .select(
+      `
+        id, slug, title, description, cover_image_url,
+        certificate_enabled, certificate_template_url, certificate_workload_hours,
+        certificate_signer_name, certificate_signer_role,
+        published_at, archived_at, created_at, updated_at,
+        modules (
+          id, course_id, title, description, position, deleted_at, created_at,
+          lessons ( id, deleted_at )
+        )
+      `,
+    )
+    .eq("slug", slug)
+    .order("position", { foreignTable: "modules", ascending: true })
+    .maybeSingle();
+
+  if (error) {
+    logger.error("Falha ao carregar curso para admin por slug", { slug, error: error.message });
+    return null;
+  }
+
+  return data as AdminCourseWithModules | null;
+}
+
+// Admin-specific query: module with active lessons (deleted_at IS NULL)
+type AdminModuleWithLessons = ModuleRow & {
+  lessons: LessonRow[] | null;
+};
+
+export async function getAdminModuleWithLessons(
+  moduleId: string,
+  client?: SupabaseServerClient,
+): Promise<AdminModuleWithLessons | null> {
+  const supabase = await resolveClient(client);
+  const { data, error } = await supabase
+    .from("modules")
+    .select(
+      `
+        id, course_id, title, description, position, deleted_at, created_at,
+        lessons (
+          id, module_id, title, description, video_url, video_provider, video_external_id,
+          workload_minutes, position, deleted_at, created_at
+        )
+      `,
+    )
+    .eq("id", moduleId)
+    .maybeSingle();
+
+  if (error) {
+    logger.error("Falha ao carregar módulo para admin", { moduleId, error: error.message });
+    return null;
+  }
+
+  if (!data) return null;
+
+  const moduleData = data as AdminModuleWithLessons;
+
+  // Filter only active lessons (deleted_at IS NULL) for admin module page
+  return {
+    ...moduleData,
+    lessons: (moduleData.lessons ?? [])
+      .filter((lesson) => !lesson.deleted_at)
+      .sort((a, b) => a.position - b.position),
+  };
+}
+
+// Admin-specific query: lesson with materials + parent module + course slug
+type AdminLessonWithContext = {
+  lesson: LessonRow & { materials: MaterialRow[] };
+  module: ModuleRow & { courses: { id: string; slug: string; title: string } | null };
+};
+
+export async function getAdminLessonWithContext(
+  lessonId: string,
+  client?: SupabaseServerClient,
+): Promise<AdminLessonWithContext | null> {
+  const supabase = await resolveClient(client);
+
+  const { data: lessonData, error: lessonError } = await supabase
+    .from("lessons")
+    .select(
+      `
+        id, module_id, title, description, video_url, video_provider, video_external_id,
+        workload_minutes, position, deleted_at, created_at,
+        materials (
+          id, lesson_id, label, description, source_kind, storage_bucket, storage_path,
+          mime_type, file_size_bytes, original_file_name, material_type, resource_url, created_at
+        )
+      `,
+    )
+    .eq("id", lessonId)
+    .maybeSingle();
+
+  if (lessonError) {
+    logger.error("Falha ao carregar aula para admin", { lessonId, error: lessonError.message });
+    return null;
+  }
+
+  if (!lessonData) return null;
+
+  const lesson = lessonData as LessonRow & { materials: MaterialRow[] | null };
+
+  const { data: moduleData, error: moduleError } = await supabase
+    .from("modules")
+    .select(
+      `
+        id, course_id, title, description, position, deleted_at, created_at,
+        courses:course_id ( id, slug, title )
+      `,
+    )
+    .eq("id", lesson.module_id)
+    .maybeSingle();
+
+  if (moduleError) {
+    logger.error("Falha ao carregar módulo da aula para admin", {
+      lessonId,
+      moduleId: lesson.module_id,
+      error: moduleError.message,
+    });
+    return null;
+  }
+
+  if (!moduleData) return null;
+
+  return {
+    lesson: { ...lesson, materials: lesson.materials ?? [] },
+    module: moduleData as ModuleRow & { courses: { id: string; slug: string; title: string } | null },
+  };
+}
