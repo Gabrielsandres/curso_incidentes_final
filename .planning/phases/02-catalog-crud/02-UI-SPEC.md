@@ -56,7 +56,11 @@ via `min-h-[44px] min-w-[44px]` ou padding equivalente.
 
 ## Typography
 
-Quatro tamanhos; dois pesos. Preserva exatamente o que o codebase já usa.
+Quatro tamanhos; três pesos com papéis semânticos distintos. Preserva exatamente o que o codebase já usa.
+
+- **font-normal (400)** — apenas conteúdo: parágrafos, descrições, células de tabela.
+- **font-medium (500)** — labels e cabeçalhos de coluna (mais destaque que conteúdo, sem peso de heading).
+- **font-semibold (600)** — headings de seção/página E botões. Esta sobreposição é intencional: botões usam font-semibold para serem distinguíveis como ações primárias dentro do bloco de texto adjacente.
 
 | Role | Tailwind | px | Peso | Line-height | Uso |
 |------|----------|----|------|-------------|-----|
@@ -800,7 +804,7 @@ Sem optimistic UI no v1 — a lista recarrega após a ação.
 | Ação | Label do botão | Pendente |
 |------|---------------|----------|
 | Criar curso | "Novo curso" | N/A (link) |
-| Salvar edições | "Salvar" | "Salvando..." |
+| Salvar rascunho do curso | "Salvar rascunho" | "Salvando..." |
 | Publicar curso | "Publicar curso" | "Publicando..." |
 | Despublicar | "Despublicar curso" | "Despublicando..." |
 | Arquivar curso | "Arquivar curso" | "Arquivando..." |
