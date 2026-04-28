@@ -109,8 +109,8 @@ export function LessonPlayer({ lesson, initialIsCompleted }: LessonPlayerProps) 
   const playerRef = useRef<YouTubePlayer | null>(null);
   const playerElementRef = useRef<HTMLDivElement | null>(null);
 
-  const youtubeVideoId = useMemo(() => extractYouTubeVideoId(lesson.video_url), [lesson.video_url]);
-  const fallbackEmbedUrl = useMemo(() => buildYouTubeEmbedUrl(lesson.video_url), [lesson.video_url]);
+  const youtubeVideoId = useMemo(() => extractYouTubeVideoId(lesson.video_url ?? ""), [lesson.video_url]);
+  const fallbackEmbedUrl = useMemo(() => buildYouTubeEmbedUrl(lesson.video_url ?? ""), [lesson.video_url]);
 
   useEffect(() => {
     completionRef.current = isCompleted;

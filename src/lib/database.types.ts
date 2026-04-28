@@ -21,6 +21,8 @@ export interface Database {
           certificate_workload_hours: number | null;
           certificate_signer_name: string | null;
           certificate_signer_role: string | null;
+          published_at: string | null;
+          archived_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -35,6 +37,8 @@ export interface Database {
           certificate_workload_hours?: number | null;
           certificate_signer_name?: string | null;
           certificate_signer_role?: string | null;
+          published_at?: string | null;
+          archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -49,6 +53,8 @@ export interface Database {
           certificate_workload_hours?: number | null;
           certificate_signer_name?: string | null;
           certificate_signer_role?: string | null;
+          published_at?: string | null;
+          archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -61,6 +67,7 @@ export interface Database {
           title: string;
           description: string | null;
           position: number;
+          deleted_at: string | null;
           created_at: string;
         };
         Insert: {
@@ -69,6 +76,7 @@ export interface Database {
           title: string;
           description?: string | null;
           position?: number;
+          deleted_at?: string | null;
           created_at?: string;
         };
         Update: {
@@ -77,6 +85,7 @@ export interface Database {
           title?: string;
           description?: string | null;
           position?: number;
+          deleted_at?: string | null;
           created_at?: string;
         };
         Relationships: [
@@ -94,8 +103,12 @@ export interface Database {
           module_id: string;
           title: string;
           description: string | null;
-          video_url: string;
+          video_url: string | null;
           position: number;
+          deleted_at: string | null;
+          video_provider: string | null;
+          video_external_id: string | null;
+          workload_minutes: number | null;
           created_at: string;
         };
         Insert: {
@@ -103,8 +116,12 @@ export interface Database {
           module_id: string;
           title: string;
           description?: string | null;
-          video_url: string;
+          video_url?: string | null;
           position?: number;
+          deleted_at?: string | null;
+          video_provider?: string | null;
+          video_external_id?: string | null;
+          workload_minutes?: number | null;
           created_at?: string;
         };
         Update: {
@@ -112,8 +129,12 @@ export interface Database {
           module_id?: string;
           title?: string;
           description?: string | null;
-          video_url?: string;
+          video_url?: string | null;
           position?: number;
+          deleted_at?: string | null;
+          video_provider?: string | null;
+          video_external_id?: string | null;
+          workload_minutes?: number | null;
           created_at?: string;
         };
         Relationships: [
@@ -495,6 +516,9 @@ export interface Database {
           phone: string | null;
           message: string | null;
           headcount: number | null;
+          utm_source: string | null;
+          utm_medium: string | null;
+          utm_campaign: string | null;
           created_at: string;
         };
         Insert: {
@@ -505,6 +529,9 @@ export interface Database {
           phone?: string | null;
           message?: string | null;
           headcount?: number | null;
+          utm_source?: string | null;
+          utm_medium?: string | null;
+          utm_campaign?: string | null;
           created_at?: string;
         };
         Update: {
@@ -515,9 +542,52 @@ export interface Database {
           phone?: string | null;
           message?: string | null;
           headcount?: number | null;
+          utm_source?: string | null;
+          utm_medium?: string | null;
+          utm_campaign?: string | null;
           created_at?: string;
         };
         Relationships: [];
+      };
+      pending_enrollments: {
+        Row: {
+          id: string;
+          email: string;
+          course_id: string;
+          invited_by: string | null;
+          expires_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          course_id: string;
+          invited_by?: string | null;
+          expires_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          course_id?: string;
+          invited_by?: string | null;
+          expires_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pending_enrollments_course_id_fkey";
+            columns: ["course_id"];
+            referencedRelation: "courses";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pending_enrollments_invited_by_fkey";
+            columns: ["invited_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       coupons: {
         Row: {

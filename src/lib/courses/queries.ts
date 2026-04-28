@@ -104,6 +104,8 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
         certificate_workload_hours,
         certificate_signer_name,
         certificate_signer_role,
+        published_at,
+        archived_at,
         created_at,
         updated_at,
         modules (
@@ -146,6 +148,8 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
       certificate_workload_hours: course.certificate_workload_hours,
       certificate_signer_name: course.certificate_signer_name,
       certificate_signer_role: course.certificate_signer_role,
+      published_at: course.published_at,
+      archived_at: course.archived_at,
       created_at: course.created_at,
       updated_at: course.updated_at,
       ...buildProgressStats(lessonIds.length, completedLessons),
@@ -173,6 +177,8 @@ export async function getCourseWithContent(
         certificate_workload_hours,
         certificate_signer_name,
         certificate_signer_role,
+        published_at,
+        archived_at,
         created_at,
         updated_at,
         modules (
@@ -359,7 +365,7 @@ export async function getLessonWithCourseContext(
   const courseResponse = await supabase
     .from("courses")
     .select(
-      "id, slug, title, description, cover_image_url, certificate_enabled, certificate_template_url, certificate_workload_hours, certificate_signer_name, certificate_signer_role, created_at, updated_at",
+      "id, slug, title, description, cover_image_url, certificate_enabled, certificate_template_url, certificate_workload_hours, certificate_signer_name, certificate_signer_role, published_at, archived_at, created_at, updated_at",
     )
     .eq("id", lessonModule.course_id)
     .eq("slug", courseSlug)
