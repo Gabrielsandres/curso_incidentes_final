@@ -940,7 +940,9 @@ export default async function ModulePage({ params }) {
 
 ---
 
-## Q10: Arquitetura de Validação (Nyquist)
+## Validation Architecture
+
+(Q10 — Arquitetura de Validação para Nyquist)
 
 ### Test Framework
 
@@ -1485,3 +1487,15 @@ Todas estas diretivas são **obrigatórias** para todos os novos arquivos desta 
 
 **Research date:** 2026-04-28
 **Valid until:** 2026-05-28 (deps estáveis; re-verificar se houver atualização de Next.js ou Supabase SDK)
+
+---
+
+## Resolved Open Questions (verified by orchestrator after research)
+
+| Question | Status | Evidence |
+|----------|--------|----------|
+| A1: RLS ativo em lessons/modules? | **CONFIRMED ENABLED** | `supabase/migrations/0002_roles_and_profiles.sql` lines 63 (modules) e 93 (lessons); 0003 reafirma para lessons | 
+| A5: UNIQUE em (course_id, position) ou (module_id, position)? | **NO UNIQUE** | grep em todas as migrations não encontra essa constraint; swap de reorder não precisa de advisory lock para conflitos básicos |
+| video_url NOT NULL? | **CONFIRMED NOT NULL** | `supabase/migrations/0001_initial_schema.sql` line 48 — migration 0014 DEVE incluir `ALTER COLUMN video_url DROP NOT NULL` para permitir aulas com video_provider/video_external_id sem video_url legacy |
+
+**Implication for planner:** the soft-delete filter strategy can be either policy-level OR query-level (RLS already enabled gives the option). Recommendation from research stands: query-level filter is simpler and aligned with project precedent. 0014 must include `ALTER TABLE public.lessons ALTER COLUMN video_url DROP NOT NULL`.
