@@ -17,26 +17,14 @@ export async function createSupabaseServerClient() {
         }));
       },
       setAll(cookieBatch) {
-        cookieBatch.forEach(({ name, value, options }) => {
-          if (!value) {
-            if ("delete" in cookieStore) {
-              
-              cookieStore.delete(name);
-            }
-            return;
-          }
-
-          if (options && "set" in cookieStore) {
-            
+        try {
+          cookieBatch.forEach(({ name, value, options }) => {
             cookieStore.set({ name, value, ...options });
-            return;
-          }
-
-          if ("set" in cookieStore) {
-            
-            cookieStore.set(name, value);
-          }
-        });
+          });
+        } catch {
+          // Server Components can read cookies but cannot persist refreshed auth
+          // cookies. Middleware, Server Actions and Route Handlers handle writes.
+        }
       },
     },
   });
