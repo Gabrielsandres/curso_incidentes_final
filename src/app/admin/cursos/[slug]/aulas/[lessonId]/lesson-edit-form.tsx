@@ -3,7 +3,8 @@
 import { useActionState, useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 
-import { updateLessonAction, deleteLessonAction, type LessonFormState } from "@/app/actions/update-lesson";
+import { updateLessonAction, deleteLessonAction } from "@/app/actions/update-lesson";
+import type { LessonFormState } from "@/app/actions/lesson-form-state";
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
 import type { LessonRow } from "@/lib/courses/types";
 

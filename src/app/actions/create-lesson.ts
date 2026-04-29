@@ -2,17 +2,15 @@
 
 import { redirect } from "next/navigation";
 
+import type { CreateLessonFormState } from "@/app/actions/create-lesson-state";
 import { fetchUserRole } from "@/lib/auth/roles";
 import { uploadLessonMaterialFile } from "@/lib/materials/upload";
 import { createLessonSchema } from "@/lib/lessons/schema";
 import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type CreateLessonFormState = {
-  success: boolean;
-  message: string;
-  fieldErrors?: Record<string, string[]>;
-};
+// CreateLessonFormState type is exported from `@/app/actions/create-lesson-state`
+// to satisfy Next.js "use server" rule (server action files can only export async functions).
 
 type ModuleWithCourse = {
   id: string;

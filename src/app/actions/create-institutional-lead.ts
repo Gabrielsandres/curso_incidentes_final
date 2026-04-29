@@ -2,20 +2,14 @@
 
 import { captureException } from "@sentry/nextjs";
 
+import type { InstitutionalLeadFormState } from "@/app/actions/institutional-lead-form-state";
 import { logger } from "@/lib/logger";
 import { institutionalLeadSchema } from "@/lib/marketing/institutional-lead-schema";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-export type InstitutionalLeadFormState = {
-  success: boolean;
-  message: string;
-  fieldErrors?: Record<string, string[]>;
-};
-
-export const initialInstitutionalLeadState: InstitutionalLeadFormState = {
-  success: false,
-  message: "",
-};
+// InstitutionalLeadFormState type and initialInstitutionalLeadState are exported from
+// `@/app/actions/institutional-lead-form-state` to satisfy Next.js "use server" rule
+// (server action files can only export async functions).
 
 export async function submitInstitutionalLead(
   _prevState: InstitutionalLeadFormState,

@@ -1,17 +1,13 @@
 "use server";
 
+import type { CreateModuleFormState } from "@/app/actions/create-module-state";
 import { fetchUserRole } from "@/lib/auth/roles";
-import type { ModuleForLessonOption } from "@/lib/courses/types";
 import { logger } from "@/lib/logger";
 import { createModuleSchema } from "@/lib/modules/schema";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type CreateModuleFormState = {
-  success: boolean;
-  message: string;
-  fieldErrors?: Record<string, string[]>;
-  moduleOption?: ModuleForLessonOption;
-};
+// CreateModuleFormState type is exported from `@/app/actions/create-module-state`
+// to satisfy Next.js "use server" rule (server action files can only export async functions).
 
 type CourseForModule = {
   id: string;

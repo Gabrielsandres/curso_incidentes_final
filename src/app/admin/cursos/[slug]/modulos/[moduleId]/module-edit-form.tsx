@@ -3,7 +3,8 @@
 import { useActionState, useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 
-import { updateModuleAction, deleteModuleAction, type ModuleFormState } from "@/app/actions/update-module";
+import { updateModuleAction, deleteModuleAction } from "@/app/actions/update-module";
+import type { ModuleFormState } from "@/app/actions/module-form-state";
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
 import type { ModuleRow } from "@/lib/courses/types";
 

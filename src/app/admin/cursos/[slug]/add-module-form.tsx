@@ -2,7 +2,8 @@
 
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { createModuleAction, type CreateModuleFormState } from "@/app/actions/create-module";
+import { createModuleAction } from "@/app/actions/create-module";
+import type { CreateModuleFormState } from "@/app/actions/create-module-state";
 
 const initialState: CreateModuleFormState = { success: false, message: "" };
 

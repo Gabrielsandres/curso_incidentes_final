@@ -157,8 +157,10 @@ export function GrantEnrollmentDialog({ courseId, courseSlug, courseTitle }: Gra
   }
 
   // Derive dialog state
+  // Defensive: grantState.message may be undefined in initial state (before any submission)
+  // depending on initial state shape; optional chaining + ?? false guard handles that.
   const isAlreadyEnrolledError =
-    !grantState.success && grantState.message.includes("já tem acesso");
+    !grantState.success && (grantState.message?.includes("já tem acesso") ?? false);
 
   const profileFound = hasSearched && lookupState.success && lookupState.foundProfile != null;
   const profileNotFound =

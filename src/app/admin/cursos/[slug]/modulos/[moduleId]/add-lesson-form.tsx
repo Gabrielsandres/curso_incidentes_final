@@ -3,7 +3,8 @@
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-import { createLessonAction, type CreateLessonFormState } from "@/app/actions/create-lesson";
+import { createLessonAction } from "@/app/actions/create-lesson";
+import type { CreateLessonFormState } from "@/app/actions/create-lesson-state";
 
 const initialState: CreateLessonFormState = { success: false, message: "" };
 

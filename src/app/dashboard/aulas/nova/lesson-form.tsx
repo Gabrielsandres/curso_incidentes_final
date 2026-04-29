@@ -3,11 +3,10 @@
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-import { createLessonAction, type CreateLessonFormState } from "@/app/actions/create-lesson";
-import {
-  createModuleAction,
-  type CreateModuleFormState,
-} from "@/app/actions/create-module";
+import { createLessonAction } from "@/app/actions/create-lesson";
+import type { CreateLessonFormState } from "@/app/actions/create-lesson-state";
+import { createModuleAction } from "@/app/actions/create-module";
+import type { CreateModuleFormState } from "@/app/actions/create-module-state";
 import type { CourseSummary, ModuleForLessonOption } from "@/lib/courses/types";
 import { ALLOWED_MATERIAL_EXTENSIONS, MAX_MATERIAL_FILE_SIZE_BYTES } from "@/lib/materials/storage";
 

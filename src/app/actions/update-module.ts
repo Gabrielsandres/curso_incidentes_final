@@ -3,19 +3,16 @@
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import type { ModuleFormState } from "@/app/actions/module-form-state";
 import { fetchUserRole } from "@/lib/auth/roles";
 import type { Database } from "@/lib/database.types";
 import { logger } from "@/lib/logger";
 import { deleteModuleSchema, reorderModuleSchema, updateModuleSchema } from "@/lib/modules/schema";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type ModuleFormState = {
-  success: boolean;
-  message: string;
-  fieldErrors?: Record<string, string[] | undefined>;
-};
-
-export const initialModuleFormState: ModuleFormState = { success: false, message: "" };
+// ModuleFormState type and initialModuleFormState are exported from
+// `@/app/actions/module-form-state` to satisfy Next.js "use server" rule
+// (server action files can only export async functions).
 
 async function requireAdminUser() {
   const supabase: SupabaseClient<Database> = await createSupabaseServerClient();

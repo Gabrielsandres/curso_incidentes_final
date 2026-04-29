@@ -2,11 +2,11 @@
 
 import { useActionState, useEffect, useRef } from "react";
 
+import { submitInstitutionalLead } from "@/app/actions/create-institutional-lead";
 import {
   initialInstitutionalLeadState,
-  submitInstitutionalLead,
   type InstitutionalLeadFormState,
-} from "@/app/actions/create-institutional-lead";
+} from "@/app/actions/institutional-lead-form-state";
 
 const headcountOptions = [
   { label: "Até 200 estudantes", value: "200" },
