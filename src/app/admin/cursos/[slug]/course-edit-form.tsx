@@ -51,6 +51,10 @@ export function CourseEditForm({ course, status }: CourseEditFormProps) {
   const [isArchiving, startArchive] = useTransition();
   const [publishPending, startPublish] = useTransition();
   const [unpublishPending, startUnpublish] = useTransition();
+  // Inline feedback for lifecycle mutations (publish/unpublish/archive).
+  // Server actions return CourseFormState — capture the message + success flag
+  // so the user gets explicit confirmation (BUG-04 from UAT — UX silenciosa).
+  const [lifecycleFeedback, setLifecycleFeedback] = useState<{ success: boolean; message: string } | null>(null);
 
   const slugSuggestion = titleValue ? slugify(titleValue) : "";
 
@@ -64,7 +68,8 @@ export function CourseEditForm({ course, status }: CourseEditFormProps) {
     startArchive(async () => {
       const fd = new FormData();
       fd.append("course_id", course.id);
-      await archiveCourseAction(initialCourseFormState, fd);
+      const result = await archiveCourseAction(initialCourseFormState, fd);
+      setLifecycleFeedback({ success: result.success, message: result.message });
       setArchiveOpen(false);
     });
   }
@@ -73,7 +78,8 @@ export function CourseEditForm({ course, status }: CourseEditFormProps) {
     startPublish(async () => {
       const fd = new FormData();
       fd.append("course_id", course.id);
-      await publishCourseAction(initialCourseFormState, fd);
+      const result = await publishCourseAction(initialCourseFormState, fd);
+      setLifecycleFeedback({ success: result.success, message: result.message });
     });
   }
 
@@ -81,7 +87,8 @@ export function CourseEditForm({ course, status }: CourseEditFormProps) {
     startUnpublish(async () => {
       const fd = new FormData();
       fd.append("course_id", course.id);
-      await unpublishCourseAction(initialCourseFormState, fd);
+      const result = await unpublishCourseAction(initialCourseFormState, fd);
+      setLifecycleFeedback({ success: result.success, message: result.message });
     });
   }
 
@@ -231,6 +238,20 @@ export function CourseEditForm({ course, status }: CourseEditFormProps) {
             }`}
           >
             {state.message}
+          </div>
+        ) : null}
+
+        {lifecycleFeedback ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className={`rounded-lg px-3 py-2 text-sm border ${
+              lifecycleFeedback.success
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border-red-200 bg-red-50 text-red-700"
+            }`}
+          >
+            {lifecycleFeedback.message}
           </div>
         ) : null}
 
