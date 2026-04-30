@@ -21,31 +21,31 @@ created: 2026-04-30
 | Tool | none — Tailwind v4 utility classes only |
 | Preset | not applicable |
 | Component library | none — custom Tailwind components |
-| Icon library | lucide-react (already installed; used in my-certificates.tsx and course-edit-form.tsx) |
+| Icon library | lucide-react (already installed; `Loader2` used in my-certificates.tsx and lesson-player.tsx) |
 | Font | System font stack (inherited from existing app) |
 
-Source: codebase scan — `components.json` absent; all components hand-rolled in Tailwind v4.
+Source: `components.json` absent; `tailwind.config.ts` has CSS-variable-based custom tokens on top of Tailwind default palette; all components hand-rolled with Tailwind v4 utility classes.
 
 ---
 
 ## Spacing Scale
 
-Standard 8-point scale. All new elements in this phase must use only these values:
+Standard 8-point scale. All new elements in this phase must use only these values.
 
-| Token | px Value | Tailwind Class | Usage |
-|-------|----------|---------------|-------|
-| xs | 4px | gap-1, p-1 | Icon-to-label gaps (e.g., Loader2 icon inside button) |
-| sm | 8px | gap-2, p-2 | Button internal padding, badge gaps |
+| Token | px Value | Tailwind Class | Usage in Phase 3 |
+|-------|----------|---------------|-----------------|
+| xs | 4px | gap-1, p-1 | Icon-to-label gaps inside buttons |
+| sm | 8px | gap-2, p-2 | Button row gap, badge gaps |
 | md | 16px | gap-4, p-4 | Card internal section spacing, form field gaps |
-| lg | 24px | gap-6, p-6 | Card padding (existing cards use p-6) |
+| lg | 24px | gap-6, p-6 | Existing card padding (unchanged) |
 | xl | 32px | gap-8 | Section-to-section vertical rhythm |
-| 2xl | 48px | py-12 | Page-level top/bottom padding |
-| 3xl | 64px | — | Not used in Phase 3 delta areas |
+| 2xl | 48px | py-12 | Page-level top/bottom padding (unchanged) |
+| 3xl | 64px | — | Not used in Phase 3 delta |
 
 Exceptions:
-- Progress bar height: `h-2` (8px) — already established in dashboard card; completion banner uses `px-3 py-2.5` (12px/10px) to match existing inline feedback blocks in `course-edit-form.tsx`
-- Certificate section inner container: `p-4` (16px) on `bg-slate-50` sub-card — matches existing pattern at line 162 of course-edit-form.tsx
-- Touch targets for dashboard course-card buttons: minimum effective height 36px via `py-2` + `text-sm` — existing pattern, not changing
+- Completion banner: `px-3 py-3` (12px padding) — matches existing inline feedback block pattern in `course-edit-form.tsx` line 233. Not a 4px multiple per-axis but consistent with codebase pattern.
+- Certificate section inner container: `p-4` (16px) on `bg-slate-50` sub-card — existing pattern at course-edit-form.tsx line 162.
+- Dashboard course-card buttons: minimum effective height 36px via `py-2` + `text-sm` — existing pattern, not changing.
 
 Source: direct measurement from `src/app/dashboard/page.tsx`, `src/components/course/lesson-player.tsx`, `src/app/admin/cursos/[slug]/course-edit-form.tsx`.
 
@@ -53,122 +53,131 @@ Source: direct measurement from `src/app/dashboard/page.tsx`, `src/components/co
 
 ## Typography
 
-Extend (never replace) the existing type scale. All sizes below are already in use; Phase 3 introduces no new sizes or weights.
+Extend (never replace) the existing type scale. Phase 3 introduces zero new font sizes and zero new font weights.
 
-| Role | Tailwind | Size | Weight | Line Height | Usage in Phase 3 |
-|------|----------|------|--------|-------------|-----------------|
-| Section label | `text-xs font-semibold uppercase tracking-[0.2em] text-slate-500` | 12px | 600 | 1.5 | "CERTIFICADO" label in admin cert section |
-| Body / form label | `text-sm font-medium text-slate-700` | 14px | 500 | 1.5 | Field labels in cert section, banner body |
-| Body supporting | `text-sm text-slate-600` | 14px | 400 | 1.5 | Hint text under cert fields, banner text |
-| Subsection heading | `text-xl font-semibold text-slate-900` | 20px | 600 | 1.2 | Not added in Phase 3; already present in admin page |
+| Role | Tailwind Classes | Size | Weight | Line Height | Usage in Phase 3 |
+|------|-----------------|------|--------|-------------|-----------------|
+| Section label | `text-xs font-semibold uppercase tracking-[0.2em] text-slate-500` | 12px | 600 | 1.5 | "CERTIFICADO" label in admin cert section (already present) |
+| Body label | `text-sm font-semibold text-slate-700` | 14px | 600 | 1.5 | Field labels in cert section |
+| Body supporting | `text-sm text-slate-600` | 14px | 400 | 1.5 | Hint text under cert fields |
+| Banner body | `text-sm text-emerald-700` | 14px | 400 | 1.5 | Completion banner text |
+| Banner link | `text-sm font-semibold text-emerald-700 underline` | 14px | 600 | 1.5 | "Seu certificado está disponível no painel." link |
+| Micro / badge | `text-xs text-slate-500` | 12px | 400 | 1.5 | Progress counts on dashboard card |
+| Subsection heading | `text-xl font-semibold text-slate-900` | 20px | 600 | 1.2 | Not added in Phase 3; present in admin page |
 | Page heading | `text-2xl font-semibold text-slate-900` | 24px | 600 | 1.2 | Not changed in Phase 3 |
-| Micro / badge | `text-xs font-medium text-slate-500` | 12px | 500 | 1.5 | Progress counts on dashboard card |
 
-Phase 3 introduces exactly zero new font sizes and zero new font weights.
+Two weights only: 400 (regular) and 600 (semibold). No new sizes introduced.
 
-Source: existing classes extracted from `lesson-player.tsx` lines 209–252, `dashboard/page.tsx` lines 85–198, `course-edit-form.tsx` lines 97–229.
+Source: classes extracted from `lesson-player.tsx` lines 209–252, `dashboard/page.tsx` lines 85–198, `course-edit-form.tsx` lines 97–229.
 
 ---
 
 ## Color
 
-60/30/10 split — do not introduce new Tailwind color tokens. All values already present in codebase.
+60/30/10 split — no new Tailwind color tokens. All values already present in codebase.
 
-| Role | Tailwind color | Usage |
-|------|---------------|-------|
+| Role | Tailwind Tokens | Usage |
+|------|----------------|-------|
 | Dominant (60%) | `bg-slate-50` | Page background — unchanged |
-| Secondary (30%) | `bg-white` | Cards (`rounded-2xl border border-slate-200 bg-white`) — unchanged |
-| Accent (10%) | `sky-600` | Reserved-for list below |
-| Success | `emerald-600 / emerald-100 / emerald-700` | Completion states — see mapping below |
-| Warning | `amber-100 / amber-700` | "Em andamento" badge — unchanged |
-| Destructive | `red-600 / red-50 / red-200` | Error messages and invalid video placeholder — unchanged |
+| Secondary (30%) | `bg-white`, `border-slate-200` | Cards (`rounded-2xl border border-slate-200 bg-white`) — unchanged |
+| Accent (10%) | `sky-600` / `sky-700` | Reserved-for list below |
+| Success | `emerald-50`, `emerald-200`, `emerald-600`, `emerald-700`, `emerald-800` | Completion states — see mapping below |
+| Warning | `amber-100`, `amber-700` | "Em andamento" badge — unchanged |
+| Destructive | `red-600`, `red-50`, `red-200` | Error messages — unchanged |
 
 **Accent (sky-600) reserved for:**
-- "Continuar de onde parei" button (primary CTA on dashboard course card when progress is partial)
-- "Meus Certificados" primary button on dashboard card when course is 100% complete
-- "Entrar no curso" button when no progress (existing — unchanged)
+- "Continuar de onde parei" primary button background (partial-progress state)
+- "Meus Certificados" primary button background (100%-complete state)
+- "Entrar no curso" button background (no-progress state — unchanged)
 - "Elegível" certificate status badge (`bg-sky-100 text-sky-700`) — existing in MyCertificates
 - Progress bar fill (`bg-sky-600`) — existing — unchanged
-- Focus ring: `focus-visible:outline-sky-500` — existing pattern on form inputs
+- Focus ring: `focus-visible:outline-sky-500` — existing pattern
 
 **Emerald reserved for:**
-- Completion banner background: `bg-emerald-50 border-emerald-200 text-emerald-700` — same pattern as success inline feedback at course-edit-form.tsx line 233
-- Banner link inside: `text-emerald-700 underline hover:text-emerald-800`
+- Completion banner: `bg-emerald-50 border border-emerald-200 text-emerald-700`
+- Banner link text: `text-emerald-700 underline hover:text-emerald-800`
 - "Marcar aula como concluída" / "Aula concluída" button: `bg-emerald-600 hover:bg-emerald-700` — existing
-- "Concluída" badge: `bg-emerald-100 text-emerald-700` — existing
+- "Concluída" lesson badge: `bg-emerald-100 text-emerald-700` — existing
 
-**No new colors are introduced in Phase 3.**
+**No new colors introduced in Phase 3.**
 
-Source: color tokens extracted from existing components; confirmed no `components.json` or custom Tailwind config with semantic overrides.
+Source: extracted from `my-certificates.tsx`, `lesson-player.tsx`, `course-edit-form.tsx`. No CSS variable override in `tailwind.config.ts` affects slate/sky/emerald.
 
 ---
 
 ## Component Inventory
 
-Three UI changes, all additive to existing components. No new files unless the planner elects to extract to a sub-component.
+Three UI changes, all additive to existing components. No new files created by the executor.
 
 ### 1. Dashboard Course Card — Contextual CTA Buttons
 
-**Location:** `src/app/dashboard/page.tsx`, inside the `courses.map()` article element, replacing the single "Entrar no curso" button.
+**Location:** `src/app/dashboard/page.tsx`, inside the `courses.map()` article element, replacing the current single "Entrar no curso" `<Link>`.
 
-**Three exclusive states:**
+Three mutually exclusive states:
 
 **State A — No progress** (`completedLessons === 0`):
 ```
-One button: "Entrar no curso"
-  class: rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700
+Container: mt-4 flex flex-wrap items-center gap-2
+
+One button:
+  label: "Entrar no curso"
+  element: <Link>
   href: /curso/{course.slug}
+  class: rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700
 ```
-(Identical to current implementation — no change.)
+Identical to current implementation — no visual change.
 
 **State B — Partial progress** (`completedLessons > 0 && completedLessons < totalLessons`):
 ```
-Two buttons in a flex-wrap gap-2 row:
+Container: mt-4 flex flex-wrap items-center gap-2
 
-Primary: "Continuar de onde parei"
-  class: rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700
+Primary button:
+  label: "Continuar de onde parei"
+  element: <Link>
   href: /curso/{course.slug}/aula/{course.nextLessonId}
+  class: rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700
 
-Secondary: "Ver curso"
-  class: rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50
+Secondary button:
+  label: "Ver curso"
+  element: <Link>
   href: /curso/{course.slug}
+  class: rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50
 ```
 
 **State C — 100% complete** (`completedLessons >= totalLessons && totalLessons > 0`):
 ```
-Two buttons in a flex-wrap gap-2 row:
+Container: mt-4 flex flex-wrap items-center gap-2
 
-Primary: "Meus Certificados"
+Primary button (only when course.certificate_enabled === true):
+  label: "Meus Certificados"
+  element: <Link>
+  href: #certificados
   class: rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700
-  href: #certificados  (anchor to MyCertificates section on same page)
 
-Secondary: "Rever curso"
-  class: rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50
+Secondary button (always shown in State C):
+  label: "Rever curso"
+  element: <Link>
   href: /curso/{course.slug}
+  class: rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50
 ```
 
-Note: "Meus Certificados" primary only appears when `course.certificate_enabled === true`. When `certificate_enabled === false` and 100% complete: show only "Rever curso" (secondary style).
+When `certificate_enabled === false` and State C: show only "Rever curso" (secondary style).
 
-The buttons container:
-```
-class: mt-4 flex flex-wrap items-center gap-2
-```
-
-**MyCertificates section anchor:** The existing `<MyCertificates>` section element must receive `id="certificados"` so the `#certificados` href resolves. This is a one-attribute addition to the section wrapper in `dashboard/page.tsx`.
+**MyCertificates section anchor:** Add `id="certificados"` to the `<section>` wrapper that wraps `<MyCertificates>` in `dashboard/page.tsx`. Do NOT modify `my-certificates.tsx` itself.
 
 ### 2. LessonPlayer — Course Completion Banner
 
-**Location:** `src/components/lesson-player.tsx`, inside the `<div className="space-y-2">` block that contains the completion button. The banner renders **above** the completion button row (before the `<div className="flex flex-wrap items-center gap-3">` row), so it does not compete visually with `completionError` below.
+**Location:** `src/components/course/lesson-player.tsx`, inside the `<div className="space-y-2">` block containing the completion button. The banner renders **above** the `<div className="flex flex-wrap items-center gap-3">` button row, so it does not compete visually with `completionError` (which renders below the button row).
 
-**Trigger:** Local state `showCompletionBanner: boolean`, initialized `false`. Set to `true` when the API response from `/api/lesson-progress/complete` returns `{ ok: true, isCourseCompleted: true }`.
+**Trigger:** Local React state `showCompletionBanner: boolean`, initialized `false`. Set to `true` when `/api/lesson-progress/complete` returns `{ ok: true, isCourseCompleted: true }`.
 
-**Markup:**
-```
+**Exact markup:**
+```tsx
 {showCompletionBanner ? (
   <div
     role="status"
     aria-live="polite"
-    className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700"
+    className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm text-emerald-700"
   >
     Curso concluído!{" "}
     <a
@@ -182,52 +191,68 @@ class: mt-4 flex flex-wrap items-center gap-2
 ```
 
 Behavior:
-- Banner is not auto-dismissed. It persists until the user navigates away.
-- No close/X button — the link itself is the call to action.
-- Banner appears immediately after the API call resolves with `isCourseCompleted: true`, without page reload.
-- Banner does not appear if the lesson was already completed before page load (`initialIsCompleted === true`).
+- Never auto-dismissed. Persists until user navigates away.
+- No close/X button — the link is the only call to action.
+- Appears immediately after API resolves with `isCourseCompleted: true`, without page reload.
+- Does NOT appear if the lesson was already completed before page load (`initialIsCompleted === true` — guarded by `completionRef.current` check in `markLessonAsCompleted`).
 
-### 3. Admin Course Page — Certificate Section
+### 3. Admin Course Page — Certificate Section Conditional Visibility
 
 **Location:** `src/app/admin/cursos/[slug]/course-edit-form.tsx`.
 
-**Status:** Partially implemented in Phase 2. The certificate fields exist in the form (lines 162–228) but the conditional visibility of sub-fields when `certificate_enabled = false` is absent — all fields render unconditionally.
+**Current state (Phase 2 deliverable):** Certificate fields exist at lines 162–228 but all render unconditionally regardless of `certificate_enabled` value.
 
-**Phase 3 delta:** Add conditional visibility to the template/signer/workload fields. The checkbox toggle (`certificate_enabled`) controls whether the four dependent fields are shown. Use CSS visibility (opacity + pointer-events or conditional rendering) — CONTEXT.md D-08 specifies "mostrar/ocultar com CSS, não condicional de renderização" to avoid jank. Use a controlled React state `certificateEnabled` initialized from `course.certificate_enabled`.
+**Phase 3 delta — what changes:**
 
-**Fields always visible:**
-- Toggle checkbox: `certificate_enabled` — "Emitir certificado neste curso"
-- Explanatory paragraph (new, add below the toggle):
-  ```
-  <p className="text-xs text-slate-500">
-    O certificado é emitido automaticamente quando o aluno conclui 100% das aulas.
-    Adicionar novas aulas não invalida certificados já emitidos.
-  </p>
-  ```
+1. Add controlled React state at the top of `CourseEditForm`:
+   ```tsx
+   const [certificateEnabled, setCertificateEnabled] = useState(course.certificate_enabled);
+   ```
 
-**Fields shown only when `certificateEnabled === true`** (wrap in a div with transition):
+2. Change the `certificate_enabled` checkbox from uncontrolled to controlled:
+   ```tsx
+   <input
+     type="checkbox"
+     name="certificate_enabled"
+     checked={certificateEnabled}
+     onChange={(e) => setCertificateEnabled(e.target.checked)}
+     className="h-4 w-4 rounded border-slate-300"
+   />
+   ```
+   Do NOT use `defaultChecked` — it is incompatible with the controlled visibility pattern.
+
+3. Add explanatory paragraph immediately after the checkbox label row:
+   ```tsx
+   <p className="text-xs text-slate-500">
+     O certificado é emitido automaticamente quando o aluno conclui 100% das aulas.
+     Adicionar novas aulas não invalida certificados já emitidos.
+   </p>
+   ```
+
+4. Wrap the four dependent fields in a single div:
+   ```tsx
+   <div className={certificateEnabled ? "" : "hidden"}>
+     {/* certificate_template_url, certificate_workload_hours,
+         certificate_signer_name, certificate_signer_role */}
+   </div>
+   ```
+   Use `className="hidden"` (display:none) — NOT `opacity-0 pointer-events-none`. display:none removes the element from the accessibility tree; opacity tricks do not.
+
+5. Add hint text below the `certificate_template_url` input:
+   ```tsx
+   <p className="text-xs text-slate-500">
+     Faça upload da imagem no bucket público do Supabase Storage e cole a URL aqui.
+     Formato recomendado: PNG landscape 1754×1240 px.
+   </p>
+   ```
+
+**Section container (already present, preserve unchanged):**
 ```
-class (container): mt-4 space-y-4 (visible) vs. mt-4 space-y-4 opacity-0 pointer-events-none h-0 overflow-hidden (hidden)
+class: space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4
+section label: text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 — "CERTIFICADO"
 ```
-Or use Tailwind's conditional class: `{certificateEnabled ? "" : "hidden"}` — simpler and avoids jank since the values aren't lost from the DOM (they remain mounted).
 
-Fields in the conditional block:
-- `certificate_template_url` — text input with hint text:
-  ```
-  Faça upload da imagem no bucket público do Supabase Storage e cole a URL aqui.
-  Formato recomendado: PNG landscape 1754×1240 px.
-  ```
-- `certificate_workload_hours` — number input (min=1, step=1), placeholder "60"
-- `certificate_signer_name` — text input, placeholder "Nome do responsável"
-- `certificate_signer_role` — text input, placeholder "Ex.: Coordenação Pedagógica"
-
-The certificate section is inside the main course form and saved by the same "Salvar rascunho" button — no separate save button needed (CONTEXT.md D-09 permits reusing `upsertCourseAction`).
-
-Section label and card structure (already present, preserve as-is):
-```
-class (section): space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4
-label text: text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 — "CERTIFICADO"
-```
+**Save behavior:** The certificate section is saved by the existing "Salvar rascunho" button (D-09). No separate save button is added.
 
 ---
 
@@ -235,15 +260,14 @@ label text: text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 — 
 
 Every interactive element must cover all states. No new state colors introduced.
 
-| Element | Default | Hover | Disabled | Loading | Active/Selected |
-|---------|---------|-------|----------|---------|----------------|
-| "Continuar de onde parei" (primary) | bg-sky-600 white text | bg-sky-700 | opacity-70 cursor-not-allowed | — | — |
-| "Ver curso" / "Rever curso" (secondary) | border-slate-300 bg-white slate-700 | border-slate-400 bg-slate-50 | opacity-70 | — | — |
-| "Meus Certificados" (primary, 100% state) | bg-sky-600 white text | bg-sky-700 | opacity-70 | — | — |
-| Completion banner | Static block | — | — | — | Persistent until nav |
-| Banner link | emerald-700 underline | emerald-800 | — | — | — |
-| `certificate_enabled` checkbox | — | — | — | — | Toggles field visibility |
-| Cert sub-fields | border-slate-300 | focus:border-sky-500 focus:ring-2 focus:ring-sky-100 | — | — | — |
+| Element | Default | Hover | Disabled | Focus |
+|---------|---------|-------|----------|-------|
+| Primary CTA buttons (sky-600) | bg-sky-600 white text | bg-sky-700 | opacity-70 cursor-not-allowed | focus-visible:outline-sky-500 |
+| Secondary CTA buttons (border) | border-slate-300 bg-white slate-700 text | border-slate-400 bg-slate-50 | opacity-70 | focus-visible:outline-sky-500 |
+| Completion banner | Static block — no hover state | — | — | — |
+| Banner link `<a>` | emerald-700 underline | emerald-800 | — | underline maintained |
+| `certificate_enabled` checkbox | Native browser style | — | — | Native browser focus ring |
+| Cert sub-field text inputs | border-slate-300 | — | — | focus:border-sky-500 focus:ring-2 focus:ring-sky-100 |
 
 ---
 
@@ -254,12 +278,12 @@ All copy is pt-BR. Exact strings — do not paraphrase.
 | Element | Exact Copy |
 |---------|-----------|
 | Dashboard CTA — no progress | "Entrar no curso" |
-| Dashboard CTA — partial progress (primary) | "Continuar de onde parei" |
-| Dashboard CTA — partial progress (secondary) | "Ver curso" |
-| Dashboard CTA — 100% complete (primary) | "Meus Certificados" |
-| Dashboard CTA — 100% complete (secondary) | "Rever curso" |
-| Completion banner text | "Curso concluído! Seu certificado está disponível no painel." |
-| Completion banner link anchor | "Seu certificado está disponível no painel." (linked; "Curso concluído!" is plain text prefix) |
+| Dashboard CTA — partial progress, primary | "Continuar de onde parei" |
+| Dashboard CTA — partial progress, secondary | "Ver curso" |
+| Dashboard CTA — 100% complete, primary | "Meus Certificados" |
+| Dashboard CTA — 100% complete, secondary | "Rever curso" |
+| Completion banner — plain text prefix | "Curso concluído!" |
+| Completion banner — link text | "Seu certificado está disponível no painel." |
 | Cert section toggle label | "Emitir certificado neste curso" |
 | Cert section explanatory text | "O certificado é emitido automaticamente quando o aluno conclui 100% das aulas. Adicionar novas aulas não invalida certificados já emitidos." |
 | Cert template field label | "Template do certificado" |
@@ -272,9 +296,9 @@ All copy is pt-BR. Exact strings — do not paraphrase.
 | Cert signer role placeholder | "Ex.: Coordenação Pedagógica" |
 | Dashboard courses empty state | "Nenhum curso cadastrado no momento. Assim que um curso estiver disponível ele aparecerá aqui." (existing — do not change) |
 | MyCertificates empty state | "Nenhum curso com certificado foi configurado até o momento." (existing — do not change) |
-| Banner error (API failure) | Not applicable — banner only shown on success path; errors use existing `completionError` below the button |
+| Banner error | Not applicable — banner shown only on success path; API errors use existing `completionError` display below the button |
 
-**No destructive actions added in Phase 3.** The existing archive/unpublish flows in the admin form are not modified.
+**No destructive actions added in Phase 3.** Existing archive/unpublish flows in the admin form are not modified.
 
 ---
 
@@ -282,12 +306,12 @@ All copy is pt-BR. Exact strings — do not paraphrase.
 
 | Requirement | Implementation |
 |-------------|---------------|
-| Completion banner announced to screen readers | `role="status" aria-live="polite"` on the banner div (matches existing inline feedback pattern in course-edit-form.tsx line 234) |
+| Completion banner announced to screen readers | `role="status" aria-live="polite"` on the banner `<div>` |
 | Dashboard CTA buttons — keyboard navigable | `<Link>` renders as `<a>`, inherently focusable; no tabIndex needed |
-| `#certificados` anchor target | `<section id="certificados">` — the MyCertificates wrapper gains this id; screen readers can navigate to it |
+| `#certificados` anchor target | `<section id="certificados">` wrapper around `<MyCertificates>` in dashboard/page.tsx; screen readers can navigate to landmark |
 | Certificate section toggle — keyboard operable | Native `<input type="checkbox">` — inherently keyboard-operable |
-| Conditional cert fields — hidden from AT when invisible | Use `className="hidden"` (display:none) not opacity/visibility trick — display:none removes from accessibility tree correctly |
-| Loading state — Loader2 spinner | Already uses `aria-hidden="true"` in my-certificates.tsx (line 147); maintain this pattern |
+| Conditional cert fields — hidden from assistive technology when not visible | `className="hidden"` (display:none) — removes from accessibility tree. NOT `opacity-0` or `pointer-events-none` which leave elements accessible to screen readers while visually hidden |
+| Loading spinner inside buttons | `aria-hidden="true"` on `<Loader2>` — existing pattern in my-certificates.tsx line 147; maintain |
 
 ---
 
@@ -298,7 +322,7 @@ All copy is pt-BR. Exact strings — do not paraphrase.
 | shadcn official | none | not applicable |
 | third-party | none | not applicable |
 
-Phase 3 installs zero new packages. All components built with existing Tailwind v4 classes and lucide-react icons already in the project.
+Phase 3 installs zero new packages. All components built with existing Tailwind v4 classes and lucide-react already in the project.
 
 ---
 
@@ -307,18 +331,20 @@ Phase 3 installs zero new packages. All components built with existing Tailwind 
 | Decision | Source |
 |----------|--------|
 | Spacing scale (8pt) | Extracted from dashboard/page.tsx + lesson-player.tsx |
-| Typography (all 5 roles) | Extracted from existing components — zero new sizes |
+| Typography (all roles) | Extracted from existing components — zero new sizes/weights |
 | Color tokens | Extracted from my-certificates.tsx, lesson-player.tsx, course-edit-form.tsx |
-| Button shape (rounded-full) | Established in Phase 2, confirmed in course-edit-form.tsx line 30 |
-| Card shape (rounded-2xl) | Established in Phase 1/2, confirmed in lesson-player.tsx line 206 |
-| Banner structure | Matches inline feedback in course-edit-form.tsx lines 230–257 |
-| Conditional field visibility | CONTEXT.md D-08 |
-| Banner placement (above button) | CONTEXT.md specifics section |
-| All pt-BR copy | CONTEXT.md specifics + decisions D-01 through D-10 |
-| nextLessonId state logic | CONTEXT.md D-05/D-06 |
+| Button shape (`rounded-full`) | Established in Phase 2; confirmed in course-edit-form.tsx line 30 |
+| Card shape (`rounded-2xl`) | Established in Phase 1/2; confirmed in lesson-player.tsx line 206 |
+| Banner structure and classes | Matches inline success feedback in course-edit-form.tsx lines 230–257 |
+| Banner placement (above button row, not below) | CONTEXT.md specifics section |
+| Conditional visibility — `className="hidden"` | CONTEXT.md D-08 (accessibility requirement); RESEARCH.md Pattern 4 |
+| Certificate section controlled checkbox | RESEARCH.md Pattern 4 anti-pattern note |
+| All pt-BR copy | CONTEXT.md decisions D-01 through D-09 + specifics section |
+| nextLessonId state logic (3 card states) | CONTEXT.md D-05, D-06 |
 | No new pages | CONTEXT.md D-04, D-07 |
 | No new dependencies | CLAUDE.md + CONTEXT.md brownfield_reality |
-| Certificate section already partially built | Verified: course-edit-form.tsx lines 162–228 |
+| Certificate section partially built in Phase 2 | RESEARCH.md verification: course-edit-form.tsx lines 162–228 |
+| Save via existing "Salvar rascunho" button | CONTEXT.md D-09 |
 
 ---
 
