@@ -55,6 +55,7 @@ export function CourseEditForm({ course, status }: CourseEditFormProps) {
   // Server actions return CourseFormState — capture the message + success flag
   // so the user gets explicit confirmation (BUG-04 from UAT — UX silenciosa).
   const [lifecycleFeedback, setLifecycleFeedback] = useState<{ success: boolean; message: string } | null>(null);
+  const [certificateEnabled, setCertificateEnabled] = useState(course.certificate_enabled ?? false);
 
   const slugSuggestion = titleValue ? slugify(titleValue) : "";
 
@@ -165,13 +166,19 @@ export function CourseEditForm({ course, status }: CourseEditFormProps) {
             <input
               type="checkbox"
               name="certificate_enabled"
-              defaultChecked={course.certificate_enabled}
+              checked={certificateEnabled}
+              onChange={(e) => setCertificateEnabled(e.target.checked)}
               className="h-4 w-4 rounded border-slate-300"
             />
             Emitir certificado neste curso
           </label>
           <FieldError errors={state.fieldErrors?.certificateEnabled} />
+          <p className="text-xs text-slate-500">
+            O certificado é emitido automaticamente quando o aluno conclui 100% das aulas.
+            Adicionar novas aulas não invalida certificados já emitidos.
+          </p>
 
+          <div className={certificateEnabled ? "" : "hidden"}>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="flex flex-col gap-2">
               <span className="text-sm font-medium text-slate-700">Template do certificado</span>
@@ -182,6 +189,10 @@ export function CourseEditForm({ course, status }: CourseEditFormProps) {
                 placeholder="/certificado_teste.png ou https://..."
                 className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
               />
+              <p className="text-xs text-slate-500">
+                Faça upload da imagem no bucket público do Supabase Storage e cole a URL aqui.
+                Formato recomendado: PNG landscape 1754×1240 px.
+              </p>
               <FieldError errors={state.fieldErrors?.certificateTemplateUrl} />
             </label>
 
@@ -200,7 +211,7 @@ export function CourseEditForm({ course, status }: CourseEditFormProps) {
             </label>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
             <label className="flex flex-col gap-2">
               <span className="text-sm font-medium text-slate-700">Nome da assinatura</span>
               <input
@@ -224,6 +235,7 @@ export function CourseEditForm({ course, status }: CourseEditFormProps) {
               />
               <FieldError errors={state.fieldErrors?.certificateSignerRole} />
             </label>
+          </div>
           </div>
         </section>
 
