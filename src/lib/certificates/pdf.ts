@@ -20,13 +20,14 @@ type TextFieldPosition = {
   x: number;
   y: number;
   size: number;
+  centered?: boolean;
 };
 
 const DEFAULT_CERTIFICATE_TEMPLATE = "/certificado_teste.png";
 const CERTIFICATE_TEXT_COLOR = rgb(0.09, 0.12, 0.2);
 
 const CERTIFICATE_FIELDS = {
-  name: { x: 300, y: 430, size: 60 },
+  name: { x: 0, y: 430, size: 60, centered: true },
   course: { x: 260, y: 360, size: 34 },
   hours: { x: 700, y: 330, size: 32 },
   date: { x: 1220, y: 120, size: 20 },
@@ -121,8 +122,12 @@ function drawTextAtPosition(params: {
     fontSize -= 1;
   }
 
+  const x = params.field.centered
+    ? (params.pageWidth - params.font.widthOfTextAtSize(params.text, fontSize)) / 2
+    : params.field.x;
+
   params.page.drawText(params.text, {
-    x: params.field.x,
+    x,
     y: params.field.y,
     size: fontSize,
     font: params.font,

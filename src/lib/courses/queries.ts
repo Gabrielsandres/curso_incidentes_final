@@ -279,33 +279,38 @@ export async function getCourseWithContent(
     return null;
   }
 
-  const lessonIds = (course.modules ?? []).flatMap((module) => (module.lessons ?? []).map((lesson) => lesson.id));
-  const progressByLessonId = await getLessonProgressByLessonId(supabase, userId, lessonIds);
-
   // Filter soft-deleted modules and lessons on the student-facing path (T-02-T3 mitigation)
+  // lessonIds must be derived AFTER filtering deleted_at so the progress denominator is accurate
   const modules = (course.modules ?? [])
     .filter((module) => !module.deleted_at)
     .map((module) => ({
       ...module,
-      lessons: (module.lessons ?? [])
-        .filter((lesson) => !lesson.deleted_at)
-        .map((lesson) => ({
-          ...lesson,
-          materials: lesson.materials ?? [],
-          progressStatus: (progressByLessonId.get(lesson.id)?.status ?? "NOT_STARTED") as LessonProgressStatus,
-          completedAt: progressByLessonId.get(lesson.id)?.completed_at ?? null,
-          isCompleted: progressByLessonId.get(lesson.id)?.status === "COMPLETED",
-        })),
-    })) as ModuleWithLessons[];
+      lessons: (module.lessons ?? []).filter((lesson) => !lesson.deleted_at),
+    }))
+    .filter((module) => module.lessons.length > 0) as (typeof course.modules extends null ? never : NonNullable<typeof course.modules>[number] & { lessons: NonNullable<NonNullable<typeof course.modules>[number]["lessons"]> })[];
 
-  const completedLessons = modules.reduce(
+  const lessonIds = modules.flatMap((module) => module.lessons.map((lesson) => lesson.id));
+  const progressByLessonId = await getLessonProgressByLessonId(supabase, userId, lessonIds);
+
+  const mappedModules = modules.map((module) => ({
+    ...module,
+    lessons: module.lessons.map((lesson) => ({
+      ...lesson,
+      materials: lesson.materials ?? [],
+      progressStatus: (progressByLessonId.get(lesson.id)?.status ?? "NOT_STARTED") as LessonProgressStatus,
+      completedAt: progressByLessonId.get(lesson.id)?.completed_at ?? null,
+      isCompleted: progressByLessonId.get(lesson.id)?.status === "COMPLETED",
+    })),
+  })) as ModuleWithLessons[];
+
+  const completedLessons = mappedModules.reduce(
     (total, module) => total + module.lessons.reduce((moduleTotal, lesson) => moduleTotal + (lesson.isCompleted ? 1 : 0), 0),
     0,
   );
 
   return {
     ...course,
-    modules,
+    modules: mappedModules,
     ...buildProgressStats(lessonIds.length, completedLessons),
   };
 }

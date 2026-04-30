@@ -118,13 +118,7 @@ export default async function DashboardPage() {
               >
                 Gerenciar cursos
               </Link>
-              <Link
-                href="/dashboard/aulas/nova?createModule=1&askCreateLesson=1"
-                className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-              >
-                Criar módulo
-              </Link>
-              <Link
+<Link
                 href="/admin/usuarios"
                 className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
               >
