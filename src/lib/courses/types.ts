@@ -13,6 +13,7 @@ export type ProgressStats = {
   totalLessons: number;
   completedLessons: number;
   completionPercentage: number;
+  nextLessonId: string | null;
 };
 
 export type CourseSummary = CourseRow & ProgressStats;
