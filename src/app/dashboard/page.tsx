@@ -140,7 +140,11 @@ export default async function DashboardPage() {
           </section>
         ) : null}
 
-        {role !== "admin" ? <MyCertificates certificates={studentCertificates} /> : null}
+        {role !== "admin" ? (
+          <section id="certificados">
+            <MyCertificates certificates={studentCertificates} />
+          </section>
+        ) : null}
 
         <section className="space-y-4">
           <div>
@@ -189,12 +193,51 @@ export default async function DashboardPage() {
                     </p>
                   </div>
 
-                  <Link
-                    href={`/curso/${course.slug}`}
-                    className="mt-4 inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
-                  >
-                    Entrar no curso
-                  </Link>
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    {course.completedLessons === 0 ? (
+                      /* State A: sem progresso */
+                      <Link
+                        href={`/curso/${course.slug}`}
+                        className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+                      >
+                        Entrar no curso
+                      </Link>
+                    ) : course.completedLessons >= course.totalLessons && course.totalLessons > 0 ? (
+                      /* State C: 100% concluído */
+                      <>
+                        {course.certificate_enabled && (
+                          <Link
+                            href="#certificados"
+                            className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+                          >
+                            Meus Certificados
+                          </Link>
+                        )}
+                        <Link
+                          href={`/curso/${course.slug}`}
+                          className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                        >
+                          Rever curso
+                        </Link>
+                      </>
+                    ) : (
+                      /* State B: progresso parcial */
+                      <>
+                        <Link
+                          href={`/curso/${course.slug}/aula/${course.nextLessonId}`}
+                          className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+                        >
+                          Continuar de onde parei
+                        </Link>
+                        <Link
+                          href={`/curso/${course.slug}`}
+                          className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                        >
+                          Ver curso
+                        </Link>
+                      </>
+                    )}
+                  </div>
                 </article>
               ))}
             </div>
