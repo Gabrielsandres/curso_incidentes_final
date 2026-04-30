@@ -362,7 +362,9 @@ describe("getAvailableCourses — nextLessonId and deleted_at filter", () => {
     },
   ];
 
-  function makeAvailableCoursesClient(courseModules: typeof standardModules, progressRows: { lesson_id: string; status: string; completed_at: string | null }[]) {
+  type ModuleFixture = { id: string; position: number; lessons: { id: string; position: number; deleted_at: string | null }[] };
+
+  function makeAvailableCoursesClient(courseModules: ModuleFixture[], progressRows: { lesson_id: string; status: string; completed_at: string | null }[]) {
     const coursesQuery = {
       select: vi.fn().mockReturnThis(),
       not: vi.fn().mockReturnThis(),

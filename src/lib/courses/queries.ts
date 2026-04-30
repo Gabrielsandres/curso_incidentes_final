@@ -28,7 +28,9 @@ type CourseQueryResult = CourseRow & {
 };
 
 type CourseSummaryQueryResult = CourseRow & {
-  modules: ({ lessons: Pick<LessonRow, "id">[] | null } & Pick<ModuleRow, "id">)[] | null;
+  modules: ({
+    lessons: Pick<LessonRow, "id" | "position" | "deleted_at">[] | null;
+  } & Pick<ModuleRow, "id" | "position">)[] | null;
 };
 
 type LessonQueryResult = LessonRow & {
@@ -52,9 +54,38 @@ async function resolveClient(client?: SupabaseServerClient) {
   return createSupabaseServerClient();
 }
 
-function buildProgressStats(totalLessons: number, completedLessons: number): ProgressStats {
+function buildProgressStats(
+  totalLessons: number,
+  completedLessons: number,
+  nextLessonId: string | null = null,
+): ProgressStats {
   const completionPercentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-  return { totalLessons, completedLessons, completionPercentage };
+  return { totalLessons, completedLessons, completionPercentage, nextLessonId };
+}
+
+function computeNextLessonId(
+  modules: Array<{
+    id: string;
+    position: number;
+    lessons: Array<{ id: string; position: number; deleted_at: string | null }> | null;
+  }>,
+  progressMap: Map<string, { status: string }>,
+): string | null {
+  const orderedLessons = modules
+    .slice()
+    .sort((a, b) => a.position - b.position)
+    .flatMap((module) =>
+      (module.lessons ?? [])
+        .filter((lesson) => !lesson.deleted_at)
+        .slice()
+        .sort((a, b) => a.position - b.position),
+    );
+
+  const firstIncomplete = orderedLessons.find(
+    (lesson) => progressMap.get(lesson.id)?.status !== "COMPLETED",
+  );
+
+  return firstIncomplete?.id ?? null;
 }
 
 async function getLessonProgressByLessonId(
@@ -110,8 +141,11 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
         updated_at,
         modules (
           id,
+          position,
           lessons (
-            id
+            id,
+            position,
+            deleted_at
           )
         )
       `,
@@ -128,7 +162,11 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
   const courses = (data as CourseSummaryQueryResult[] | null) ?? [];
   const lessonsByCourse = courses.map((course) => ({
     course,
-    lessonIds: (course.modules ?? []).flatMap((module) => (module.lessons ?? []).map((lesson) => lesson.id)),
+    lessonIds: (course.modules ?? []).flatMap((module) =>
+      (module.lessons ?? [])
+        .filter((lesson) => !lesson.deleted_at)
+        .map((lesson) => lesson.id),
+    ),
   }));
 
   const uniqueLessonIds = Array.from(new Set(lessonsByCourse.flatMap((item) => item.lessonIds)));
@@ -139,6 +177,12 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
       const status = progressByLessonId.get(lessonId)?.status;
       return total + (status === "COMPLETED" ? 1 : 0);
     }, 0);
+
+    const nextLessonId =
+      completedLessons === 0
+        ? null
+        : computeNextLessonId(course.modules ?? [], progressByLessonId);
+
     return {
       id: course.id,
       slug: course.slug,
@@ -154,7 +198,7 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
       archived_at: course.archived_at,
       created_at: course.created_at,
       updated_at: course.updated_at,
-      ...buildProgressStats(lessonIds.length, completedLessons),
+      ...buildProgressStats(lessonIds.length, completedLessons, nextLessonId),
     };
   });
 }
@@ -411,6 +455,7 @@ export async function getLessonWithCourseContext(
     course: {
       ...course,
       ...buildProgressStats(0, 0),
+      nextLessonId: null,
     },
     module: lessonModule,
     lesson: normalizedLesson,
