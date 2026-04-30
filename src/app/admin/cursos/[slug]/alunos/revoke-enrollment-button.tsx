@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { UserMinus } from "lucide-react";
 
 import { ConfirmationDialog } from "@/components/admin/confirmation-dialog";
-import { revokeEnrollmentAction, initialRevokeState } from "@/app/actions/revoke-enrollment";
+import { revokeEnrollmentAction } from "@/app/actions/revoke-enrollment";
+import { initialRevokeState } from "@/app/actions/revoke-enrollment-state";
 
 interface RevokeEnrollmentButtonProps {
   enrollmentId: string;
@@ -14,14 +15,17 @@ interface RevokeEnrollmentButtonProps {
 
 export function RevokeEnrollmentButton({ enrollmentId, courseSlug, email }: RevokeEnrollmentButtonProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [, startTransition] = useTransition();
   const [state, formAction, isPending] = useActionState(revokeEnrollmentAction, initialRevokeState);
 
   function handleConfirm() {
+    setDialogOpen(false);
     const formData = new FormData();
     formData.set("enrollment_id", enrollmentId);
     formData.set("course_slug", courseSlug);
-    formAction(formData);
-    setDialogOpen(false);
+    startTransition(() => {
+      formAction(formData);
+    });
   }
 
   return (

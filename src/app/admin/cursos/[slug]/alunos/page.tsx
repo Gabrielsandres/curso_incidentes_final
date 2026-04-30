@@ -4,7 +4,7 @@ import { Users } from "lucide-react";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Breadcrumb } from "@/components/admin/breadcrumb";
-import { GrantEnrollmentDialog } from "@/components/admin/grant-enrollment-dialog";
+import { GrantEnrollmentDialog, type StudentOption } from "@/components/admin/grant-enrollment-dialog";
 import { fetchUserRole } from "@/lib/auth/roles";
 import { getAdminCourseBySlug } from "@/lib/courses/queries";
 import { logger } from "@/lib/logger";
@@ -91,9 +91,33 @@ export default async function AlunosPage({
     }
   }
 
-  // Fetch auth emails via admin client for each enrolled user
-  // Note: profiles table doesn't store email — we display user_id as fallback
-  // (email lookup via auth.admin.listUsers is expensive for large sets; show user_id for now)
+  // Fetch all auth users to populate emails for enrolled users and build available-students list
+  const { data: allAuthUsers } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  const authEmailMap = new Map<string, string>();
+  for (const u of allAuthUsers?.users ?? []) {
+    if (u.email) authEmailMap.set(u.id, u.email);
+  }
+
+  // Enrich profilesMap with emails
+  for (const [id, profile] of profilesMap.entries()) {
+    profilesMap.set(id, { ...profile, email: authEmailMap.get(id) ?? null });
+  }
+
+  // Build list of all students not yet enrolled in this course
+  const enrolledSet = new Set(enrolledUserIds);
+  const { data: allProfiles } = await adminClient
+    .from("profiles")
+    .select("id, full_name")
+    .order("full_name", { ascending: true })
+    .limit(1000);
+
+  const availableStudents: StudentOption[] = (allProfiles ?? [])
+    .filter((p) => !enrolledSet.has(p.id))
+    .map((p) => ({
+      id: p.id,
+      fullName: p.full_name,
+      email: authEmailMap.get(p.id) ?? "",
+    }));
 
   const { data: pending, error: pendingError } = await adminClient
     .from("pending_enrollments")
@@ -146,6 +170,7 @@ export default async function AlunosPage({
               courseId={course.id}
               courseSlug={slug}
               courseTitle={course.title}
+              availableStudents={availableStudents}
             />
           </div>
         </div>
@@ -161,6 +186,7 @@ export default async function AlunosPage({
                 courseId={course.id}
                 courseSlug={slug}
                 courseTitle={course.title}
+                availableStudents={availableStudents}
               />
             </div>
           ) : (
@@ -191,11 +217,11 @@ export default async function AlunosPage({
               <tbody className="divide-y divide-slate-100">
                 {enrollmentList.map((enrollment) => {
                   const profile = profilesMap.get(enrollment.user_id);
-                  const displayId = enrollment.user_id.slice(0, 8) + "...";
+                  const displayEmail = profile?.email ?? enrollment.user_id.slice(0, 8) + "...";
                   return (
                     <tr key={enrollment.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 text-sm text-slate-700">
-                        <span className="font-mono text-xs text-slate-500">{displayId}</span>
+                        <span className="text-xs text-slate-500">{displayEmail}</span>
                       </td>
                       <td className="hidden px-4 py-3 text-sm text-slate-700 md:table-cell">
                         {profile?.full_name ?? "—"}
@@ -213,7 +239,7 @@ export default async function AlunosPage({
                         <RevokeEnrollmentButton
                           enrollmentId={enrollment.id}
                           courseSlug={slug}
-                          email={displayId}
+                          email={displayEmail}
                         />
                       </td>
                     </tr>

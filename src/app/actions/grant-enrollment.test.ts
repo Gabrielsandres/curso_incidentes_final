@@ -39,11 +39,10 @@ import { fetchUserRole } from "@/lib/auth/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
-  lookupProfileByEmailAction,
-  grantEnrollmentAction,
+  grantEnrollmentBatchAction,
   grantEnrollmentWithInviteAction,
-  initialEnrollmentState,
 } from "./grant-enrollment";
+import { initialEnrollmentState } from "./grant-enrollment-state";
 
 const initialState = initialEnrollmentState;
 
@@ -60,37 +59,16 @@ function makeServerSupabase(overrides?: Partial<{ userId: string; role?: string 
 }
 
 function makeAdminClientChain(overrides?: {
-  // authUser: the user returned by listUsers (matched by email)
-  authUser?: { id: string; email: string } | null;
-  // profileData: the profiles row (id + full_name, no email)
-  profileData?: { id: string; full_name: string } | null;
-  enrollmentError?: { code: string; message: string } | null;
+  upsertError?: { code: string; message: string } | null;
   pendingError?: { code: string; message: string } | null;
   inviteError?: { message: string } | null;
 }) {
-  // authUser defaults to a found user matching "joao@example.com"
-  const authUser = overrides?.authUser !== undefined
-    ? overrides.authUser
-    : { id: "profile-id-123", email: "joao@example.com" };
-  const profileData = overrides?.profileData !== undefined
-    ? overrides.profileData
-    : { id: "profile-id-123", full_name: "João Silva" };
-  const enrollmentError = overrides?.enrollmentError !== undefined ? overrides.enrollmentError : null;
+  const upsertError = overrides?.upsertError !== undefined ? overrides.upsertError : null;
   const pendingError = overrides?.pendingError !== undefined ? overrides.pendingError : null;
   const inviteError = overrides?.inviteError !== undefined ? overrides.inviteError : null;
 
-  const listUsersData = authUser
-    ? { users: [{ id: authUser.id, email: authUser.email }], total: 1 }
-    : { users: [], total: 0 };
-
-  const profileQuery = {
-    select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    maybeSingle: vi.fn().mockResolvedValue({ data: profileData, error: null }),
-  };
-
-  const enrollmentInsertQuery = {
-    insert: vi.fn().mockResolvedValue({ data: null, error: enrollmentError }),
+  const enrollmentUpsertQuery = {
+    upsert: vi.fn().mockResolvedValue({ data: null, error: upsertError }),
   };
 
   const pendingInsertQuery = {
@@ -100,7 +78,6 @@ function makeAdminClientChain(overrides?: {
   const adminClient = {
     auth: {
       admin: {
-        listUsers: vi.fn().mockResolvedValue({ data: listUsersData, error: null }),
         inviteUserByEmail: vi.fn().mockResolvedValue({
           data: inviteError ? null : { user: { id: "new-user-id", email: "test@example.com" } },
           error: inviteError,
@@ -108,202 +85,102 @@ function makeAdminClientChain(overrides?: {
       },
     },
     from: vi.fn((table: string) => {
-      if (table === "profiles") return profileQuery;
-      if (table === "enrollments") return enrollmentInsertQuery;
+      if (table === "enrollments") return enrollmentUpsertQuery;
       if (table === "pending_enrollments") return pendingInsertQuery;
       return {};
     }),
   };
 
-  return { adminClient, profileQuery, enrollmentInsertQuery, pendingInsertQuery };
+  return { adminClient, enrollmentUpsertQuery, pendingInsertQuery };
 }
 
-describe("lookupProfileByEmailAction", () => {
+describe("grantEnrollmentBatchAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("T1: retorna erro de permissão para usuário não admin", async () => {
-    const serverSupabase = makeServerSupabase();
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(
-      serverSupabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
-    );
-    vi.mocked(fetchUserRole).mockResolvedValue("student");
-
-    const formData = new FormData();
-    formData.set("email", "aluno@example.com");
-    formData.set("course_id", "course-123");
-
-    const result = await lookupProfileByEmailAction(initialState, formData);
-
-    expect(result.success).toBe(false);
-    expect(result.message.toLowerCase()).toContain("permiss");
-  });
-
-  it("T2: retorna erro de sessão quando usuário não está autenticado", async () => {
-    const serverSupabase = {
-      auth: {
-        getUser: vi.fn().mockResolvedValue({
-          data: { user: null },
-          error: null,
-        }),
-      },
-    };
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(
-      serverSupabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
-    );
-
-    const formData = new FormData();
-    formData.set("email", "aluno@example.com");
-    formData.set("course_id", "course-123");
-
-    const result = await lookupProfileByEmailAction(initialState, formData);
-
-    expect(result.success).toBe(false);
-    expect(result.message.toLowerCase()).toContain("sess");
-  });
-
-  it("T3: retorna foundProfile quando perfil existe", async () => {
+  it("T5: upsert com expires_at null quando sem expiração", async () => {
     const serverSupabase = makeServerSupabase();
     vi.mocked(createSupabaseServerClient).mockResolvedValue(
       serverSupabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
     );
     vi.mocked(fetchUserRole).mockResolvedValue("admin");
 
-    const { adminClient } = makeAdminClientChain({
-      authUser: { id: "profile-id-123", email: "joao@example.com" },
-      profileData: { id: "profile-id-123", full_name: "João Silva" },
-    });
+    const { adminClient, enrollmentUpsertQuery } = makeAdminClientChain({ upsertError: null });
     vi.mocked(createSupabaseAdminClient).mockReturnValue(
       adminClient as unknown as ReturnType<typeof createSupabaseAdminClient>,
     );
 
     const formData = new FormData();
-    formData.set("email", "joao@example.com");
-    formData.set("course_id", "course-123");
-
-    const result = await lookupProfileByEmailAction(initialState, formData);
-
-    expect(result.success).toBe(true);
-    expect(result.foundProfile).toMatchObject({
-      id: "profile-id-123",
-      fullName: "João Silva",
-      email: "joao@example.com",
-    });
-  });
-
-  it("T4: retorna foundProfile null quando perfil não existe (auth user não encontrado)", async () => {
-    const serverSupabase = makeServerSupabase();
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(
-      serverSupabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
-    );
-    vi.mocked(fetchUserRole).mockResolvedValue("admin");
-
-    // authUser: null means listUsers returns empty array — no user with this email
-    const { adminClient } = makeAdminClientChain({ authUser: null, profileData: null });
-    vi.mocked(createSupabaseAdminClient).mockReturnValue(
-      adminClient as unknown as ReturnType<typeof createSupabaseAdminClient>,
-    );
-
-    const formData = new FormData();
-    formData.set("email", "desconhecido@example.com");
-    formData.set("course_id", "course-123");
-
-    const result = await lookupProfileByEmailAction(initialState, formData);
-
-    expect(result.success).toBe(false);
-    expect(result.foundProfile).toBeNull();
-    expect(result.message).toBe("");
-  });
-});
-
-describe("grantEnrollmentAction", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("T5: insere enrollment com expires_at null quando 'Sem expiração'", async () => {
-    const serverSupabase = makeServerSupabase();
-    vi.mocked(createSupabaseServerClient).mockResolvedValue(
-      serverSupabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
-    );
-    vi.mocked(fetchUserRole).mockResolvedValue("admin");
-
-    const { adminClient, enrollmentInsertQuery } = makeAdminClientChain({ enrollmentError: null });
-    vi.mocked(createSupabaseAdminClient).mockReturnValue(
-      adminClient as unknown as ReturnType<typeof createSupabaseAdminClient>,
-    );
-
-    const formData = new FormData();
-    formData.set("user_id", "user-abc");
+    formData.append("user_ids[]", "user-abc");
     formData.set("course_id", "course-xyz");
     formData.set("course_slug", "my-course");
-    // No expires_at — means no expiry
 
-    const result = await grantEnrollmentAction(initialState, formData);
+    const result = await grantEnrollmentBatchAction(initialState, formData);
 
     expect(result.success).toBe(true);
-    expect(enrollmentInsertQuery.insert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        user_id: "user-abc",
-        course_id: "course-xyz",
-        source: "admin_grant",
-        expires_at: null,
-      }),
+    expect(enrollmentUpsertQuery.upsert).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          user_id: "user-abc",
+          course_id: "course-xyz",
+          source: "admin_grant",
+          expires_at: null,
+        }),
+      ]),
+      expect.any(Object),
     );
   });
 
-  it("T6: insere enrollment com expires_at quando data fornecida", async () => {
+  it("T6: upsert com expires_at quando data fornecida", async () => {
     const serverSupabase = makeServerSupabase();
     vi.mocked(createSupabaseServerClient).mockResolvedValue(
       serverSupabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
     );
     vi.mocked(fetchUserRole).mockResolvedValue("admin");
 
-    const { adminClient, enrollmentInsertQuery } = makeAdminClientChain({ enrollmentError: null });
+    const { adminClient, enrollmentUpsertQuery } = makeAdminClientChain({ upsertError: null });
     vi.mocked(createSupabaseAdminClient).mockReturnValue(
       adminClient as unknown as ReturnType<typeof createSupabaseAdminClient>,
     );
 
     const formData = new FormData();
-    formData.set("user_id", "user-abc");
+    formData.append("user_ids[]", "user-abc");
     formData.set("course_id", "course-xyz");
     formData.set("course_slug", "my-course");
     formData.set("expires_at", "2025-12-31");
 
-    const result = await grantEnrollmentAction(initialState, formData);
+    const result = await grantEnrollmentBatchAction(initialState, formData);
 
     expect(result.success).toBe(true);
-    expect(enrollmentInsertQuery.insert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        expires_at: "2025-12-31",
-      }),
+    expect(enrollmentUpsertQuery.upsert).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ expires_at: "2025-12-31" }),
+      ]),
+      expect.any(Object),
     );
   });
 
-  it("T7: retorna mensagem pt-BR quando Postgres retorna 23505", async () => {
+  it("T7: retorna erro quando nenhum aluno selecionado", async () => {
     const serverSupabase = makeServerSupabase();
     vi.mocked(createSupabaseServerClient).mockResolvedValue(
       serverSupabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
     );
     vi.mocked(fetchUserRole).mockResolvedValue("admin");
 
-    const { adminClient } = makeAdminClientChain({
-      enrollmentError: { code: "23505", message: "duplicate key value violates unique constraint" },
-    });
+    const { adminClient } = makeAdminClientChain();
     vi.mocked(createSupabaseAdminClient).mockReturnValue(
       adminClient as unknown as ReturnType<typeof createSupabaseAdminClient>,
     );
 
     const formData = new FormData();
-    formData.set("user_id", "user-abc");
     formData.set("course_id", "course-xyz");
     formData.set("course_slug", "my-course");
 
-    const result = await grantEnrollmentAction(initialState, formData);
+    const result = await grantEnrollmentBatchAction(initialState, formData);
 
     expect(result.success).toBe(false);
-    expect(result.message).toBe("Este aluno já tem acesso ativo a este curso.");
+    expect(result.message).toContain("Selecione");
   });
 
   it("T8: retorna erro de permissão para não admin", async () => {
@@ -314,14 +191,39 @@ describe("grantEnrollmentAction", () => {
     vi.mocked(fetchUserRole).mockResolvedValue("student");
 
     const formData = new FormData();
-    formData.set("user_id", "user-abc");
+    formData.append("user_ids[]", "user-abc");
     formData.set("course_id", "course-xyz");
     formData.set("course_slug", "my-course");
 
-    const result = await grantEnrollmentAction(initialState, formData);
+    const result = await grantEnrollmentBatchAction(initialState, formData);
 
     expect(result.success).toBe(false);
     expect(result.message.toLowerCase()).toContain("permiss");
+  });
+
+  it("T8b: grantedCount reflete número de alunos selecionados", async () => {
+    const serverSupabase = makeServerSupabase();
+    vi.mocked(createSupabaseServerClient).mockResolvedValue(
+      serverSupabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
+    );
+    vi.mocked(fetchUserRole).mockResolvedValue("admin");
+
+    const { adminClient } = makeAdminClientChain({ upsertError: null });
+    vi.mocked(createSupabaseAdminClient).mockReturnValue(
+      adminClient as unknown as ReturnType<typeof createSupabaseAdminClient>,
+    );
+
+    const formData = new FormData();
+    formData.append("user_ids[]", "user-1");
+    formData.append("user_ids[]", "user-2");
+    formData.append("user_ids[]", "user-3");
+    formData.set("course_id", "course-xyz");
+    formData.set("course_slug", "my-course");
+
+    const result = await grantEnrollmentBatchAction(initialState, formData);
+
+    expect(result.success).toBe(true);
+    expect(result.grantedCount).toBe(3);
   });
 });
 

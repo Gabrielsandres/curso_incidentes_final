@@ -6,6 +6,9 @@ import { fetchUserRole } from "@/lib/auth/roles";
 import { logger } from "@/lib/logger";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { RevokeEnrollmentState } from "./revoke-enrollment-state";
+
+export type { RevokeEnrollmentState };
 
 async function requireAdminUser() {
   const supabase = await createSupabaseServerClient();
@@ -37,13 +40,6 @@ async function requireAdminUser() {
 
   return { supabase, user, errorMessage: null as string | null };
 }
-
-export type RevokeEnrollmentState = {
-  success: boolean;
-  message: string;
-};
-
-export const initialRevokeState: RevokeEnrollmentState = { success: false, message: "" };
 
 export async function revokeEnrollmentAction(
   _prevState: RevokeEnrollmentState,
