@@ -205,6 +205,34 @@ describe("ensureCourseCertificateIssued", () => {
     expect(admin.spies.upload).not.toHaveBeenCalled();
   });
 
+  it("retorna already_issued na segunda chamada — adicionar aulas nao invalida certificado existente (D-10/CERT-05)", async () => {
+    // Simulates: certificate was issued at some point in the past (row exists in DB).
+    // A new lesson was later added to the course.
+    // The issuer is called again (e.g., student completes the new lesson).
+    // Expected: already_issued — no new certificate, no PDF re-generation.
+    const existingCertificate = makeCertificateRow({
+      id: "certificate-existing",
+      certificate_code: "CERT-EXISTING",
+    });
+    const admin = createAdminClientMock({
+      certificateLookups: [{ data: existingCertificate, error: null }],
+    });
+    const buildPdf = vi.fn(async () => new Uint8Array([1, 2, 3]));
+
+    const result = await ensureCourseCertificateIssued(
+      { userId: "user-1", courseId: "course-1" },
+      {
+        createAdminClient: () => admin.client as never,
+        buildPdf,
+      },
+    );
+
+    expect(result.status).toBe("already_issued");
+    expect(buildPdf).not.toHaveBeenCalled();
+    expect(admin.spies.upload).not.toHaveBeenCalled();
+    expect(admin.spies.certificateInsertSingle).not.toHaveBeenCalled();
+  });
+
   it("retorna not_eligible quando progresso nao atingiu 100%", async () => {
     const admin = createAdminClientMock({
       certificateLookups: [{ data: null, error: null }],
