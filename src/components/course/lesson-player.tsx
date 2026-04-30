@@ -103,6 +103,7 @@ export function LessonPlayer({ lesson, initialIsCompleted }: LessonPlayerProps) 
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
   const [isSaving, setIsSaving] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
+  const [showCompletionBanner, setShowCompletionBanner] = useState(false);
 
   const completionRef = useRef(initialIsCompleted);
   const savingRef = useRef(false);
@@ -145,8 +146,12 @@ export function LessonPlayer({ lesson, initialIsCompleted }: LessonPlayerProps) 
           throw new Error(apiMessage && apiMessage.length > 0 ? apiMessage : fallbackMessage);
         }
 
+        const responseBody = (await response.json().catch(() => null)) as { ok: boolean; isCourseCompleted?: boolean } | null;
         completionRef.current = true;
         setIsCompleted(true);
+        if (responseBody?.isCourseCompleted === true) {
+          setShowCompletionBanner(true);
+        }
       } catch (error) {
         const friendlyMessage =
           error instanceof Error && error.message
@@ -232,6 +237,21 @@ export function LessonPlayer({ lesson, initialIsCompleted }: LessonPlayerProps) 
       )}
 
       <div className="space-y-2">
+        {showCompletionBanner ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm text-emerald-700"
+          >
+            Curso concluído!{" "}
+            <a
+              href="/dashboard"
+              className="font-semibold underline hover:text-emerald-800"
+            >
+              Seu certificado está disponível no painel.
+            </a>
+          </div>
+        ) : null}
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
