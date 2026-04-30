@@ -92,8 +92,8 @@ export async function POST(request: Request) {
   );
 
   if (!error) {
-    await issueCertificateBestEffort(user.id, courseId);
-    return NextResponse.json({ ok: true });
+    const isCourseCompleted = await issueCertificateBestEffort(user.id, courseId);
+    return NextResponse.json({ ok: true, isCourseCompleted });
   }
 
   if (isPermissionError(error.code, error.message)) {
@@ -106,8 +106,8 @@ export async function POST(request: Request) {
 
       if (!adminError) {
         logger.warn("Fallback com service role para atualizar progresso de aula", { userId: user.id, lessonId });
-        await issueCertificateBestEffort(user.id, courseId);
-        return NextResponse.json({ ok: true });
+        const isCourseCompleted = await issueCertificateBestEffort(user.id, courseId);
+        return NextResponse.json({ ok: true, isCourseCompleted });
       }
 
       logger.error("Falha no fallback service role para atualizar progresso da aula", {
@@ -144,18 +144,25 @@ export async function POST(request: Request) {
   );
 }
 
-async function issueCertificateBestEffort(userId: string, courseId: string) {
+async function issueCertificateBestEffort(userId: string, courseId: string): Promise<boolean> {
   try {
     const result = await ensureCourseCertificateIssued({ userId, courseId });
 
     if (result.status === "issued") {
-      logger.info("Certificado emitido automaticamente apos concluir aula", { userId, courseId, certificateId: result.certificate.id });
+      logger.info("Certificado emitido automaticamente apos concluir aula", {
+        userId,
+        courseId,
+        certificateId: result.certificate.id,
+      });
     }
+
+    return result.status === "issued" || result.status === "already_issued";
   } catch (error) {
     logger.warn("Falha no modo best effort para emissao de certificado", {
       userId,
       courseId,
       error: error instanceof Error ? error.message : String(error),
     });
+    return false;
   }
 }
