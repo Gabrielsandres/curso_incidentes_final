@@ -70,8 +70,13 @@ Plans:
   3. Ao concluir a ultima aula, o player exibe um banner "Curso concluido — certificado disponivel" sem recarregar a pagina
   4. Aluno acessa "Meus certificados", clica em baixar e recebe um PDF valido com nome sem mojibake (ç, ã, õ corretos), nome do curso, data em America/Sao_Paulo e codigo UUID de verificacao
   5. Adicionar uma aula nova ao curso depois que o aluno ja recebeu o certificado nao invalida nem re-emite o certificado existente
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 4 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — TDD: nextLessonId in ProgressStats + queries extension (deleted_at filter + computeNextLessonId) + getLessonWithCourseContext cascade fix
+- [ ] 03-02-PLAN.md — TDD: isCourseCompleted flag in /api/lesson-progress/complete response + issueCertificateBestEffort refactor
+- [ ] 03-03-PLAN.md — Dashboard CTA button states (3-state: no-progress / partial / 100%) + #certificados anchor
+- [ ] 03-04-PLAN.md — LessonPlayer completion banner + admin cert form conditional visibility (certificateEnabled controlled state)
 
 ### Phase 4: Video & Anti-Piracy
 **Goal**: O player abstrai o provider de video — YouTube no dev, Bunny Stream com token auth em producao — e exibe watermark com o email do aluno para dissuadir pirataria.
@@ -109,7 +114,7 @@ Note: Phase 4 (Video) depends only on Phase 2 (Catalog). If capacity allows, Pha
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete    | 2026-04-28 |
-| 2. Catalog CRUD | 0/7 | Not started | - |
-| 3. Progress & Certificates | 0/TBD | Not started | - |
+| 2. Catalog CRUD | 7/7 | Complete    | 2026-04-30 |
+| 3. Progress & Certificates | 0/4 | Not started | - |
 | 4. Video & Anti-Piracy | 0/TBD | Not started | - |
 | 5. B2B Institution Manager | 0/TBD | Not started | - |
