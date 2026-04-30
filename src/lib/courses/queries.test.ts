@@ -325,3 +325,160 @@ describe("courses queries helpers", () => {
     expect(context?.lesson.materials).toEqual([]);
   });
 });
+
+describe("getAvailableCourses — nextLessonId and deleted_at filter", () => {
+  const baseCourse = {
+    id: "course-1",
+    slug: "curso-1",
+    title: "Curso 1",
+    description: null,
+    cover_image_url: null,
+    certificate_enabled: false,
+    certificate_template_url: null,
+    certificate_workload_hours: null,
+    certificate_signer_name: null,
+    certificate_signer_role: null,
+    published_at: "2025-01-01T00:00:00.000Z",
+    archived_at: null,
+    created_at: "2025-01-01T00:00:00.000Z",
+    updated_at: "2025-01-01T00:00:00.000Z",
+  };
+
+  const standardModules = [
+    {
+      id: "module-1",
+      position: 1,
+      lessons: [
+        { id: "lesson-a", position: 1, deleted_at: null },
+        { id: "lesson-b", position: 2, deleted_at: null },
+      ],
+    },
+    {
+      id: "module-2",
+      position: 2,
+      lessons: [
+        { id: "lesson-c", position: 1, deleted_at: null },
+      ],
+    },
+  ];
+
+  function makeAvailableCoursesClient(courseModules: typeof standardModules, progressRows: { lesson_id: string; status: string; completed_at: string | null }[]) {
+    const coursesQuery = {
+      select: vi.fn().mockReturnThis(),
+      not: vi.fn().mockReturnThis(),
+      is: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({
+        data: [{ ...baseCourse, modules: courseModules }],
+        error: null,
+      }),
+    };
+
+    const progressQuery = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockResolvedValue({ data: progressRows, error: null }),
+    };
+
+    return {
+      from: vi.fn((table: string) => {
+        if (table === "courses") return coursesQuery;
+        if (table === "lesson_progress") return progressQuery;
+        throw new Error(`Unexpected table: ${table}`);
+      }),
+    } as unknown as SupabaseClient<Database>;
+  }
+
+  it("Teste A: retorna nextLessonId null quando aluno nao tem nenhum progresso (completedLessons === 0)", async () => {
+    const client = makeAvailableCoursesClient(standardModules, []);
+
+    const result = await getAvailableCourses(client, "user-1");
+
+    expect(result).toHaveLength(1);
+    expect(result[0].nextLessonId).toBeNull();
+    expect(result[0].completedLessons).toBe(0);
+  });
+
+  it("Teste B: retorna nextLessonId igual a primeira aula incompleta ordenada por (module.position ASC, lesson.position ASC)", async () => {
+    const client = makeAvailableCoursesClient(standardModules, [
+      { lesson_id: "lesson-a", status: "COMPLETED", completed_at: "2026-01-01T00:00:00.000Z" },
+    ]);
+
+    const result = await getAvailableCourses(client, "user-1");
+
+    expect(result).toHaveLength(1);
+    expect(result[0].nextLessonId).toBe("lesson-b");
+  });
+
+  it("Teste C: retorna nextLessonId null quando o aluno completou 100% do curso", async () => {
+    const client = makeAvailableCoursesClient(standardModules, [
+      { lesson_id: "lesson-a", status: "COMPLETED", completed_at: "2026-01-01T00:00:00.000Z" },
+      { lesson_id: "lesson-b", status: "COMPLETED", completed_at: "2026-01-01T00:00:00.000Z" },
+      { lesson_id: "lesson-c", status: "COMPLETED", completed_at: "2026-01-01T00:00:00.000Z" },
+    ]);
+
+    const result = await getAvailableCourses(client, "user-1");
+
+    expect(result).toHaveLength(1);
+    expect(result[0].nextLessonId).toBeNull();
+    expect(result[0].completionPercentage).toBe(100);
+  });
+
+  it("Teste D: exclui aulas com deleted_at do totalLessons (correcao D-12)", async () => {
+    const modulesWithDeletedLesson = [
+      {
+        id: "module-1",
+        position: 1,
+        lessons: [
+          { id: "lesson-a", position: 1, deleted_at: null },
+          { id: "lesson-b", position: 2, deleted_at: "2026-01-01T00:00:00.000Z" },
+        ],
+      },
+      {
+        id: "module-2",
+        position: 2,
+        lessons: [
+          { id: "lesson-c", position: 1, deleted_at: null },
+        ],
+      },
+    ];
+
+    const client = makeAvailableCoursesClient(modulesWithDeletedLesson, []);
+
+    const result = await getAvailableCourses(client, "user-1");
+
+    expect(result).toHaveLength(1);
+    // lesson-b tem deleted_at, entao deve ser excluida — total 2, nao 3
+    expect(result[0].totalLessons).toBe(2);
+  });
+
+  it("Teste E: exclui aula soft-deleted de nextLessonId (aula removida nunca e a proxima aula)", async () => {
+    const modulesWithDeletedLesson = [
+      {
+        id: "module-1",
+        position: 1,
+        lessons: [
+          { id: "lesson-a", position: 1, deleted_at: null },
+          { id: "lesson-b", position: 2, deleted_at: "2026-01-01T00:00:00.000Z" },
+        ],
+      },
+      {
+        id: "module-2",
+        position: 2,
+        lessons: [
+          { id: "lesson-c", position: 1, deleted_at: null },
+        ],
+      },
+    ];
+
+    // lesson-a concluida, lesson-b esta soft-deleted, lesson-c e a proxima valida
+    const client = makeAvailableCoursesClient(modulesWithDeletedLesson, [
+      { lesson_id: "lesson-a", status: "COMPLETED", completed_at: "2026-01-01T00:00:00.000Z" },
+    ]);
+
+    const result = await getAvailableCourses(client, "user-1");
+
+    expect(result).toHaveLength(1);
+    // lesson-b deve ser ignorada (soft-deleted); lesson-c e a proxima valida
+    expect(result[0].nextLessonId).toBe("lesson-c");
+  });
+});
