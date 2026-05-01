@@ -47,6 +47,29 @@ const serverSchema = clientSchema.extend({
   SUPABASE_JWT_SECRET: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+  BUNNY_STREAM_TOKEN_KEY: z
+    .string()
+    .optional()
+    .superRefine((v, ctx) => {
+      if (process.env.NODE_ENV === "production" && !v) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "BUNNY_STREAM_TOKEN_KEY is required in production.",
+        });
+      }
+    }),
+  BUNNY_STREAM_LIBRARY_ID: z
+    .string()
+    .optional()
+    .superRefine((v, ctx) => {
+      if (process.env.NODE_ENV === "production" && !v) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "BUNNY_STREAM_LIBRARY_ID is required in production.",
+        });
+      }
+    }),
+  BUNNY_STREAM_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
 });
 
 /* -------------------------------------------------------
