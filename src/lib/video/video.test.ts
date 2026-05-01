@@ -16,6 +16,9 @@ describe("video/bunny-adapter", () => {
 
   beforeEach(() => {
     resetEnvCache();
+    // serverSchema extends clientSchema — both sets of vars are required
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
     process.env.BUNNY_STREAM_TOKEN_KEY = "testtokenkey123";
     process.env.BUNNY_STREAM_LIBRARY_ID = "99999";
     process.env.BUNNY_STREAM_TOKEN_TTL_SECONDS = "3600";
@@ -23,6 +26,8 @@ describe("video/bunny-adapter", () => {
 
   afterEach(() => {
     resetEnvCache();
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     delete process.env.BUNNY_STREAM_TOKEN_KEY;
     delete process.env.BUNNY_STREAM_LIBRARY_ID;
     delete process.env.BUNNY_STREAM_TOKEN_TTL_SECONDS;
@@ -185,6 +190,9 @@ describe("video/index (factory)", () => {
 
   beforeEach(() => {
     resetEnvCache();
+    // serverSchema extends clientSchema — both sets of vars are required
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
     process.env.BUNNY_STREAM_TOKEN_KEY = "factorytokenkey456";
     process.env.BUNNY_STREAM_LIBRARY_ID = "88888";
     process.env.BUNNY_STREAM_TOKEN_TTL_SECONDS = "3600";
@@ -192,6 +200,8 @@ describe("video/index (factory)", () => {
 
   afterEach(() => {
     resetEnvCache();
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     delete process.env.BUNNY_STREAM_TOKEN_KEY;
     delete process.env.BUNNY_STREAM_LIBRARY_ID;
     delete process.env.BUNNY_STREAM_TOKEN_TTL_SECONDS;
