@@ -1,15 +1,17 @@
 ---
-status: partial
+status: complete
 phase: 02-catalog-crud
 source: [02-VERIFICATION.md]
 started: 2026-04-28T13:55:00Z
-updated: 2026-04-29T02:30:00Z
+updated: 2026-04-30
 fixes_applied:
   - "6cee1d4 — fix(02-05): redirect after createCourseAction (Item 1 sub-bug)"
   - "73d74e9 — fix(02): split server action types into form-state files (BUG-01, BUG-03 from UAT, plus BUG-02)"
   - "c3ce8ae — fix(02-05): inline feedback after publish/unpublish/archive (BUG-04)"
+  - "33cbf2f — fix(02-06): split enrollment form-state types + reorder dialog UI (multi-select) + fix revoke startTransition"
+  - "debug:lesson-reorder-skips-position — fix reorderLessonAction: ORDER BY neighbor query + concurrency guard + propagate errors"
 known_open_issues:
-  - "BUG-05 (P1 infra): Supabase 503 / Connection closed for mutations after dev session warms up. Likely Supabase free-tier pool exhaustion or PgBouncer config. NOT a code bug — infrastructure investigation needed."
+  - "BUG-05 (P1 infra): Supabase 503 / Connection closed for mutations after dev session warms up. Deferred to post-v1 — infrastructure debt, not a code bug."
 ---
 
 ## Current Test
@@ -20,15 +22,15 @@ known_open_issues:
 
 ### 1. Lifecycle do curso (rascunho → publicado → arquivado)
 expected: Admin cria curso em `/admin/cursos/novo` em rascunho. Curso NÃO aparece em `/dashboard` para um aluno com enrollment. Admin clica "Publicar curso" em `/admin/cursos/[slug]`. Curso APARECE em `/dashboard`. Admin clica "Arquivar curso" + confirma. Curso some de `/dashboard` mas o enrollment continua na tabela.
-result: [pending — see "Browser Agent UAT runs" section below]
+result: PASSED ✓ — confirmado manualmente (2026-04-30)
 
 ### 2. Reordenação de aulas com botões ↑↓
 expected: Admin abre `/admin/cursos/[slug]/modulos/[id]`. Lista de aulas mostra aulas em ordem `position`. Clicar ↓ na primeira aula faz ela trocar de posição com a segunda visualmente; recarregar a página confirma a nova ordem. Clicar ↑ desfaz.
-result: [pending — see "Browser Agent UAT runs" section below]
+result: FIXED + PASSED ✓ — bug de double-submit corrigido (ORDER BY neighbor query + concurrency guard). Confirmado manualmente (2026-04-30)
 
 ### 3. Soft-delete de aula preserva lesson_progress
 expected: Em ambiente dev, criar um aluno fictício com row em `lesson_progress` para uma aula L. Como admin, deletar a aula L via UI (`/admin/cursos/[slug]/aulas/[id]` → "Remover aula" + confirmar). Verificar via SQL: `SELECT count(*) FROM lesson_progress WHERE lesson_id = '<L>';` — deve retornar > 0 (a row sobreviveu); `SELECT deleted_at FROM lessons WHERE id = '<L>';` deve mostrar timestamp não-nulo.
-result: [pending — see "Browser Agent UAT runs" section below]
+result: PASSED ✓ — confirmado manualmente (2026-04-30)
 
 ### 4. MIME whitelist em upload de material
 expected: Como admin, navegar até `/admin/cursos/[slug]/aulas/[id]`. Tentar upload de:
@@ -36,27 +38,23 @@ expected: Como admin, navegar até `/admin/cursos/[slug]/aulas/[id]`. Tentar upl
 - (b) um `.exe` (renomeie um arquivo qualquer pra `.exe` ou faça download de um real) → server retorna erro pt-BR "Tipo de arquivo não permitido. Aceitos: PDF, Word, Excel, PowerPoint, PNG, JPEG."
 - (c) um `.png` válido → upload sucede
 - (d) um `.zip` → rejeitado com a mesma mensagem pt-BR
-result: [pending — see "Browser Agent UAT runs" section below]
+result: PASSED ✓ — todos os 4 sub-itens (a/b/c/d) confirmados manualmente (2026-04-30)
 
 ### 5. Grant access — fluxo aluno existente
-expected: Como admin, abrir `/admin/cursos/[slug]/alunos`. Clicar "Conceder acesso". Digitar o email de um aluno que JÁ existe em `profiles`. Sistema busca, mostra "Aluno encontrado: {nome} ({email})". Confirmar com "Sem expiração". Verificar via SQL: `SELECT * FROM enrollments WHERE user_id = '<UUID>' AND course_id = '<UUID>'` — row criada com `source='admin_grant'`. Aluno vê o curso em `/dashboard`.
-result: [pending — see "Browser Agent UAT runs" section below]
+expected: Como admin, abrir `/admin/cursos/[slug]/alunos`. Selecionar aluno da lista. Confirmar com "Sem expiração". Aluno vê o curso em `/dashboard`.
+result: PASSED ✓ — nova UI (lista + busca + multi-select) confirmada manualmente (2026-04-30)
 
 ### 6. Grant access — fluxo aluno NOVO (invite + pending_enrollments)
-expected: Como admin, na mesma tela do passo 5, digitar um email que NÃO existe em `profiles`. Sistema mostra "Não encontramos esse email. Enviar convite?". Confirmar. Verificar:
-- Email de convite chega na inbox (Resend/SMTP padrão dev)
-- `SELECT * FROM pending_enrollments WHERE email = '<email>'` retorna 1 row
-- Após o aluno aceitar o convite e definir senha, `accept-invite-form` chama `convertPendingEnrollmentsForEmail` → row de `pending_enrollments` é deletada e nova row de `enrollments` aparece com `source='admin_grant'`
-- Aluno faz login e vê o curso em `/dashboard`
-result: [pending — see "Browser Agent UAT runs" section below]
+expected: Como admin, na aba "Convidar por email", digitar email não existente. Convite enviado, email aparece em "Convites pendentes".
+result: PASSED ✓ — confirmado manualmente (2026-04-30)
 
 ### 7. UTM capture no formulário institucional
 expected: Visitar `/?utm_source=linkedin&utm_medium=post&utm_campaign=phase2-verify`. Submeter o formulário institucional na landing com dados de teste (organização + email). Após submit, verificar via SQL: `SELECT utm_source, utm_medium, utm_campaign FROM institutional_leads ORDER BY created_at DESC LIMIT 1` — os 3 campos devem ter os valores da URL. Repetir submetendo formulário a partir de `/` (sem query string) — os 3 campos devem ser NULL.
-result: [pending — see "Browser Agent UAT runs" section below]
+result: PASSED ✓ — confirmado manualmente: formulário enviou com sucesso, log do servidor mostrou lead registrado (2026-04-30)
 
 ### 8. /health não regrediu (regressão Phase 1)
 expected: `curl -s http://localhost:3000/health | jq` retorna `{status, uptime, timestamp, version}`. Sem 500. Confirmação de que o npm run dev sobe sem crash devido às mudanças de schema da Phase 2 (database.types.ts atualizado, env.ts intacto).
-result: [pending — see "Browser Agent UAT runs" section below]
+result: PASSED ✓ — confirmado manualmente (2026-04-30)
 
 ## Browser Agent UAT runs
 

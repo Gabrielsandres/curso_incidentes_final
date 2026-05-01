@@ -624,17 +624,19 @@ if (responseBody?.isCourseCompleted === true) {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Response body parse in LessonPlayer when `response.ok`**
    - What we know: current code does not call `response.json()` on the success path (only on error path). Adding `isCourseCompleted` to the response requires parsing the body.
    - What's unclear: whether calling `response.json()` after the `if (!response.ok)` error block is correct (the body has already been consumed in the error case — but the error case `throw`s, so execution never reaches the success parse).
    - Recommendation: restructure as: `if (!response.ok) { /* parse and throw */ } const data = await response.json()`. This is safe because the error path always throws.
+   - RESOLVED: Pattern confirmed correct and implemented in Plan 03-04 Task 1. Error path always throws so body is not double-consumed.
 
 2. **Admin form `defaultChecked` → controlled checkbox migration**
    - What we know: `course-edit-form.tsx` uses `defaultChecked={course.certificate_enabled}` (line 168). Phase 3 must change this to controlled to enable visibility toggling.
    - What's unclear: whether this breaks any existing test for the form.
    - Recommendation: Search `upsert-course.test.ts` — it tests Server Actions, not the React form component. No test should break from the controlled switch.
+   - RESOLVED: Confirmed `upsert-course.test.ts` tests only Server Action logic, not the React component. Migration to controlled pattern in Plan 03-04 Task 2 does not break any existing test.
 
 ---
 
