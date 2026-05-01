@@ -30,7 +30,7 @@ type CourseQueryResult = CourseRow & {
 type CourseSummaryQueryResult = CourseRow & {
   modules: ({
     lessons: Pick<LessonRow, "id" | "position" | "deleted_at">[] | null;
-  } & Pick<ModuleRow, "id" | "position">)[] | null;
+  } & Pick<ModuleRow, "id" | "position" | "deleted_at">)[] | null;
 };
 
 type LessonQueryResult = LessonRow & {
@@ -142,6 +142,7 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
         modules (
           id,
           position,
+          deleted_at,
           lessons (
             id,
             position,
@@ -162,11 +163,13 @@ export async function getAvailableCourses(client?: SupabaseServerClient, userId?
   const courses = (data as CourseSummaryQueryResult[] | null) ?? [];
   const lessonsByCourse = courses.map((course) => ({
     course,
-    lessonIds: (course.modules ?? []).flatMap((module) =>
-      (module.lessons ?? [])
-        .filter((lesson) => !lesson.deleted_at)
-        .map((lesson) => lesson.id),
-    ),
+    lessonIds: (course.modules ?? [])
+      .filter((module) => !module.deleted_at)
+      .flatMap((module) =>
+        (module.lessons ?? [])
+          .filter((lesson) => !lesson.deleted_at)
+          .map((lesson) => lesson.id),
+      ),
   }));
 
   const uniqueLessonIds = Array.from(new Set(lessonsByCourse.flatMap((item) => item.lessonIds)));
@@ -371,6 +374,8 @@ export async function getLessonWithCourseContext(
         title,
         description,
         video_url,
+        video_provider,
+        video_external_id,
         position,
         created_at,
         materials (
