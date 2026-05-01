@@ -88,8 +88,14 @@ Plans:
   3. Durante reproducao de qualquer aula, o email do aluno aparece em overlay sobre o video em opacidade reduzida, mudando de posicao a cada 30 segundos
   4. Reproducao em dispositivo mobile (rede 4G brasileira com CGNAT) funciona normalmente — nao ha IP-binding nos tokens Bunny
   5. Documentacao em `docs/` descreve honestamente o teto da protecao (overlay e deterrencia, screen recording continua possivel)
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 5 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — TDD: src/lib/video/ module (VideoProvider interface, BunnyStreamAdapter SHA256 signing, YouTubeAdapter prod guard, factory getPlayableSource)
+- [x] 04-02-PLAN.md — Env vars (BUNNY_STREAM_TOKEN_KEY/LIBRARY_ID/TTL) + createLessonSchema/Action migration (videoProvider + videoExternalId)
+- [ ] 04-03-PLAN.md — queries.ts video columns + RSC page.tsx getPlayableSource wiring + LessonPlayer refactor (postMessage, WatermarkOverlay)
+- [ ] 04-04-PLAN.md — add-lesson-form.tsx video provider selector + module page isProduction prop
+- [ ] 04-05-PLAN.md — docs/anti-piracy.md + human verification checkpoint
 
 ### Phase 5: B2B Institution Manager
 **Goal**: Admin da MDHE cria uma instituicao, vincula alunos e atribui um gestor; o gestor loga em `/gestor` e ve o progresso e certificados da equipe da sua propria instituicao — apenas da sua.
@@ -116,5 +122,5 @@ Note: Phase 4 (Video) depends only on Phase 2 (Catalog). If capacity allows, Pha
 | 1. Foundation | 5/5 | Complete    | 2026-04-28 |
 | 2. Catalog CRUD | 7/7 | Complete    | 2026-04-30 |
 | 3. Progress & Certificates | 4/4 | Complete    | 2026-04-30 |
-| 4. Video & Anti-Piracy | 0/TBD | Not started | - |
+| 4. Video & Anti-Piracy | 1/5 | In Progress|  |
 | 5. B2B Institution Manager | 0/TBD | Not started | - |

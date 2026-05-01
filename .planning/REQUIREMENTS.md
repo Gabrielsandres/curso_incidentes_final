@@ -51,9 +51,9 @@ Requisitos para o "v1 lançável" — plataforma 100% funcional antes do redesig
 
 - [ ] **VID-01**: Existe interface TypeScript `VideoProvider` em `src/lib/video/` com função `getPlayableSource(lesson, user) → { provider, embedUrl, watermarkText, ttl }`
 - [ ] **VID-02**: Adapter `youtube-unlisted` resolve fonte a partir de um `video_external_id` no formato YouTube (uso restrito a `NODE_ENV !== 'production'`; build falha se YouTube for selecionado em prod)
-- [ ] **VID-03**: Adapter `bunny-stream` mint signed URL com `SHA256(BUNNY_STREAM_TOKEN_KEY + videoId + expiresUnix)` e TTL configurável via `BUNNY_STREAM_TOKEN_TTL_SECONDS`
-- [ ] **VID-04**: Token signing acontece **apenas no server** (RSC ou Server Action); chave Bunny nunca é serializada para o client
-- [ ] **VID-05**: Aulas têm colunas `video_provider` e `video_external_id` (substituindo URL solta); admin form usa um seletor para o provider
+- [x] **VID-03**: Adapter `bunny-stream` mint signed URL com `SHA256(BUNNY_STREAM_TOKEN_KEY + videoId + expiresUnix)` e TTL configurável via `BUNNY_STREAM_TOKEN_TTL_SECONDS`
+- [x] **VID-04**: Token signing acontece **apenas no server** (RSC ou Server Action); chave Bunny nunca é serializada para o client
+- [x] **VID-05**: Aulas têm colunas `video_provider` e `video_external_id` (substituindo URL solta); admin form usa um seletor para o provider
 
 ### Anti-Piracy
 
@@ -160,9 +160,9 @@ Mapeamento preenchido durante a criação do roadmap.
 | CERT-05 | Phase 3 | Pending |
 | VID-01 | Phase 4 | Pending |
 | VID-02 | Phase 4 | Pending |
-| VID-03 | Phase 4 | Pending |
-| VID-04 | Phase 4 | Pending |
-| VID-05 | Phase 4 | Pending |
+| VID-03 | Phase 4 | Complete |
+| VID-04 | Phase 4 | Complete |
+| VID-05 | Phase 4 | Complete |
 | AP-01 | Phase 4 | Pending |
 | AP-02 | Phase 4 | Pending |
 | AP-03 | Phase 4 | Pending |
