@@ -77,3 +77,69 @@ describe("SUPABASE_SERVICE_ROLE_KEY prod refinement", () => {
     expect(() => getEnv()).not.toThrow();
   });
 });
+
+describe("Bunny env vars", () => {
+  it("BUNNY_STREAM_TOKEN_TTL_SECONDS defaults to 3600 when not set", () => {
+    delete process.env.BUNNY_STREAM_TOKEN_TTL_SECONDS;
+    resetEnvCache();
+    const env = getEnv();
+    expect(env.BUNNY_STREAM_TOKEN_TTL_SECONDS).toBe(3600);
+  });
+
+  it("BUNNY_STREAM_TOKEN_TTL_SECONDS accepts a custom numeric value", () => {
+    process.env.BUNNY_STREAM_TOKEN_TTL_SECONDS = "7200";
+    resetEnvCache();
+    const env = getEnv();
+    expect(env.BUNNY_STREAM_TOKEN_TTL_SECONDS).toBe(7200);
+  });
+
+  it("BUNNY_STREAM_TOKEN_KEY and BUNNY_STREAM_LIBRARY_ID are optional in dev/test", () => {
+    delete process.env.BUNNY_STREAM_TOKEN_KEY;
+    delete process.env.BUNNY_STREAM_LIBRARY_ID;
+    resetEnvCache();
+    expect(() => getEnv()).not.toThrow();
+  });
+
+  it("throws when NODE_ENV=production and BUNNY_STREAM_TOKEN_KEY is absent", () => {
+    const origNodeEnv = process.env.NODE_ENV;
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: "production",
+      configurable: true,
+    });
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "fake-key";
+    delete process.env.BUNNY_STREAM_TOKEN_KEY;
+    resetEnvCache();
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    expect(() => getEnv()).toThrowError();
+
+    consoleSpy.mockRestore();
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: origNodeEnv,
+      configurable: true,
+    });
+    resetEnvCache();
+  });
+
+  it("throws when NODE_ENV=production and BUNNY_STREAM_LIBRARY_ID is absent", () => {
+    const origNodeEnv = process.env.NODE_ENV;
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: "production",
+      configurable: true,
+    });
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "fake-key";
+    process.env.BUNNY_STREAM_TOKEN_KEY = "fake-token-key";
+    delete process.env.BUNNY_STREAM_LIBRARY_ID;
+    resetEnvCache();
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    expect(() => getEnv()).toThrowError();
+
+    consoleSpy.mockRestore();
+    Object.defineProperty(process.env, "NODE_ENV", {
+      value: origNodeEnv,
+      configurable: true,
+    });
+    resetEnvCache();
+  });
+});
