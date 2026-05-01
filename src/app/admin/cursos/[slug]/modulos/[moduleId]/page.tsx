@@ -106,7 +106,7 @@ export default async function ModuleEditPage({
           </div>
 
           <div className="mt-4">
-            <AddLessonForm moduleId={moduleId} courseSlug={courseSlug} />
+            <AddLessonForm moduleId={moduleId} courseSlug={courseSlug} isProduction={process.env.NODE_ENV === "production"} />
           </div>
 
           {lessons.length === 0 ? (
