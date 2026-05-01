@@ -58,14 +58,14 @@ Extend (never replace) the existing type scale. Phase 4 introduces zero new font
 | Role | Tailwind Classes | Size | Weight | Line Height | Usage in Phase 4 |
 |------|-----------------|------|--------|-------------|-----------------|
 | Section label | `text-xs font-semibold uppercase tracking-[0.2em] text-slate-500` | 12px | 600 | 1.5 | "CONFIGURAÇÃO DE VÍDEO" label in both admin forms (existing pattern) |
-| Body label | `text-sm font-medium text-slate-700` | 14px | 500 | 1.5 | Field labels in video section ("Plataforma de vídeo", "ID do vídeo") |
+| Body label | `text-sm font-semibold text-slate-700` | 14px | 600 | 1.5 | Field labels in video section ("Plataforma de vídeo", "ID do vídeo") |
 | Body supporting | `text-sm text-slate-600` | 14px | 400 | 1.5 | Hint text under selects/inputs |
 | Input text | `text-sm` (inherits color) | 14px | 400 | 1.5 | Value inside select and text input |
 | Error / micro | `text-xs text-red-600` | 12px | 400 | 1.5 | Field validation errors |
-| Watermark | `text-sm font-medium` (white, opacity override) | 14px | 500 | 1.2 | Email watermark overlay — size kept readable on capture |
+| Watermark | `text-sm font-semibold` (white, opacity override) | 14px | 600 | 1.2 | Email watermark overlay — semibold at low opacity ensures legibility in screen captures |
 | Hint / info micro | `text-xs text-slate-500` | 12px | 400 | 1.5 | "Em produção, use Bunny Stream. YouTube é apenas para desenvolvimento." |
 
-Two weights used in Phase 4 UI: 400 (regular) and 600 (semibold). The watermark uses `font-medium` (500) to remain legible at low opacity — this is a deliberate exception for the deterrence function, not a UI decoration.
+Two weights used in Phase 4 UI: 400 (regular) and 600 (semibold). All elements including the watermark use only these two weights.
 
 Source: extracted from `lesson-edit-form.tsx` lines 51–136 (existing video section already partially implemented with these exact classes).
 
@@ -176,7 +176,7 @@ function WatermarkOverlay({ text }: { text: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none absolute ${positionClass} select-none text-sm font-medium text-white transition-opacity duration-500`}
+      className={`pointer-events-none absolute ${positionClass} select-none text-sm font-semibold text-white transition-opacity duration-500`}
       style={{ opacity: 0.12 }}
     >
       {text}
@@ -224,7 +224,7 @@ The video configuration section already exists (lines 100–137) with a `<select
   </p>
 
   <label className="flex flex-col gap-2">
-    <span className="text-sm font-medium text-slate-700">Plataforma de vídeo</span>
+    <span className="text-sm font-semibold text-slate-700">Plataforma de vídeo</span>
     <div className="relative">
       <select
         name="video_provider"
@@ -243,7 +243,7 @@ The video configuration section already exists (lines 100–137) with a `<select
   </label>
 
   <label className="flex flex-col gap-2">
-    <span className="text-sm font-medium text-slate-700">ID do vídeo</span>
+    <span className="text-sm font-semibold text-slate-700">ID do vídeo</span>
     <input
       type="text"
       name="video_external_id"
@@ -281,7 +281,7 @@ The create form currently has only a title field. Phase 4 adds the video configu
   </p>
 
   <label className="flex flex-col gap-1">
-    <span className="text-sm font-medium text-slate-700">Plataforma</span>
+    <span className="text-sm font-semibold text-slate-700">Plataforma</span>
     <select
       name="video_provider"
       value={provider}
@@ -299,7 +299,7 @@ The create form currently has only a title field. Phase 4 adds the video configu
   </label>
 
   <label className="flex flex-col gap-1">
-    <span className="text-sm font-medium text-slate-700">ID do vídeo</span>
+    <span className="text-sm font-semibold text-slate-700">ID do vídeo</span>
     <input
       type="text"
       name="video_external_id"
@@ -436,11 +436,11 @@ Phase 4 installs zero new packages. All components built with existing Tailwind 
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: FLAG (non-blocking — focal point implied by video container size/contrast)
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved (2026-04-30)
