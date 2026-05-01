@@ -57,7 +57,7 @@ Requisitos para o "v1 lançável" — plataforma 100% funcional antes do redesig
 
 ### Anti-Piracy
 
-- [ ] **AP-01**: Player exibe overlay CSS com email do aluno em baixa opacidade sobre o vídeo, em posição que não bloqueia conteúdo crítico (deterrent, comunicado honestamente como tal)
+- [x] **AP-01**: Player exibe overlay CSS com email do aluno em baixa opacidade sobre o vídeo, em posição que não bloqueia conteúdo crítico (deterrent, comunicado honestamente como tal)
 - [x] **AP-02**: Signed URLs do Bunny têm TTL curto (≤ 4h) e são re-mintadas a cada novo carregamento da página da aula
 - [x] **AP-03**: Player NÃO usa IP-binding nos tokens (incompatível com mobile BR via CGNAT — Claro/Vivo/TIM)
 - [ ] **AP-04**: `docs/` documenta o ceiling realista da proteção (overlay é deterrence, não DRM; screen recording continua possível)
@@ -163,7 +163,7 @@ Mapeamento preenchido durante a criação do roadmap.
 | VID-03 | Phase 4 | Complete |
 | VID-04 | Phase 4 | Complete |
 | VID-05 | Phase 4 | Complete |
-| AP-01 | Phase 4 | Pending |
+| AP-01 | Phase 4 | Complete |
 | AP-02 | Phase 4 | Complete |
 | AP-03 | Phase 4 | Complete |
 | AP-04 | Phase 4 | Pending |

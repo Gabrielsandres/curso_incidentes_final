@@ -93,7 +93,7 @@ Plans:
 Plans:
 - [x] 04-01-PLAN.md — TDD: src/lib/video/ module (VideoProvider interface, BunnyStreamAdapter SHA256 signing, YouTubeAdapter prod guard, factory getPlayableSource)
 - [x] 04-02-PLAN.md — Env vars (BUNNY_STREAM_TOKEN_KEY/LIBRARY_ID/TTL) + createLessonSchema/Action migration (videoProvider + videoExternalId)
-- [ ] 04-03-PLAN.md — queries.ts video columns + RSC page.tsx getPlayableSource wiring + LessonPlayer refactor (postMessage, WatermarkOverlay)
+- [x] 04-03-PLAN.md — queries.ts video columns + RSC page.tsx getPlayableSource wiring + LessonPlayer refactor (postMessage, WatermarkOverlay)
 - [x] 04-04-PLAN.md — add-lesson-form.tsx video provider selector + module page isProduction prop
 - [ ] 04-05-PLAN.md — docs/anti-piracy.md + human verification checkpoint
 
