@@ -48,16 +48,22 @@ export const createLessonSchema = z
       .trim()
       .optional()
       .transform((value) => (value && value.length > 0 ? value : null)),
-    videoProvider: z
-      .string()
-      .trim()
-      .optional()
-      .transform((v) => (v && v.length > 0 ? v : null)),
-    videoExternalId: z
-      .string()
-      .trim()
-      .optional()
-      .transform((v) => (v && v.length > 0 ? v : null)),
+    videoProvider: z.preprocess(
+      (v) => (v === null || v === undefined ? undefined : v),
+      z
+        .string()
+        .trim()
+        .optional()
+        .transform((v) => (v && v.length > 0 ? v : null)),
+    ),
+    videoExternalId: z.preprocess(
+      (v) => (v === null || v === undefined ? undefined : v),
+      z
+        .string()
+        .trim()
+        .optional()
+        .transform((v) => (v && v.length > 0 ? v : null)),
+    ),
     videoUrl: z
       .string()
       .trim()

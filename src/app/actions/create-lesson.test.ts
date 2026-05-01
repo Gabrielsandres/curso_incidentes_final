@@ -40,7 +40,8 @@ function makeValidFormData() {
   formData.set("module_id", "11111111-1111-4111-8111-111111111111");
   formData.set("title", "Aula de teste");
   formData.set("description", "");
-  formData.set("video_url", "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  formData.set("video_provider", "bunny");
+  formData.set("video_external_id", "abc-guid-123");
   formData.set("position", "1");
   return formData;
 }
@@ -130,7 +131,8 @@ describe("createLessonAction", () => {
       module_id: "11111111-1111-4111-8111-111111111111",
       title: "Aula de teste",
       description: null,
-      video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      video_provider: "bunny",
+      video_external_id: "abc-guid-123",
       position: 1,
     });
     expect(redirect).toHaveBeenCalledWith("/curso/curso-seguro");
