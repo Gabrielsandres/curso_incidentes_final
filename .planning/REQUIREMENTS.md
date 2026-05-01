@@ -49,8 +49,8 @@ Requisitos para o "v1 lançável" — plataforma 100% funcional antes do redesig
 
 ### Video Provider Abstraction
 
-- [ ] **VID-01**: Existe interface TypeScript `VideoProvider` em `src/lib/video/` com função `getPlayableSource(lesson, user) → { provider, embedUrl, watermarkText, ttl }`
-- [ ] **VID-02**: Adapter `youtube-unlisted` resolve fonte a partir de um `video_external_id` no formato YouTube (uso restrito a `NODE_ENV !== 'production'`; build falha se YouTube for selecionado em prod)
+- [x] **VID-01**: Existe interface TypeScript `VideoProvider` em `src/lib/video/` com função `getPlayableSource(lesson, user) → { provider, embedUrl, watermarkText, ttl }`
+- [x] **VID-02**: Adapter `youtube-unlisted` resolve fonte a partir de um `video_external_id` no formato YouTube (uso restrito a `NODE_ENV !== 'production'`; build falha se YouTube for selecionado em prod)
 - [x] **VID-03**: Adapter `bunny-stream` mint signed URL com `SHA256(BUNNY_STREAM_TOKEN_KEY + videoId + expiresUnix)` e TTL configurável via `BUNNY_STREAM_TOKEN_TTL_SECONDS`
 - [x] **VID-04**: Token signing acontece **apenas no server** (RSC ou Server Action); chave Bunny nunca é serializada para o client
 - [x] **VID-05**: Aulas têm colunas `video_provider` e `video_external_id` (substituindo URL solta); admin form usa um seletor para o provider
@@ -58,8 +58,8 @@ Requisitos para o "v1 lançável" — plataforma 100% funcional antes do redesig
 ### Anti-Piracy
 
 - [ ] **AP-01**: Player exibe overlay CSS com email do aluno em baixa opacidade sobre o vídeo, em posição que não bloqueia conteúdo crítico (deterrent, comunicado honestamente como tal)
-- [ ] **AP-02**: Signed URLs do Bunny têm TTL curto (≤ 4h) e são re-mintadas a cada novo carregamento da página da aula
-- [ ] **AP-03**: Player NÃO usa IP-binding nos tokens (incompatível com mobile BR via CGNAT — Claro/Vivo/TIM)
+- [x] **AP-02**: Signed URLs do Bunny têm TTL curto (≤ 4h) e são re-mintadas a cada novo carregamento da página da aula
+- [x] **AP-03**: Player NÃO usa IP-binding nos tokens (incompatível com mobile BR via CGNAT — Claro/Vivo/TIM)
 - [ ] **AP-04**: `docs/` documenta o ceiling realista da proteção (overlay é deterrence, não DRM; screen recording continua possível)
 
 ### B2B Institution & Manager Dashboard
@@ -158,14 +158,14 @@ Mapeamento preenchido durante a criação do roadmap.
 | CERT-03 | Phase 3 | Pending |
 | CERT-04 | Phase 3 | Pending |
 | CERT-05 | Phase 3 | Pending |
-| VID-01 | Phase 4 | Pending |
-| VID-02 | Phase 4 | Pending |
+| VID-01 | Phase 4 | Complete |
+| VID-02 | Phase 4 | Complete |
 | VID-03 | Phase 4 | Complete |
 | VID-04 | Phase 4 | Complete |
 | VID-05 | Phase 4 | Complete |
 | AP-01 | Phase 4 | Pending |
-| AP-02 | Phase 4 | Pending |
-| AP-03 | Phase 4 | Pending |
+| AP-02 | Phase 4 | Complete |
+| AP-03 | Phase 4 | Complete |
 | AP-04 | Phase 4 | Pending |
 | INST-01 | Phase 1 | Complete |
 | INST-02 | Phase 1 | Complete |
