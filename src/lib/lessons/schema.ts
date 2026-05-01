@@ -48,7 +48,22 @@ export const createLessonSchema = z
       .trim()
       .optional()
       .transform((value) => (value && value.length > 0 ? value : null)),
-    videoUrl: z.string({ required_error: "Informe a URL do video" }).trim().url({ message: "Informe uma URL valida." }),
+    videoProvider: z
+      .string()
+      .trim()
+      .optional()
+      .transform((v) => (v && v.length > 0 ? v : null)),
+    videoExternalId: z
+      .string()
+      .trim()
+      .optional()
+      .transform((v) => (v && v.length > 0 ? v : null)),
+    videoUrl: z
+      .string()
+      .trim()
+      .url({ message: "Informe uma URL valida." })
+      .optional()
+      .nullable(),
     position: z.coerce
       .number({ required_error: "Informe a posicao na ordem do modulo" })
       .int({ message: "Posicao deve ser um numero inteiro." })

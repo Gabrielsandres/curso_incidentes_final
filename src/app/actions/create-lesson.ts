@@ -42,7 +42,8 @@ export async function createLessonAction(
     moduleId: formData.get("module_id"),
     title: formData.get("title"),
     description: formData.get("description"),
-    videoUrl: formData.get("video_url"),
+    videoProvider: formData.get("video_provider"),
+    videoExternalId: formData.get("video_external_id"),
     position: formData.get("position"),
     materialLabel: formData.get("material_label"),
     materialDescription: formData.get("material_description"),
@@ -128,7 +129,8 @@ export async function createLessonAction(
       module_id: parsed.data.moduleId,
       title: parsed.data.title,
       description: parsed.data.description ?? null,
-      video_url: parsed.data.videoUrl,
+      video_provider: parsed.data.videoProvider ?? null,
+      video_external_id: parsed.data.videoExternalId ?? null,
       position: parsed.data.position,
     })
     .select("id")
