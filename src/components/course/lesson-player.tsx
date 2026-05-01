@@ -1,105 +1,53 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-import type { LessonWithMaterials } from "@/lib/courses/types";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type LessonPlayerProps = {
-  lesson: LessonWithMaterials;
+  embedUrl: string;
+  provider: "youtube" | "bunny";
+  watermarkText: string | null;
+  lessonId: string;
+  lessonTitle: string;
+  lessonDescription: string | null;
   initialIsCompleted: boolean;
 };
 
-type YouTubePlayer = {
-  destroy: () => void;
-};
+function WatermarkOverlay({ text }: { text: string }) {
+  const [corner, setCorner] = useState<0 | 1 | 2 | 3>(0);
 
-type YouTubePlayerStateEvent = {
-  data: number;
-};
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCorner((c) => ((c + 1) % 4) as 0 | 1 | 2 | 3);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
-type YouTubePlayerOptions = {
-  videoId: string;
-  playerVars?: {
-    rel?: number;
-  };
-  events?: {
-    onStateChange?: (event: YouTubePlayerStateEvent) => void;
-  };
-};
+  const positionClass = [
+    "top-3 left-3",
+    "top-3 right-3",
+    "bottom-12 right-3",
+    "bottom-12 left-3",
+  ][corner];
 
-type YouTubeApi = {
-  Player: new (element: HTMLElement, options: YouTubePlayerOptions) => YouTubePlayer;
-  PlayerState: {
-    ENDED: number;
-  };
-};
-
-declare global {
-  interface Window {
-    YT?: YouTubeApi;
-    onYouTubeIframeAPIReady?: () => void;
-    __youtubeIframeApiPromise?: Promise<YouTubeApi>;
-  }
+  return (
+    <div
+      aria-hidden="true"
+      className={`pointer-events-none absolute ${positionClass} select-none text-sm font-semibold text-white transition-opacity duration-500`}
+      style={{ opacity: 0.12 }}
+    >
+      {text}
+    </div>
+  );
 }
 
-function loadYouTubeIframeApi(): Promise<YouTubeApi> {
-  if (typeof window === "undefined") {
-    return Promise.reject(new Error("YouTube API can only be loaded in the browser."));
-  }
-
-  if (window.YT?.Player) {
-    return Promise.resolve(window.YT);
-  }
-
-  if (window.__youtubeIframeApiPromise) {
-    return window.__youtubeIframeApiPromise;
-  }
-
-  window.__youtubeIframeApiPromise = new Promise<YouTubeApi>((resolve, reject) => {
-    const previousReadyHandler = window.onYouTubeIframeAPIReady;
-    const restoreReadyHandler = () => {
-      window.onYouTubeIframeAPIReady = previousReadyHandler;
-    };
-
-    const timeoutId = window.setTimeout(() => {
-      restoreReadyHandler();
-      reject(new Error("Timed out while loading YouTube iframe API."));
-    }, 15000);
-
-    window.onYouTubeIframeAPIReady = () => {
-      previousReadyHandler?.();
-      if (window.YT?.Player) {
-        window.clearTimeout(timeoutId);
-        restoreReadyHandler();
-        resolve(window.YT);
-        return;
-      }
-
-      restoreReadyHandler();
-      reject(new Error("YouTube iframe API loaded but Player is unavailable."));
-    };
-
-    const existingScript = document.getElementById("youtube-iframe-api");
-    if (existingScript) {
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = "youtube-iframe-api";
-    script.src = "https://www.youtube.com/iframe_api";
-    script.async = true;
-    script.onerror = () => {
-      window.clearTimeout(timeoutId);
-      restoreReadyHandler();
-      reject(new Error("Failed to load YouTube iframe API script."));
-    };
-    document.head.appendChild(script);
-  });
-
-  return window.__youtubeIframeApiPromise;
-}
-
-export function LessonPlayer({ lesson, initialIsCompleted }: LessonPlayerProps) {
+export function LessonPlayer({
+  embedUrl,
+  watermarkText,
+  lessonId,
+  lessonTitle,
+  lessonDescription,
+  initialIsCompleted,
+}: LessonPlayerProps) {
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
   const [isSaving, setIsSaving] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
@@ -107,11 +55,6 @@ export function LessonPlayer({ lesson, initialIsCompleted }: LessonPlayerProps) 
 
   const completionRef = useRef(initialIsCompleted);
   const savingRef = useRef(false);
-  const playerRef = useRef<YouTubePlayer | null>(null);
-  const playerElementRef = useRef<HTMLDivElement | null>(null);
-
-  const youtubeVideoId = useMemo(() => extractYouTubeVideoId(lesson.video_url ?? ""), [lesson.video_url]);
-  const fallbackEmbedUrl = useMemo(() => buildYouTubeEmbedUrl(lesson.video_url ?? ""), [lesson.video_url]);
 
   useEffect(() => {
     completionRef.current = isCompleted;
@@ -133,7 +76,7 @@ export function LessonPlayer({ lesson, initialIsCompleted }: LessonPlayerProps) 
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ lessonId: lesson.id }),
+          body: JSON.stringify({ lessonId }),
         });
 
         if (!response.ok) {
@@ -141,8 +84,8 @@ export function LessonPlayer({ lesson, initialIsCompleted }: LessonPlayerProps) 
           const apiMessage = responseBody?.message?.trim();
           const fallbackMessage =
             response.status === 401
-              ? "Sua sessao expirou. Faca login novamente."
-              : "Nao foi possivel marcar a aula como concluida. Tente novamente.";
+              ? "Sua sessão expirou. Faça login novamente."
+              : "Não foi possível marcar a aula como concluída. Tente novamente.";
           throw new Error(apiMessage && apiMessage.length > 0 ? apiMessage : fallbackMessage);
         }
 
@@ -156,7 +99,7 @@ export function LessonPlayer({ lesson, initialIsCompleted }: LessonPlayerProps) 
         const friendlyMessage =
           error instanceof Error && error.message
             ? error.message
-            : "Nao foi possivel marcar a aula como concluida. Tente novamente.";
+            : "Não foi possível marcar a aula como concluída. Tente novamente.";
         if (source === "manual") {
           setCompletionError(friendlyMessage);
         }
@@ -166,73 +109,65 @@ export function LessonPlayer({ lesson, initialIsCompleted }: LessonPlayerProps) 
         savingRef.current = false;
       }
     },
-    [lesson.id],
+    [lessonId],
   );
 
   useEffect(() => {
-    if (!youtubeVideoId || !playerElementRef.current) {
-      return;
+    function handleMessage(event: MessageEvent) {
+      // Bunny Stream: Player.js protocol (D-12, verified via Player.js spec)
+      if (
+        typeof event.data === "object" &&
+        event.data !== null &&
+        (event.data as Record<string, unknown>).context === "player.js" &&
+        (event.data as Record<string, unknown>).event === "ended"
+      ) {
+        void markLessonAsCompleted("video-end");
+        return;
+      }
+
+      // YouTube: infoDelivery with playerState 0 (ENDED) (D-14)
+      if (typeof event.data === "string") {
+        try {
+          const parsed = JSON.parse(event.data) as {
+            event?: string;
+            info?: { playerState?: number };
+          };
+          if (parsed.event === "infoDelivery" && parsed.info?.playerState === 0) {
+            void markLessonAsCompleted("video-end");
+          }
+        } catch {
+          // not a JSON message — ignore
+        }
+      }
     }
 
-    let isCancelled = false;
-
-    void loadYouTubeIframeApi()
-      .then((yt) => {
-        if (isCancelled || !playerElementRef.current) {
-          return;
-        }
-
-        playerRef.current = new yt.Player(playerElementRef.current, {
-          videoId: youtubeVideoId,
-          playerVars: {
-            rel: 0,
-          },
-          events: {
-            onStateChange: (event) => {
-              if (event.data === yt.PlayerState.ENDED) {
-                void markLessonAsCompleted("video-end");
-              }
-            },
-          },
-        });
-      })
-      .catch((error) => {
-        console.error("Failed to initialize YouTube player", error);
-      });
-
-    return () => {
-      isCancelled = true;
-      playerRef.current?.destroy();
-      playerRef.current = null;
-    };
-  }, [markLessonAsCompleted, youtubeVideoId]);
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [markLessonAsCompleted]);
 
   return (
     <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Aula</p>
-        <h1 className="text-2xl font-semibold text-slate-900">{lesson.title}</h1>
-        {lesson.description ? <p className="text-sm text-slate-600">{lesson.description}</p> : null}
+        <h1 className="text-2xl font-semibold text-slate-900">{lessonTitle}</h1>
+        {lessonDescription ? <p className="text-sm text-slate-600">{lessonDescription}</p> : null}
       </div>
 
-      {youtubeVideoId ? (
-        <div className="aspect-video overflow-hidden rounded-xl border border-slate-200 bg-black">
-          <div ref={playerElementRef} className="h-full w-full" />
+      {!embedUrl ? (
+        <div className="rounded-xl border border-dashed border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          Não foi possível carregar o vídeo desta aula. Verifique se o ID de vídeo salvo é válido.
         </div>
-      ) : fallbackEmbedUrl ? (
-        <div className="aspect-video overflow-hidden rounded-xl border border-slate-200 bg-black">
+      ) : (
+        <div className="relative aspect-video overflow-hidden rounded-xl border border-slate-200 bg-black">
           <iframe
-            title={lesson.title}
-            src={fallbackEmbedUrl}
+            title={lessonTitle}
+            src={embedUrl}
             className="h-full w-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             loading="lazy"
           />
-        </div>
-      ) : (
-        <div className="rounded-xl border border-dashed border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          Nao foi possivel carregar o video desta aula. Verifique se o link salvo e valido.
+          {watermarkText !== null ? <WatermarkOverlay text={watermarkText} /> : null}
         </div>
       )}
 
@@ -259,60 +194,19 @@ export function LessonPlayer({ lesson, initialIsCompleted }: LessonPlayerProps) 
             disabled={isCompleted || isSaving}
             className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isCompleted ? "Aula concluida" : isSaving ? "Marcando..." : "Marcar aula como concluida"}
+            {isCompleted ? "Aula concluída" : isSaving ? "Marcando..." : "Marcar aula como concluída"}
           </button>
           <span
             className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
               isCompleted ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
             }`}
           >
-            {isCompleted ? "Concluida" : "Pendente"}
+            {isCompleted ? "Concluída" : "Pendente"}
           </span>
         </div>
-        <p className="text-xs text-slate-500">Ao terminar o video, a aula e marcada automaticamente como concluida.</p>
+        <p className="text-xs text-slate-500">Ao terminar o vídeo, a aula é marcada automaticamente como concluída.</p>
         {completionError ? <p className="text-xs text-red-600">{completionError}</p> : null}
       </div>
     </section>
   );
-}
-
-function extractYouTubeVideoId(videoUrl: string) {
-  try {
-    const parsed = new URL(videoUrl);
-    const host = parsed.hostname.replace(/^www\./, "");
-
-    if (host === "youtu.be") {
-      const videoId = parsed.pathname.replace("/", "");
-      return videoId || null;
-    }
-
-    if (host === "youtube.com") {
-      const pathSegments = parsed.pathname.split("/").filter(Boolean);
-
-      if (pathSegments[0] === "embed" && pathSegments[1]) {
-        return pathSegments[1];
-      }
-
-      const videoId = parsed.searchParams.get("v");
-      return videoId || null;
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-function buildYouTubeEmbedUrl(videoUrl: string) {
-  const youtubeVideoId = extractYouTubeVideoId(videoUrl);
-  if (youtubeVideoId) {
-    return `https://www.youtube.com/embed/${youtubeVideoId}?rel=0`;
-  }
-
-  try {
-    const parsed = new URL(videoUrl);
-    return parsed.toString();
-  } catch {
-    return null;
-  }
 }

@@ -9,6 +9,7 @@ import { getUserDisplayName } from "@/lib/auth/user-display-name";
 import { getLessonWithCourseContext } from "@/lib/courses/queries";
 import { logger } from "@/lib/logger";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getPlayableSource } from "@/lib/video";
 
 export const metadata: Metadata = {
   title: "Aula | Gestão de Incidentes",
@@ -41,6 +42,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
   if (!context) {
     notFound();
   }
+
+  const playableSource = getPlayableSource(context.lesson, { email: user.email ?? "" });
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
@@ -76,7 +79,15 @@ export default async function LessonPage({ params }: LessonPageProps) {
         </nav>
 
         <div className="space-y-6">
-          <LessonPlayer lesson={context.lesson} initialIsCompleted={context.lesson.isCompleted} />
+          <LessonPlayer
+            embedUrl={playableSource.embedUrl}
+            provider={playableSource.provider}
+            watermarkText={playableSource.watermarkText}
+            lessonId={context.lesson.id}
+            lessonTitle={context.lesson.title}
+            lessonDescription={context.lesson.description ?? null}
+            initialIsCompleted={context.lesson.isCompleted}
+          />
           <LessonMaterials materials={context.lesson.materials} />
         </div>
       </main>
