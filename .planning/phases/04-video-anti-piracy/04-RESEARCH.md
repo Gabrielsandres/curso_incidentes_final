@@ -489,20 +489,19 @@ function WatermarkOverlay({ text }: { text: string }) {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Bunny Library ID vs CDN Zone terminology**
+1. **Bunny Library ID vs CDN Zone terminology** — (RESOLVED)
    - What we know: Official embed docs use `library_id` (numeric). STATE.md blocker mentions `BUNNY_STREAM_CDN_ZONE` as a format to verify.
-   - What's unclear: Whether the user's Bunny account uses "library ID" numbering or a "zone" concept.
-   - Recommendation: Name the env var `BUNNY_STREAM_LIBRARY_ID` (matches official docs). If the Bunny dashboard shows "CDN Zone" instead, they map to the same concept — planner should note this in documentation for the admin operator.
+   - Resolution: Named the env var `BUNNY_STREAM_LIBRARY_ID` (matches official docs). If the Bunny dashboard shows "CDN Zone" instead, they map to the same concept — operator documentation in `docs/anti-piracy.md` covers this.
 
-2. **`add-lesson-form.tsx` does not pass `isProduction` prop**
+2. **`add-lesson-form.tsx` does not pass `isProduction` prop** — (RESOLVED)
    - What we know: The create form (`add-lesson-form.tsx`) lacks the `isProduction` prop and lacks the video provider section entirely. The module page RSC (`modulos/[moduleId]/page.tsx`) needs to pass `process.env.NODE_ENV === "production"` to the form.
-   - Recommendation: This is a required task. Both "add video section to create form" and "wire isProduction prop from page RSC" must be in the plan.
+   - Resolution: Plan 04 adds the video section and wires `isProduction={process.env.NODE_ENV === "production"}` from the RSC page to `AddLessonForm`.
 
-3. **`createLessonSchema` migration**
+3. **`createLessonSchema` migration** — (RESOLVED)
    - What we know: `createLessonSchema` currently requires `videoUrl` (`.url()` validation). After Phase 4, the create form sends `video_provider` + `video_external_id` instead.
-   - Recommendation: Update schema to make `videoUrl` optional + add `videoProvider`/`videoExternalId` fields. The action must write the new columns, not `video_url`. This is a breaking change to the create-lesson flow.
+   - Resolution: Plan 02 updates `createLessonSchema` to make `videoUrl` optional and adds optional `videoProvider`/`videoExternalId` fields. `createLessonAction` writes the new columns. Addressed in Plan 02, Task 2.
 
 ---
 

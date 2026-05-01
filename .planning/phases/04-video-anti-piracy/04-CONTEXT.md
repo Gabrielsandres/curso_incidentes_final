@@ -37,7 +37,7 @@ Abstrair o provider de vídeo (YouTube no dev, Bunny Stream em prod) com interfa
 
 - **D-12:** Detecção de fim de vídeo Bunny via **`window.postMessage`** — o Bunny Player emite `{ event: 'ended' }` quando o vídeo termina. LessonPlayer escuta com `addEventListener('message')` filtrado por origem Bunny.
 - **D-13:** Botão manual "Marcar aula como concluída" permanece **sempre visível** independente do provider. Auto-conclusão é convenience, não bloqueante — se postMessage não disparar, o aluno usa o botão.
-- **D-14:** YouTube mantém auto-conclusão via IFrame API `PlayerState.ENDED` (comportamento atual preservado).
+- **D-14:** YouTube mantém auto-conclusão via postMessage (`enablejsapi=1` + event JSON string com `event: infoDelivery`, `info.playerState: 0`) — `window.YT` e `loadYouTubeIframeApi()` removidos.
 
 ### Claude's Discretion
 
