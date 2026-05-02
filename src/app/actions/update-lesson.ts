@@ -178,31 +178,57 @@ export async function reorderLessonAction(
     return { success: false, message: "Aula não encontrada." };
   }
 
-  const neighborPosition = direction === "up" ? current.position - 1 : current.position + 1;
-
-  // Find neighbor (only non-deleted lessons in same module)
-  const { data: neighbor } = await auth.supabase
+  // Find the actual adjacent active lesson by ORDER — not by position arithmetic.
+  // This is correct when soft-deleted lessons leave gaps in the position sequence.
+  const neighborQuery = auth.supabase
     .from("lessons")
     .select("id, position")
     .eq("module_id", current.module_id)
-    .eq("position", neighborPosition)
     .is("deleted_at", null)
-    .maybeSingle();
+    .limit(1);
 
-  if (!neighbor) {
+  const { data: neighbor } =
+    direction === "up"
+      ? await neighborQuery.lt("position", current.position).order("position", { ascending: false })
+      : await neighborQuery.gt("position", current.position).order("position", { ascending: true });
+
+  if (!neighbor || neighbor.length === 0) {
     return { success: false, message: "Não é possível mover além do limite." };
   }
 
-  // Swap positions — sequential (NOT atomic); accept-low-severity per T-02-T6
+  const neighborLesson = neighbor[0];
+
+  // Optimistic concurrency check: re-read the current lesson position before writing.
+  // If it changed since the first read, a concurrent call already moved it — treat as
+  // a no-op so that double-submits do not skip positions.
+  const { data: fresh, error: freshError } = await auth.supabase
+    .from("lessons")
+    .select("position")
+    .eq("id", lessonId)
+    .single();
+
+  if (freshError || !fresh) {
+    return { success: false, message: "Aula não encontrada." };
+  }
+
+  if (fresh.position !== current.position) {
+    // Another concurrent call already moved this lesson — safe to return success
+    // so the UI re-renders without showing a spurious error.
+    revalidatePath("/admin/cursos", "layout");
+    return { success: true, message: "Ordem atualizada." };
+  }
+
+  // Swap positions — sequential (NOT atomic); accept-low-severity per T-02-T6.
+  // The concurrency guard above eliminates the double-submit skip-position bug.
   const { error: e1 } = await auth.supabase
     .from("lessons")
-    .update({ position: neighborPosition })
+    .update({ position: neighborLesson.position })
     .eq("id", lessonId);
 
   const { error: e2 } = await auth.supabase
     .from("lessons")
     .update({ position: current.position })
-    .eq("id", neighbor.id);
+    .eq("id", neighborLesson.id);
 
   if (e1 ?? e2) {
     logger.error("Falha ao reordenar aulas", { e1: e1?.message, e2: e2?.message });

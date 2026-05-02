@@ -20,11 +20,7 @@ type NewLessonPageProps = {
 
 export default async function NewLessonPage({ searchParams }: NewLessonPageProps) {
   const params = searchParams ? await searchParams : {};
-  const createModuleRaw = Array.isArray(params.createModule) ? params.createModule[0] : params.createModule;
-  const askCreateLessonRaw = Array.isArray(params.askCreateLesson) ? params.askCreateLesson[0] : params.askCreateLesson;
   const courseIdRaw = Array.isArray(params.courseId) ? params.courseId[0] : params.courseId;
-  const openCreateModuleOnLoad = createModuleRaw === "1";
-  const askToCreateLessonAfterModule = askCreateLessonRaw === "1";
   const initialCourseId = typeof courseIdRaw === "string" && courseIdRaw.length > 0 ? courseIdRaw : undefined;
 
   const supabase = await createSupabaseServerClient();
@@ -86,8 +82,6 @@ export default async function NewLessonPage({ searchParams }: NewLessonPageProps
           modules={modules}
           courses={courses}
           initialCourseId={initialCourseId}
-          openCreateModuleOnLoad={openCreateModuleOnLoad}
-          askToCreateLessonAfterModule={askToCreateLessonAfterModule}
         />
       </main>
     </div>

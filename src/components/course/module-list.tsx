@@ -8,7 +8,9 @@ type ModuleListProps = {
 };
 
 export function ModuleList({ modules, courseSlug }: ModuleListProps) {
-  if (modules.length === 0) {
+  const visibleModules = modules.filter((m) => m.lessons.length > 0);
+
+  if (visibleModules.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 p-8 text-center text-sm text-slate-500">
         Nenhum modulo cadastrado ainda.
@@ -18,7 +20,7 @@ export function ModuleList({ modules, courseSlug }: ModuleListProps) {
 
   return (
     <div className="space-y-6">
-      {modules.map((module) => {
+      {visibleModules.map((module) => {
         const moduleTotalLessons = module.lessons.length;
         const moduleCompletedLessons = module.lessons.filter((lesson) => lesson.isCompleted).length;
         const modulePercentage =

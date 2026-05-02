@@ -2,11 +2,10 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import Link from "next/link";
 
 import { createLessonAction } from "@/app/actions/create-lesson";
 import type { CreateLessonFormState } from "@/app/actions/create-lesson-state";
-import { createModuleAction } from "@/app/actions/create-module";
-import type { CreateModuleFormState } from "@/app/actions/create-module-state";
 import type { CourseSummary, ModuleForLessonOption } from "@/lib/courses/types";
 import { ALLOWED_MATERIAL_EXTENSIONS, MAX_MATERIAL_FILE_SIZE_BYTES } from "@/lib/materials/storage";
 
@@ -14,8 +13,6 @@ type CreateLessonFormProps = {
   modules: ModuleForLessonOption[];
   courses: CourseSummary[];
   initialCourseId?: string;
-  openCreateModuleOnLoad?: boolean;
-  askToCreateLessonAfterModule?: boolean;
 };
 
 type UploadedMaterialMetadata = {
@@ -29,11 +26,6 @@ type UploadedMaterialMetadata = {
 type MaterialUploadStatus = "idle" | "uploading" | "uploaded" | "error";
 
 const initialCreateLessonState: CreateLessonFormState = {
-  success: false,
-  message: "",
-};
-
-const initialCreateModuleState: CreateModuleFormState = {
   success: false,
   message: "",
 };
@@ -61,11 +53,9 @@ export function CreateLessonForm({
   modules,
   courses,
   initialCourseId,
-  openCreateModuleOnLoad = false,
-  askToCreateLessonAfterModule = false,
 }: CreateLessonFormProps) {
   const courseOptions = useMemo(() => sortCourseOptions(courses), [courses]);
-  const [moduleOptions, setModuleOptions] = useState<ModuleForLessonOption[]>(() => sortModuleOptions(modules));
+  const moduleOptions = useMemo(() => sortModuleOptions(modules), [modules]);
   const [selectedCourseId, setSelectedCourseId] = useState(() => {
     if (initialCourseId && courses.some((course) => course.id === initialCourseId)) {
       return initialCourseId;
@@ -85,47 +75,15 @@ export function CreateLessonForm({
   const [materialUploadMessage, setMaterialUploadMessage] = useState<string | null>(null);
   const [uploadedMaterialMetadata, setUploadedMaterialMetadata] = useState<UploadedMaterialMetadata | null>(null);
   const [draftLessonId, setDraftLessonId] = useState("");
-  const [isCreateModuleModalOpen, setIsCreateModuleModalOpen] = useState(openCreateModuleOnLoad);
   const lessonFormRef = useRef<HTMLFormElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const materialFileInputRef = useRef<HTMLInputElement>(null);
-  const createModuleFormRef = useRef<HTMLFormElement>(null);
   const allowNextSubmitRef = useRef(false);
   const hasAnyModule = moduleOptions.length > 0;
   const [lessonState, lessonFormAction] = useActionState<CreateLessonFormState, FormData>(
     createLessonAction,
     initialCreateLessonState,
   );
-  const [createModuleState, createModuleFormAction] = useActionState<CreateModuleFormState, FormData>(
-    async (previousState, formData) => {
-      const result = await createModuleAction(previousState, formData);
-      const createdOption = result.moduleOption;
-
-      if (result.success && createdOption) {
-        createModuleFormRef.current?.reset();
-        setIsCreateModuleModalOpen(false);
-        setSelectedCourseId(createdOption.courseId);
-        setSelectedModuleId(createdOption.id);
-        setModuleOptions((previous) => {
-          const moduleMap = new Map(previous.map((moduleOption) => [moduleOption.id, moduleOption]));
-          moduleMap.set(createdOption.id, createdOption);
-          return sortModuleOptions(Array.from(moduleMap.values()));
-        });
-
-        if (askToCreateLessonAfterModule) {
-          const shouldCreateLesson = window.confirm("Módulo criado com sucesso. Deseja criar uma aula agora?");
-          if (shouldCreateLesson) {
-            titleInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-            titleInputRef.current?.focus();
-          }
-        }
-      }
-
-      return result;
-    },
-    initialCreateModuleState,
-  );
-
   const selectedCourse = useMemo(
     () => courseOptions.find((course) => course.id === selectedCourseId) ?? null,
     [courseOptions, selectedCourseId],
@@ -326,29 +284,27 @@ export function CreateLessonForm({
 
         {courseOptions.length > 0 && !hasAnyModule ? (
           <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
-            <p>Nenhum modulo cadastrado ainda. Crie um modulo para o curso selecionado antes de salvar a aula.</p>
-            <button
-              type="button"
-              onClick={() => setIsCreateModuleModalOpen(true)}
+            <p>Nenhum modulo cadastrado ainda. Crie um modulo em <strong>Gerenciar cursos</strong> antes de salvar a aula.</p>
+            <Link
+              href="/admin/cursos"
               className="w-fit font-semibold text-amber-800 underline underline-offset-2"
             >
-              Ir para criacao de modulo
-            </button>
+              Ir para Gerenciar cursos
+            </Link>
           </div>
         ) : null}
 
         {hasAnyModule && selectedCourse && !hasModulesForSelectedCourse ? (
           <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
             <p>
-              O curso <strong>{selectedCourse.title}</strong> ainda nao possui modulo. Crie um modulo para continuar.
+              O curso <strong>{selectedCourse.title}</strong> ainda nao possui modulo. Acesse <strong>Gerenciar cursos</strong> para criar um modulo.
             </p>
-            <button
-              type="button"
-              onClick={() => setIsCreateModuleModalOpen(true)}
+            <Link
+              href={`/admin/cursos/${selectedCourse.slug}`}
               className="w-fit font-semibold text-amber-800 underline underline-offset-2"
             >
-              Ir para criacao de modulo
-            </button>
+              Ir para Gerenciar cursos
+            </Link>
           </div>
         ) : null}
 
@@ -405,14 +361,6 @@ export function CreateLessonForm({
               ))}
             </select>
             <FieldError errors={lessonState.fieldErrors?.moduleId} />
-
-            <button
-              type="button"
-              onClick={() => setIsCreateModuleModalOpen(true)}
-              className="w-fit text-sm font-semibold text-sky-700 transition hover:text-sky-800"
-            >
-              + Criar novo modulo
-            </button>
           </label>
 
           <label className="flex flex-col gap-2">
@@ -637,88 +585,6 @@ export function CreateLessonForm({
         </div>
       </form>
 
-      {isCreateModuleModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-            <div className="mb-4 space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Módulo</p>
-              <h3 className="text-xl font-semibold text-slate-900">Criar novo módulo</h3>
-            </div>
-
-            <form ref={createModuleFormRef} action={createModuleFormAction} className="space-y-4">
-              <input type="hidden" name="course_id" value={selectedCourse?.id ?? ""} />
-
-              {selectedCourse ? (
-                <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                  Curso de destino: <strong>{selectedCourse.title}</strong>
-                </p>
-              ) : (
-                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                  Nenhum curso selecionado para vincular o modulo. Selecione um curso antes de continuar.
-                </p>
-              )}
-
-              {createModuleState.message ? (
-                <div
-                  className={`rounded-lg px-3 py-2 text-sm ${
-                    createModuleState.success
-                      ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-                      : "border border-red-200 bg-red-50 text-red-700"
-                  }`}
-                >
-                  {createModuleState.message}
-                </div>
-              ) : null}
-
-              <label className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-slate-700">Nome do módulo *</span>
-                <input
-                  type="text"
-                  name="title"
-                  required
-                  placeholder="Ex.: Módulo 4 - Gestão avançada"
-                  className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-                />
-                <FieldError errors={createModuleState.fieldErrors?.title} />
-              </label>
-
-              <label className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-slate-700">Descrição (opcional)</span>
-                <textarea
-                  name="description"
-                  placeholder="Resumo do conteúdo do módulo"
-                  className="min-h-[90px] w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-                />
-                <FieldError errors={createModuleState.fieldErrors?.description} />
-              </label>
-
-              <label className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-slate-700">Ordem (opcional)</span>
-                <input
-                  type="number"
-                  name="position"
-                  min={1}
-                  placeholder="Ex.: 4"
-                  className="w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-                />
-                <FieldError errors={createModuleState.fieldErrors?.position} />
-                <FieldError errors={createModuleState.fieldErrors?.courseId} />
-              </label>
-
-              <div className="mt-2 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModuleModalOpen(false)}
-                  className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Cancelar
-                </button>
-                <SubmitCreateModuleButton disabled={!selectedCourse} />
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
     </>
   );
 }
@@ -734,21 +600,6 @@ function SubmitLessonButton({ disabled }: { disabled: boolean }) {
       className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-70"
     >
       {pending ? "Salvando..." : "Salvar aula"}
-    </button>
-  );
-}
-
-function SubmitCreateModuleButton({ disabled }: { disabled: boolean }) {
-  const { pending } = useFormStatus();
-  const isDisabled = disabled || pending;
-
-  return (
-    <button
-      type="submit"
-      disabled={isDisabled}
-      className="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-70"
-    >
-      {pending ? "Criando..." : "Criar módulo"}
     </button>
   );
 }

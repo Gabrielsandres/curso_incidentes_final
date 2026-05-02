@@ -24,7 +24,10 @@ export async function reorderLessonUpAction(fd: FormData): Promise<void> {
   const newFd = new FormData();
   newFd.append("lesson_id", lessonId);
   newFd.append("direction", "up");
-  await reorderLessonAction({ success: false, message: "" }, newFd);
+  const result = await reorderLessonAction({ success: false, message: "" }, newFd);
+  if (!result.success) {
+    throw new Error(result.message);
+  }
 }
 
 export async function reorderLessonDownAction(fd: FormData): Promise<void> {
@@ -32,5 +35,8 @@ export async function reorderLessonDownAction(fd: FormData): Promise<void> {
   const newFd = new FormData();
   newFd.append("lesson_id", lessonId);
   newFd.append("direction", "down");
-  await reorderLessonAction({ success: false, message: "" }, newFd);
+  const result = await reorderLessonAction({ success: false, message: "" }, newFd);
+  if (!result.success) {
+    throw new Error(result.message);
+  }
 }

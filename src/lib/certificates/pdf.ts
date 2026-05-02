@@ -27,7 +27,7 @@ const DEFAULT_CERTIFICATE_TEMPLATE = "/certificado_teste.png";
 const CERTIFICATE_TEXT_COLOR = rgb(0.09, 0.12, 0.2);
 
 const CERTIFICATE_FIELDS = {
-  name: { x: 0, y: 430, size: 60, centered: true },
+  name: { x: 0, y: 530, size: 60, centered: true },
   course: { x: 260, y: 360, size: 34 },
   hours: { x: 700, y: 330, size: 32 },
   date: { x: 1220, y: 120, size: 20 },

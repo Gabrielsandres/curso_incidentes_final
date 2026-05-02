@@ -27,6 +27,7 @@ export async function createModuleAction(
   });
 
   if (!parsed.success) {
+    logger.error("Falha na validação de módulo", parsed.error.flatten());
     return {
       success: false,
       message: "Revise os dados informados.",

@@ -78,6 +78,10 @@ export function AddModuleForm({
           )}
         </label>
 
+        {state.fieldErrors?.courseId && (
+          <p className="text-xs text-red-600">{state.fieldErrors.courseId[0]}</p>
+        )}
+
         {state.message && (
           <div
             role="status"

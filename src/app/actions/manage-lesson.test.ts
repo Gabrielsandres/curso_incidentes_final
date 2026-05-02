@@ -138,6 +138,67 @@ describe("restoreLessonAction", () => {
   });
 });
 
+// Helper: builds a supabase mock for reorderLessonAction.
+// fromSequence is an array of return values for successive .from() calls:
+//   [0] -> read current lesson (.select.eq.single)
+//   [1] -> find neighbor (.select.eq.is.limit.lt/.gt.order  — resolves to { data: [...], error })
+//   [2] -> re-read current for concurrency check (.select.eq.single)
+//   [3] -> first UPDATE (lesson position)
+//   [4] -> second UPDATE (neighbor position)
+function makeReorderSupabase(
+  currentLesson: { position: number; module_id: string },
+  neighborRows: { id: string; position: number }[],
+  freshPosition: number,
+) {
+  let callCount = 0;
+  const updateEqMock = vi.fn().mockResolvedValue({ error: null });
+  const updateMock = vi.fn().mockReturnValue({ eq: updateEqMock });
+
+  return {
+    supabase: {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({ data: { user: { id: "admin-1" } }, error: null }),
+      },
+      from: vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          // read current lesson
+          return {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            single: vi.fn().mockResolvedValue({ data: currentLesson, error: null }),
+          };
+        }
+        if (callCount === 2) {
+          // neighbor query: chained .eq.is.limit.lt/.gt.order — all return `this` until awaited
+          const chainable: Record<string, unknown> = {};
+          const terminal = vi.fn().mockResolvedValue({ data: neighborRows, error: null });
+          chainable.select = vi.fn().mockReturnValue(chainable);
+          chainable.eq = vi.fn().mockReturnValue(chainable);
+          chainable.is = vi.fn().mockReturnValue(chainable);
+          chainable.limit = vi.fn().mockReturnValue(chainable);
+          chainable.lt = vi.fn().mockReturnValue(chainable);
+          chainable.gt = vi.fn().mockReturnValue(chainable);
+          chainable.order = terminal;
+          return chainable;
+        }
+        if (callCount === 3) {
+          // re-read current lesson for concurrency check
+          return {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            single: vi.fn().mockResolvedValue({ data: { position: freshPosition }, error: null }),
+          };
+        }
+        // UPDATE calls
+        return { update: updateMock };
+      }),
+    },
+    updateMock,
+    updateEqMock,
+  };
+}
+
 describe("reorderLessonAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -147,37 +208,7 @@ describe("reorderLessonAction", () => {
     const currentLesson = { position: 1, module_id: MODULE_ID };
     const neighborLesson = { id: NEIGHBOR_ID, position: 2 };
 
-    let selectCallCount = 0;
-    const updateEqMock = vi.fn().mockResolvedValue({ error: null });
-    const updateMock = vi.fn().mockReturnValue({ eq: updateEqMock });
-
-    const supabase = {
-      auth: {
-        getUser: vi.fn().mockResolvedValue({ data: { user: { id: "admin-1" } }, error: null }),
-      },
-      from: vi.fn().mockImplementation(() => {
-        selectCallCount++;
-        if (selectCallCount === 1) {
-          // First call: read current lesson
-          return {
-            select: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            single: vi.fn().mockResolvedValue({ data: currentLesson, error: null }),
-          };
-        }
-        if (selectCallCount === 2) {
-          // Second call: find neighbor
-          return {
-            select: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            is: vi.fn().mockReturnThis(),
-            maybeSingle: vi.fn().mockResolvedValue({ data: neighborLesson, error: null }),
-          };
-        }
-        // Subsequent calls: update positions
-        return { update: updateMock };
-      }),
-    };
+    const { supabase, updateMock } = makeReorderSupabase(currentLesson, [neighborLesson], 1);
 
     vi.mocked(createSupabaseServerClient).mockResolvedValue(
       supabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
@@ -192,5 +223,70 @@ describe("reorderLessonAction", () => {
     expect(result.success).toBe(true);
     // Verify two update calls were made (swap)
     expect(updateMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("retorna sucesso sem executar swap quando posicao ja mudou (double-submit guard)", async () => {
+    const currentLesson = { position: 1, module_id: MODULE_ID };
+    const neighborLesson = { id: NEIGHBOR_ID, position: 2 };
+
+    // freshPosition differs from current.position — simulates concurrent call already moved it
+    const { supabase, updateMock } = makeReorderSupabase(currentLesson, [neighborLesson], 2);
+
+    vi.mocked(createSupabaseServerClient).mockResolvedValue(
+      supabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
+    );
+    vi.mocked(fetchUserRole).mockResolvedValue("admin");
+
+    const result = await reorderLessonAction(
+      initialState,
+      makeFormData({ lesson_id: LESSON_ID, direction: "down" }),
+    );
+
+    expect(result.success).toBe(true);
+    // No swap should have been executed
+    expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it("retorna erro quando nao existe vizinha (aula ja esta no limite)", async () => {
+    let callCount = 0;
+    const supabase = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({ data: { user: { id: "admin-1" } }, error: null }),
+      },
+      from: vi.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            single: vi.fn().mockResolvedValue({ data: { position: 1, module_id: MODULE_ID }, error: null }),
+          };
+        }
+        // neighbor query returns empty array
+        const chainable: Record<string, unknown> = {};
+        const terminal = vi.fn().mockResolvedValue({ data: [], error: null });
+        chainable.select = vi.fn().mockReturnValue(chainable);
+        chainable.eq = vi.fn().mockReturnValue(chainable);
+        chainable.is = vi.fn().mockReturnValue(chainable);
+        chainable.limit = vi.fn().mockReturnValue(chainable);
+        chainable.lt = vi.fn().mockReturnValue(chainable);
+        chainable.gt = vi.fn().mockReturnValue(chainable);
+        chainable.order = terminal;
+        return chainable;
+      }),
+    };
+
+    vi.mocked(createSupabaseServerClient).mockResolvedValue(
+      supabase as unknown as Awaited<ReturnType<typeof createSupabaseServerClient>>,
+    );
+    vi.mocked(fetchUserRole).mockResolvedValue("admin");
+
+    const result = await reorderLessonAction(
+      initialState,
+      makeFormData({ lesson_id: LESSON_ID, direction: "up" }),
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("limite");
   });
 });
