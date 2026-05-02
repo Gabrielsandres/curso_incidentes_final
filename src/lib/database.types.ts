@@ -630,7 +630,20 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      promote_institution_manager: {
+        Args: {
+          p_institution_id: string;
+          p_new_manager_profile_id: string;
+        };
+        Returns: undefined;
+      };
+      demote_institution_manager: {
+        Args: {
+          p_institution_id: string;
+          p_profile_id: string;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       order_status: "PENDING" | "PAID" | "FAILED" | "REFUNDED" | "CANCELLED";
