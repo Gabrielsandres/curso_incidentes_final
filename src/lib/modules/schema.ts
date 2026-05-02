@@ -8,11 +8,14 @@ export const createModuleSchema = z.object({
     .string({ required_error: "Nome do módulo é obrigatório." })
     .trim()
     .min(1, { message: "Nome do módulo é obrigatório." }),
-  description: z
-    .string()
-    .trim()
-    .optional()
-    .transform((value) => (value && value.length > 0 ? value : null)),
+  description: z.preprocess(
+    (v) => (v === null || v === undefined ? undefined : v),
+    z
+      .string()
+      .trim()
+      .optional()
+      .transform((value) => (value && value.length > 0 ? value : null)),
+  ),
   position: z.preprocess(
     (value) => {
       if (value === null || value === undefined || value === "") {

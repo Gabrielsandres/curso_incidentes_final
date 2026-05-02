@@ -8,15 +8,15 @@ source:
   - 04-04-SUMMARY.md
   - 04-05-SUMMARY.md
 started: 2026-05-02T00:00:00Z
-updated: 2026-05-02T00:03:00Z
+updated: 2026-05-02T00:04:00Z
 ---
 
 ## Current Test
 
-number: 4
-name: Admin — Opção YouTube escondida em produção
+number: 5
+name: Player — Iframe Bunny + watermark com e-mail
 expected: |
-  Em build de produção (NODE_ENV=production), o seletor de provedor mostra APENAS "Bunny" — opção YouTube ausente do dropdown. Pode confirmar inspecionando o HTML ou rodando `npm run build && npm run start` localmente.
+  Abra uma aula com provider=bunny e BUNNY_STREAM_TOKEN_KEY/LIBRARY_ID configurados. O iframe carrega de iframe.mediadelivery.net com `?token=...&expires=...` na URL. Sobreposto ao vídeo aparece o seu e-mail em opacidade ~12%, sem bloquear cliques (pointer-events:none), e a posição rotaciona entre 4 cantos a cada 30 segundos.
 awaiting: user response
 
 ## Tests
@@ -35,9 +35,8 @@ result: pass
 
 ### 4. Admin — Opção YouTube escondida em produção
 expected: Em build de produção (NODE_ENV=production), o seletor de provedor mostra APENAS "Bunny" — opção YouTube ausente do dropdown. Pode confirmar inspecionando o HTML ou rodando `npm run build && npm run start` localmente.
-result: issue
-reported: "Ao realizar o deploy na vercel e tentar fazer login deu esse erro: 500 INTERNAL_SERVER_ERROR — MIDDLEWARE_INVOCATION_FAILED. GET https://curso-incidentes-novo-uyrm.vercel.app/login retorna 500."
-severity: blocker
+result: pass
+note: "Inicialmente reportado como 500 MIDDLEWARE_INVOCATION_FAILED no /login da Vercel — root cause identificado: BUNNY_STREAM_TOKEN_KEY e BUNNY_STREAM_LIBRARY_ID ausentes nas env vars de produção, causando getEnv() a lançar via superRefine prod-required. Resolvido configurando as 3 envs no Vercel (Bunny trial gratuito + SUPABASE_SERVICE_ROLE_KEY) e redeploy. Login agora retorna 200 e o seletor em prod oculta YouTube como esperado."
 
 ### 5. Player — Iframe Bunny + watermark com e-mail
 expected: Abra uma aula com provider=bunny e BUNNY_STREAM_TOKEN_KEY/LIBRARY_ID configurados. O iframe carrega de iframe.mediadelivery.net com `?token=...&expires=...` na URL. Sobreposto ao vídeo aparece o seu e-mail em opacidade ~12%, sem bloquear cliques (pointer-events:none), e a posição rotaciona entre 4 cantos a cada 30 segundos.
@@ -66,17 +65,20 @@ result: [pending]
 ## Summary
 
 total: 10
-passed: 3
-issues: 1
+passed: 4
+issues: 0
 pending: 6
 skipped: 0
 
 ## Gaps
 
-- truth: "Em build de produção (Vercel), GET /login responde 200 e renderiza o form de login normalmente."
-  status: failed
-  reason: "User reported: GET /login retorna 500 INTERNAL_SERVER_ERROR com MIDDLEWARE_INVOCATION_FAILED na Vercel. ID gru1::65r2c-1777730593006-a4323be6a32e. Erros pinComponent.js no console são de extensão Chrome (ruído, ignorar). Falha real é o middleware crashando ao processar a request."
-  severity: blocker
-  test: 4
-  artifacts: []
-  missing: []
+[none — Test 4 issue resolved by configuring Bunny env vars in Vercel]
+
+## Resolved Issues
+
+- test: 4
+  reported: "GET /login retorna 500 MIDDLEWARE_INVOCATION_FAILED na Vercel"
+  root_cause: "BUNNY_STREAM_TOKEN_KEY e BUNNY_STREAM_LIBRARY_ID ausentes em prod env vars. serverSchema.superRefine prod-required → getEnv() throws → middleware (que chama getEnv() em toda request) crasha → 500 em todas as rotas matched (/login incluso)."
+  resolution: "User cadastrou conta Bunny gratuita ($1 trial), criou Stream Library, configurou BUNNY_STREAM_TOKEN_KEY + BUNNY_STREAM_LIBRARY_ID + SUPABASE_SERVICE_ROLE_KEY no Vercel, e fez redeploy. Login voltou a 200."
+  files_touched: []
+  followup: "Considerar tornar o fail-fast em prod menos rígido OU documentar no README que as 3 envs Bunny são obrigatórias após Phase 4."
