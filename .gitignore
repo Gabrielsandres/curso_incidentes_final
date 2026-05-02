@@ -46,3 +46,6 @@ next-env.d.ts
 
 # materiais privados do cliente (não versionar)
 contexto/
+
+# Claude Code agent worktrees (parallel runs leave build artifacts here)
+.claude/worktrees/
