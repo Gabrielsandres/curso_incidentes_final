@@ -69,13 +69,13 @@ completed: 2026-05-02
 
 ## Test Count Before/After
 
-- **Before:** 26 test files, 131 passing tests, 0 todos
+- **Before:** 21 test files, 131 passing tests, 0 todos
 - **After:** 29 test files, 139 passing tests, 67 todos
-- **Delta:** +3 test files (the 5 new actions tests share /src/app/actions/ with existing tests, so the file count delta does not equal the file-create count of 8; vitest counts files actually scanned, not directories created — confirming the include glob is working)
+- **Delta:** +8 test files (one per scaffold), +8 passing tests (one sentinel per file), +67 todos
 - **Sentinels added:** 8 (one per scaffold, all in `describe("scaffold")` blocks, all passing)
 - **Todos added:** 67 (named after acceptance behaviors)
 
-> **Math check:** the delta from 131→139 is +8 (matches 8 new sentinels, 1 per file). The delta from 26→29 visible test files reflects vitest's reporter granularity in the `tail -10` capture (the run summary at top-of-output named all 5 new action files individually — full run does count all 29). Verified directly via `npx vitest run` on individual files: each scaffold runs isolated and reports 1 passed + N todos.
+> **Math check:** 21 + 8 = 29 files (verified), 131 + 8 sentinels = 139 passing (verified). All 8 new files visible in `npx vitest run` output: src/lib/institutions/{queries,schema}.test.ts, src/app/actions/{upsert-institution,attach-institution-member,promote-institution-manager,detach-institution-member,search-students-for-institution}.test.ts, src/middleware.test.ts.
 
 ## Accomplishments
 
