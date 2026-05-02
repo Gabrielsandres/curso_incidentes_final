@@ -5,8 +5,9 @@ import type { Database } from "@/lib/database.types";
 import { getEnv } from "@/lib/env";
 import { fetchUserRole } from "@/lib/auth/roles";
 
-const PROTECTED_ROUTES = ["/dashboard", "/curso", "/admin"];
+const PROTECTED_ROUTES = ["/dashboard", "/curso", "/admin", "/gestor"];
 const ADMIN_ROUTES = ["/admin", "/dashboard/aulas"];
+const GESTOR_ROUTES = ["/gestor"];
 const AUTH_ROUTES = ["/login"];
 
 function isProtectedPath(path: string) {
@@ -15,6 +16,10 @@ function isProtectedPath(path: string) {
 
 function isAdminPath(path: string) {
   return ADMIN_ROUTES.some((route) => path === route || path.startsWith(`${route}/`));
+}
+
+function isGestorPath(path: string) {
+  return GESTOR_ROUTES.some((route) => path === route || path.startsWith(`${route}/`));
 }
 
 export async function middleware(request: NextRequest) {
@@ -76,9 +81,34 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  if (user && isGestorPath(path)) {
+    const role = await fetchUserRole(supabase, user.id);
+
+    if (role === "admin") {
+      // D-02: admin doesn't use /gestor — redirect to admin equivalent.
+      return NextResponse.redirect(new URL("/admin/instituicoes", request.url));
+    }
+
+    if (role !== "institution_manager") {
+      // Per D-02: any role other than admin/institution_manager is denied.
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    // role === "institution_manager" — fall through to allow.
+    // NOTE: orphan-manager check (zero institution_members rows) is intentionally NOT here.
+    // Pitfall 1 + D-04: middleware runs every request; the orphan check belongs in
+    // /gestor/page.tsx where it adds DB query latency only on /gestor navigations.
+  }
+
   return response;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/curso/:path*", "/admin/:path*", "/login"],
+  matcher: [
+    "/dashboard/:path*",
+    "/curso/:path*",
+    "/admin/:path*",
+    "/gestor/:path*",
+    "/login",
+  ],
 };
