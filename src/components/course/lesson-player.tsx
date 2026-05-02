@@ -55,6 +55,7 @@ export function LessonPlayer({
 
   const completionRef = useRef(initialIsCompleted);
   const savingRef = useRef(false);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
     completionRef.current = isCompleted;
@@ -113,36 +114,86 @@ export function LessonPlayer({
   );
 
   useEffect(() => {
+    function parseMessage(raw: unknown): Record<string, unknown> | null {
+      if (typeof raw === "object" && raw !== null) {
+        return raw as Record<string, unknown>;
+      }
+      if (typeof raw === "string") {
+        try {
+          return JSON.parse(raw) as Record<string, unknown>;
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
+
     function handleMessage(event: MessageEvent) {
-      // Bunny Stream: Player.js protocol (D-12, verified via Player.js spec)
-      if (
-        typeof event.data === "object" &&
-        event.data !== null &&
-        (event.data as Record<string, unknown>).context === "player.js" &&
-        (event.data as Record<string, unknown>).event === "ended"
-      ) {
-        void markLessonAsCompleted("video-end");
+      const data = parseMessage(event.data);
+      if (!data) return;
+
+      // Bunny Stream uses the Player.js protocol. The parent must subscribe to events
+      // first via addEventListener (https://github.com/embedly/player.js/blob/master/SPEC.rst).
+      // Bunny serializes both directions as JSON strings.
+      if (data.context === "player.js") {
+        if (data.event === "ready" && iframeRef.current?.contentWindow) {
+          iframeRef.current.contentWindow.postMessage(
+            JSON.stringify({
+              context: "player.js",
+              version: "0.0.11",
+              method: "addEventListener",
+              value: "ended",
+              listener: "lesson-player",
+            }),
+            "*",
+          );
+          return;
+        }
+        if (data.event === "ended") {
+          void markLessonAsCompleted("video-end");
+          return;
+        }
         return;
       }
 
-      // YouTube: infoDelivery with playerState 0 (ENDED) (D-14)
-      if (typeof event.data === "string") {
-        try {
-          const parsed = JSON.parse(event.data) as {
-            event?: string;
-            info?: { playerState?: number };
-          };
-          if (parsed.event === "infoDelivery" && parsed.info?.playerState === 0) {
-            void markLessonAsCompleted("video-end");
-          }
-        } catch {
-          // not a JSON message — ignore
-        }
+      // YouTube IFrame API: parent first sends {event:"listening"}; player then emits
+      // onReady, onStateChange (info: 0 = ENDED) and infoDelivery (info.playerState: 0).
+      if (data.event === "onReady" && iframeRef.current?.contentWindow) {
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: "listening", id: "lesson-player" }),
+          "*",
+        );
+        return;
+      }
+      const ytInfo = data.info as { playerState?: number } | number | undefined;
+      const ytEnded =
+        (data.event === "infoDelivery" &&
+          typeof ytInfo === "object" &&
+          ytInfo?.playerState === 0) ||
+        (data.event === "onStateChange" && ytInfo === 0);
+      if (ytEnded) {
+        void markLessonAsCompleted("video-end");
+      }
+    }
+
+    // YouTube fires "onReady" only if the parent first declares it is listening.
+    // Send the initial listening handshake on mount.
+    function sendYouTubeHandshake() {
+      if (iframeRef.current?.contentWindow) {
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: "listening", id: "lesson-player" }),
+          "*",
+        );
       }
     }
 
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    const handshakeTimer = window.setTimeout(sendYouTubeHandshake, 1000);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      window.clearTimeout(handshakeTimer);
+    };
   }, [markLessonAsCompleted]);
 
   return (
@@ -160,6 +211,7 @@ export function LessonPlayer({
       ) : (
         <div className="relative aspect-video overflow-hidden rounded-xl border border-slate-200 bg-black">
           <iframe
+            ref={iframeRef}
             title={lessonTitle}
             src={embedUrl}
             className="h-full w-full"
