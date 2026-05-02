@@ -112,7 +112,7 @@ export async function createLessonAction(
     };
   }
 
-  if (module.course_id !== parsed.data.courseId) {
+  if (parsed.data.courseId && module.course_id !== parsed.data.courseId) {
     return {
       success: false,
       message: "O modulo selecionado nao pertence ao curso informado. Selecione novamente.",
@@ -121,6 +121,15 @@ export async function createLessonAction(
 
   const draftLessonIdRaw = getOptionalString(formData, "draft_lesson_id");
   const draftLessonId = draftLessonIdRaw && UUID_REGEX.test(draftLessonIdRaw) ? draftLessonIdRaw : null;
+
+  let position = parsed.data.position;
+  if (!position) {
+    const { count } = await supabase
+      .from("lessons")
+      .select("id", { count: "exact", head: true })
+      .eq("module_id", parsed.data.moduleId);
+    position = (count ?? 0) + 1;
+  }
 
   const { data: insertedLesson, error: insertError } = await supabase
     .from("lessons")
@@ -131,7 +140,7 @@ export async function createLessonAction(
       description: parsed.data.description ?? null,
       video_provider: parsed.data.videoProvider ?? null,
       video_external_id: parsed.data.videoExternalId ?? null,
-      position: parsed.data.position,
+      position,
     })
     .select("id")
     .single();

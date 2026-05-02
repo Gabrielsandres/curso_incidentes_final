@@ -37,7 +37,10 @@ const materialSourceSchema = z.enum(["LINK", "UPLOAD"]);
 
 export const createLessonSchema = z
   .object({
-    courseId: z.string({ required_error: "Selecione um curso" }).uuid({ message: "Selecione um curso valido." }),
+    courseId: z.preprocess(
+      (v) => (v === null || v === undefined || v === "" ? undefined : v),
+      z.string().uuid({ message: "Selecione um curso valido." }).optional(),
+    ),
     moduleId: z.string({ required_error: "Selecione um modulo" }).uuid({ message: "Selecione um modulo valido." }),
     title: z
       .string({ required_error: "Informe um titulo" })
@@ -70,10 +73,14 @@ export const createLessonSchema = z
       .url({ message: "Informe uma URL valida." })
       .optional()
       .nullable(),
-    position: z.coerce
-      .number({ required_error: "Informe a posicao na ordem do modulo" })
-      .int({ message: "Posicao deve ser um numero inteiro." })
-      .min(1, { message: "Posicao minima e 1." }),
+    position: z.preprocess(
+      (v) => (v === null || v === undefined || v === "" ? undefined : v),
+      z.coerce
+        .number()
+        .int({ message: "Posicao deve ser um numero inteiro." })
+        .min(1, { message: "Posicao minima e 1." })
+        .optional(),
+    ),
     materialLabel: optionalTrimmedString,
     materialDescription: optionalTrimmedString,
     materialUrl: optionalUrlString,
