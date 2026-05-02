@@ -69,9 +69,9 @@ Requisitos para o "v1 lançável" — plataforma 100% funcional antes do redesig
 - [x] **INST-03**: Função SQL `is_member_of_institution(institution_id)` é `SECURITY DEFINER STABLE` e usada em policies RLS para evitar recursão
 - [x] **INST-04**: Toda nova RLS de instituição inclui cláusulas `USING` **e** `WITH CHECK` em INSERT/UPDATE
 - [ ] **INST-05**: `middleware.ts` tem novo array `GESTOR_ROUTES = ["/gestor"]` e o matcher inclui `/gestor/:path*`; usuários sem role `institution_manager` ou `admin` são redirecionados
-- [ ] **INST-06**: Gestor de instituição loga em `/gestor` e vê apenas alunos/enrollments da sua própria instituição (validado por RLS, não só por filtro de aplicação)
-- [ ] **INST-07**: Dashboard do gestor mostra: lista de alunos vinculados, % de progresso por curso, certificados emitidos com link para visualizar (sem download direto — apresenta metadata: nome do curso, data, código)
-- [ ] **INST-08**: Admin (MDHE) cria uma instituição, vincula alunos a ela 1 a 1, e atribui um aluno como gestor
+- [x] **INST-06**: Gestor de instituição loga em `/gestor` e vê apenas alunos/enrollments da sua própria instituição (validado por RLS, não só por filtro de aplicação)
+- [x] **INST-07**: Dashboard do gestor mostra: lista de alunos vinculados, % de progresso por curso, certificados emitidos com link para visualizar (sem download direto — apresenta metadata: nome do curso, data, código)
+- [x] **INST-08**: Admin (MDHE) cria uma instituição, vincula alunos a ela 1 a 1, e atribui um aluno como gestor
 
 ### Marketing & Lead Capture
 
@@ -172,9 +172,9 @@ Mapeamento preenchido durante a criação do roadmap.
 | INST-03 | Phase 1 | Complete |
 | INST-04 | Phase 1 | Complete |
 | INST-05 | Phase 5 | Pending |
-| INST-06 | Phase 5 | Pending |
-| INST-07 | Phase 5 | Pending |
-| INST-08 | Phase 5 | Pending |
+| INST-06 | Phase 5 | Complete |
+| INST-07 | Phase 5 | Complete |
+| INST-08 | Phase 5 | Complete |
 | MKT-01 | Phase 2 | Pending |
 | MKT-02 | Phase 2 | Pending |
 | MKT-03 | Phase 1 | Complete |

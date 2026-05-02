@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5 UI-SPEC approved
-last_updated: "2026-05-02T20:31:42.000Z"
-last_activity: 2026-05-02 -- Phase 5 planning complete
+stopped_at: Phase 5 Plan 03 complete — institutions data layer (types/schema/queries) + 33 passing tests
+last_updated: "2026-05-02T20:57:00.000Z"
+last_activity: 2026-05-02 -- Phase 5 Plan 03 complete (institutions data layer)
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 30
-  completed_plans: 21
-  percent: 70
+  completed_plans: 25
+  percent: 83
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 ## Current Position
 
-Phase: --phase (2) — EXECUTING
-Plan: 1 of --name
-Status: Ready to execute
-Last activity: 2026-05-02 -- Phase 5 planning complete
+Phase: 5 (b2b-institution-manager) — EXECUTING
+Plan: 3 of 9 complete (next: 05-04 middleware GESTOR_ROUTES)
+Status: Wave 1 plan 05-03 complete; Wave 1 unblocks 05-05 (server actions) and 05-07/08 (admin pages + gestor dashboard)
+Last activity: 2026-05-02 -- Phase 5 Plan 03 complete (institutions data layer)
 
-Progress: [██████████] 100%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -87,8 +87,8 @@ Items acknowledged and carried forward:
 
 ## Session Continuity
 
-Last session: 2026-05-02T15:49:39.857Z
-Stopped at: Phase 5 UI-SPEC approved
-Resume file: .planning/phases/05-b2b-institution-manager/05-UI-SPEC.md
+Last session: 2026-05-02T20:57:00.000Z
+Stopped at: Phase 5 Plan 03 complete — ready to execute 05-04 (middleware GESTOR_ROUTES)
+Resume file: .planning/phases/05-b2b-institution-manager/05-04-PLAN.md
 
 **Planned Phase:** 2 (catalog-crud) — 7 plans — 2026-04-28T09:36:14.895Z
