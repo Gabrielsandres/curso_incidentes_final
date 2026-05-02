@@ -41,16 +41,22 @@ export const createLessonSchema = z
       (v) => (v === null || v === undefined || v === "" ? undefined : v),
       z.string().uuid({ message: "Selecione um curso valido." }).optional(),
     ),
-    moduleId: z.string({ required_error: "Selecione um modulo" }).uuid({ message: "Selecione um modulo valido." }),
-    title: z
-      .string({ required_error: "Informe um titulo" })
-      .trim()
-      .min(1, { message: "Titulo e obrigatorio." }),
-    description: z
-      .string()
-      .trim()
-      .optional()
-      .transform((value) => (value && value.length > 0 ? value : null)),
+    moduleId: z.preprocess(
+      (v) => (v === null ? undefined : v),
+      z.string({ required_error: "Selecione um modulo" }).uuid({ message: "Selecione um modulo valido." }),
+    ),
+    title: z.preprocess(
+      (v) => (v === null ? undefined : v),
+      z.string({ required_error: "Informe um titulo" }).trim().min(1, { message: "Titulo e obrigatorio." }),
+    ),
+    description: z.preprocess(
+      (v) => (v === null ? undefined : v),
+      z
+        .string()
+        .trim()
+        .optional()
+        .transform((value) => (value && value.length > 0 ? value : null)),
+    ),
     videoProvider: z.preprocess(
       (v) => (v === null || v === undefined ? undefined : v),
       z
@@ -67,12 +73,10 @@ export const createLessonSchema = z
         .optional()
         .transform((v) => (v && v.length > 0 ? v : null)),
     ),
-    videoUrl: z
-      .string()
-      .trim()
-      .url({ message: "Informe uma URL valida." })
-      .optional()
-      .nullable(),
+    videoUrl: z.preprocess(
+      (v) => (v === null || v === undefined || v === "" ? undefined : v),
+      z.string().trim().url({ message: "Informe uma URL valida." }).optional(),
+    ),
     position: z.preprocess(
       (v) => (v === null || v === undefined || v === "" ? undefined : v),
       z.coerce
