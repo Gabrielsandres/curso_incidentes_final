@@ -113,9 +113,9 @@ Plans:
 - [x] 05-01-PLAN.md — Migration 0014 (promote/demote SECURITY DEFINER RPCs) + types regen + README + [BLOCKING] SQL apply
 - [x] 05-02-PLAN.md — Wave 0 test scaffolds (8 test files with it.todo placeholders for INST-05/06/07/08)
 - [x] 05-03-PLAN.md — src/lib/institutions/{types,schema,queries}.ts + tests (4 query functions; D-12 admin-bypass justifications)
-- [ ] 05-04-PLAN.md — Edge Function institution_id branch + browser wrapper + docs/email-templates.md + [BLOCKING] deploy + Auth panel paste
+- [x] 05-04-PLAN.md — Edge Function institution_id branch + browser wrapper + docs/email-templates.md + [BLOCKING] deploy + Auth panel paste
 - [ ] 05-05-PLAN.md — 5 Server Actions (upsert/attach/promote/demote/detach/search) + tests; promote/demote via RPC
-- [ ] 05-06-PLAN.md — Middleware GESTOR ring + dashboard orphan-manager flash + admin nav link + middleware tests (INST-05)
+- [x] 05-06-PLAN.md — Middleware GESTOR ring + dashboard orphan-manager flash + admin nav link + middleware tests (INST-05)
 - [ ] 05-07-PLAN.md — Admin UI /admin/instituicoes/* (4 RSC + 3 client + MemberRoleBadge)
 - [ ] 05-08-PLAN.md — Manager dashboard /gestor (layout + page + ProgressMatrix + certs + MdheContactCard)
 - [ ] 05-09-PLAN.md — DEPLOY-CHECKLIST update + UAT checkpoint + ROADMAP/REQUIREMENTS tracking
@@ -135,4 +135,4 @@ Note: Phase 4 (Video) depends only on Phase 2 (Catalog). If capacity allows, Pha
 | 2. Catalog CRUD | 7/7 | Complete    | 2026-04-30 |
 | 3. Progress & Certificates | 4/4 | Complete    | 2026-04-30 |
 | 4. Video & Anti-Piracy | 5/5 | Complete    | 2026-04-30 |
-| 5. B2B Institution Manager | 3/9 | In Progress|  |
+| 5. B2B Institution Manager | 5/9 | In Progress|  |

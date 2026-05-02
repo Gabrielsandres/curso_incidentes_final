@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5 Plan 03 complete — institutions data layer (types/schema/queries) + 33 passing tests
-last_updated: "2026-05-02T20:57:00.000Z"
-last_activity: 2026-05-02 -- Phase 5 Plan 03 complete (institutions data layer)
+stopped_at: Phase 5 Plan 03 complete — ready to execute 05-04 (middleware GESTOR_ROUTES)
+last_updated: "2026-05-02T21:28:10.504Z"
+last_activity: 2026-05-02
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 30
-  completed_plans: 25
-  percent: 83
+  completed_plans: 26
+  percent: 87
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 ## Current Position
 
 Phase: 5 (b2b-institution-manager) — EXECUTING
-Plan: 3 of 9 complete (next: 05-04 middleware GESTOR_ROUTES)
-Status: Wave 1 plan 05-03 complete; Wave 1 unblocks 05-05 (server actions) and 05-07/08 (admin pages + gestor dashboard)
-Last activity: 2026-05-02 -- Phase 5 Plan 03 complete (institutions data layer)
+Plan: 4 of 9 complete (next: 05-04 middleware GESTOR_ROUTES)
+Status: Ready to execute
+Last activity: 2026-05-02
 
-Progress: [████████░░] 83%
+Progress: [█████████░] 87%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [████████░░] 83%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 5 P6 | 5min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,7 @@ Recent decisions affecting current work:
 - Roadmap: Schema para institutions/institution_members vai inteiro na Phase 1 (nao na Phase 5) porque ENR-02 (enrollment-based RLS) e INST-03 (helpers SECURITY DEFINER) bloqueiam tudo que vem depois
 - Roadmap: Phase 4 (Video) depende apenas da Phase 2 (Catalog) — pode rodar em paralelo com Phase 3 se houver capacidade
 - Roadmap: ENR-03 (admin concede acesso) ficou na Phase 2 (Catalog) porque o admin form de enrollment faz sentido construir junto com o CRUD de cursos
+- [Phase ?]: Plan 05-06: middleware tests use real NextRequest/NextResponse under Vitest node env (no next/server mock) — preserves coverage of cookie/redirect surface
 
 ### Pending Todos
 
@@ -87,8 +89,8 @@ Items acknowledged and carried forward:
 
 ## Session Continuity
 
-Last session: 2026-05-02T20:57:00.000Z
+Last session: 2026-05-02T21:27:39.727Z
 Stopped at: Phase 5 Plan 03 complete — ready to execute 05-04 (middleware GESTOR_ROUTES)
-Resume file: .planning/phases/05-b2b-institution-manager/05-04-PLAN.md
+Resume file: None
 
 **Planned Phase:** 2 (catalog-crud) — 7 plans — 2026-04-28T09:36:14.895Z
