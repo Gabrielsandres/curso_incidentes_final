@@ -107,7 +107,19 @@ Plans:
   3. Gestor ve porcentagem de progresso por curso para cada membro da sua equipe
   4. Gestor ve lista de certificados emitidos para membros da sua instituicao (nome do aluno, curso, data, codigo), sem link de download direto do PDF
   5. Convite institucional disparado pelo admin chega com template pt-BR mencionando o nome da instituicao contratante
-**Plans**: TBD
+**Plans**: 9 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Migration 0014 (promote/demote SECURITY DEFINER RPCs) + types regen + README + [BLOCKING] SQL apply
+- [ ] 05-02-PLAN.md — Wave 0 test scaffolds (8 test files with it.todo placeholders for INST-05/06/07/08)
+- [ ] 05-03-PLAN.md — src/lib/institutions/{types,schema,queries}.ts + tests (4 query functions; D-12 admin-bypass justifications)
+- [ ] 05-04-PLAN.md — Edge Function institution_id branch + browser wrapper + docs/email-templates.md + [BLOCKING] deploy + Auth panel paste
+- [ ] 05-05-PLAN.md — 5 Server Actions (upsert/attach/promote/demote/detach/search) + tests; promote/demote via RPC
+- [ ] 05-06-PLAN.md — Middleware GESTOR ring + dashboard orphan-manager flash + admin nav link + middleware tests (INST-05)
+- [ ] 05-07-PLAN.md — Admin UI /admin/instituicoes/* (4 RSC + 3 client + MemberRoleBadge)
+- [ ] 05-08-PLAN.md — Manager dashboard /gestor (layout + page + ProgressMatrix + certs + MdheContactCard)
+- [ ] 05-09-PLAN.md — DEPLOY-CHECKLIST update + UAT checkpoint + ROADMAP/REQUIREMENTS tracking
+
 **UI hint**: yes
 
 ## Progress
