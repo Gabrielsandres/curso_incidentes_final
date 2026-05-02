@@ -4,6 +4,14 @@ type CreateAdminUserPayload = {
   action: "invite" | "create";
   email: string;
   full_name: string;
+  /**
+   * Phase 5 (D-11): when present and `action === "invite"`, the Edge Function
+   * looks up institution.name, passes it as user_metadata for the Supabase Auth
+   * template (`{{ .Data.institution_name }}`), and inserts an institution_members
+   * row after invite success. Pre-flight email check returns 409 with
+   * "Email já cadastrado. Use Adicionar aluno existente." (D-06).
+   */
+  institution_id?: string;
 };
 
 type ResendInvitePayload = {
