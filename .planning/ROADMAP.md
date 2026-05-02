@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Schema migrations, enrollment model, ops hardening (service role key, UTC cert date, Sentry, Resend SMTP) (completed 2026-04-28)
 - [ ] **Phase 2: Catalog CRUD** - Multi-course admin UI: courses, modules, lessons, materials, publish/archive
 - [x] **Phase 3: Progress & Certificates** - Student dashboard with % completion, auto-certificate on 100%, Meus certificados (completed 2026-04-30)
-- [ ] **Phase 4: Video & Anti-Piracy** - VideoProvider abstraction (YouTube dev / Bunny prod), CSS watermark overlay
+- [x] **Phase 4: Video & Anti-Piracy** - VideoProvider abstraction (YouTube dev / Bunny prod), CSS watermark overlay (completed 2026-05-02)
 - [ ] **Phase 5: B2B Institution Manager** - Institution schema TypeScript layer, /gestor dashboard, invite emails via Resend
 
 ## Phase Details
