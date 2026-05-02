@@ -4,6 +4,15 @@ type InviteRequestBody = {
   action: "invite" | "create";
   email: string;
   full_name: string;
+  /**
+   * Phase 5 (D-11): when present and `action === "invite"`, the function
+   * looks up institutions.name, passes it as user_metadata for the Supabase
+   * Auth template (`{{ .Data.institution_name }}`), and inserts an
+   * institution_members row after invite success. Pre-flight email check
+   * returns 409 with explicit pt-BR message when the email is already in
+   * auth.users (D-06).
+   */
+  institution_id?: string;
 };
 
 type ResendInviteRequestBody = {
@@ -350,10 +359,87 @@ Deno.serve(async (request) => {
       );
     }
 
+    // Phase 5 (D-11): institution_id branch — pre-flight email check and
+    // institution lookup. When absent, the existing B2C-style invite behavior
+    // is preserved verbatim (regression-safe for /admin/usuarios).
+    let institutionName: string | null = null;
+    let institutionIdNormalized: string | null = null;
+
+    const rawInstitutionId = (body as InviteRequestBody).institution_id;
+    const trimmedInstitutionId = typeof rawInstitutionId === "string" ? rawInstitutionId.trim() : "";
+
+    if (trimmedInstitutionId) {
+      institutionIdNormalized = trimmedInstitutionId;
+
+      // D-06 + Open Question 4: pre-flight email check via auth.admin.listUsers.
+      // Profiles table has no email column (verified RESEARCH line 1041); the
+      // canonical source is auth.users.email accessed via the admin auth API.
+      // Cap perPage at 1000 (Supabase default max). For MDHE single-tenant scale
+      // this is sufficient; if user count grows beyond 1000, replace with a
+      // paginated scan.
+      // TODO: v2 — paginate listUsers calls if MDHE user count exceeds 1000
+      // (current cap silently misses duplicates beyond index 1000; tracked
+      // under EMAIL-03/INST-08; see Threat T-05-04-07).
+      const listUsersRes = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      if (listUsersRes.error) {
+        console.error("Failed listUsers pre-flight on Criar-usuario", {
+          error: listUsersRes.error.message,
+          adminId: user.id,
+          email,
+        });
+        return jsonResponse(
+          {
+            ok: false,
+            message: "Não foi possível verificar email. Tente novamente.",
+          },
+          500,
+        );
+      }
+      const normalizedEmail = email.trim().toLowerCase();
+      const emailExists = (listUsersRes.data?.users ?? []).some(
+        (u) => (u.email ?? "").toLowerCase() === normalizedEmail,
+      );
+      if (emailExists) {
+        return jsonResponse(
+          {
+            ok: false,
+            message: "Email já cadastrado. Use Adicionar aluno existente.",
+          },
+          409,
+        );
+      }
+
+      // Lookup institution name for metadata (templates use this via
+      // `{{ .Data.institution_name }}`).
+      const { data: institution, error: instErr } = await supabaseAdmin
+        .from("institutions")
+        .select("id, name")
+        .eq("id", institutionIdNormalized)
+        .maybeSingle();
+      if (instErr || !institution) {
+        if (instErr) {
+          console.error("Failed institution lookup on Criar-usuario", {
+            error: instErr.message,
+            adminId: user.id,
+            institutionId: institutionIdNormalized,
+          });
+        }
+        return jsonResponse(
+          {
+            ok: false,
+            message: "Instituição não encontrada.",
+          },
+          404,
+        );
+      }
+      institutionName = institution.name;
+    }
+
     const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
       data: {
         full_name: fullName,
         name: fullName,
+        ...(institutionName ? { institution_name: institutionName } : {}),
       },
       redirectTo,
     });
@@ -402,6 +488,76 @@ Deno.serve(async (request) => {
         },
         400,
       );
+    }
+
+    // Phase 5 D-11: After invite success, link the new user to the institution.
+    // Pitfall 6 (RESEARCH lines 687-707): the auth trigger that creates the
+    // profiles row has timing variability. Defensively upsert the profiles row
+    // so the institution_members FK insert below cannot fail with FK violation.
+    //
+    // Note: Deno cannot import src/lib/auth/profiles.ts:ensureProfileExists; we
+    // reimplement the safe upsert inline here.
+    if (institutionIdNormalized && inviteData?.user?.id) {
+      const newUserId = inviteData.user.id;
+
+      const profileUpsert = await supabaseAdmin
+        .from("profiles")
+        .upsert(
+          { id: newUserId, full_name: fullName, role: "student" },
+          { onConflict: "id", ignoreDuplicates: true },
+        );
+
+      if (profileUpsert.error) {
+        console.error("Convite enviado mas profile upsert falhou", {
+          error: profileUpsert.error.message,
+          newUserId,
+          institutionId: institutionIdNormalized,
+        });
+        return jsonResponse(
+          {
+            ok: false,
+            message: "Convite enviado, mas não foi possível preparar o perfil. Vincule manualmente.",
+            warning: true,
+            invited: true,
+            user_id: newUserId,
+          },
+          207,
+        );
+      }
+
+      const { error: memberErr } = await supabaseAdmin
+        .from("institution_members")
+        .insert({
+          institution_id: institutionIdNormalized,
+          profile_id: newUserId,
+          role: "student",
+        });
+
+      if (memberErr) {
+        console.error("Convite enviado mas vinculação falhou", {
+          error: memberErr.message,
+          newUserId,
+          institutionId: institutionIdNormalized,
+        });
+        return jsonResponse(
+          {
+            ok: false,
+            message: "Convite enviado, mas não foi possível vincular o aluno à instituição. Vincule manualmente.",
+            warning: true,
+            invited: true,
+            user_id: newUserId,
+          },
+          207,
+        );
+      }
+
+      return jsonResponse({
+        ok: true,
+        invited: true,
+        user_id: newUserId,
+        message: `Convite enviado para ${email} da instituição ${institutionName}.`,
+        redirectTo,
+      });
     }
 
     return jsonResponse({
