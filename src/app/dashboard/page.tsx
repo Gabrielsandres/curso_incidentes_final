@@ -17,7 +17,13 @@ export const metadata: Metadata = {
   title: "Dashboard | Gestão de Incidentes",
 };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string }>;
+}) {
+  const params = await searchParams;
+  const notice = params.notice ?? null;
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -81,6 +87,16 @@ export default async function DashboardPage() {
       </header>
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-6 py-12">
+        {notice === "orphan-manager" ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700"
+          >
+            Sua instituição ainda não foi configurada. Entre em contato com a MDHE.
+          </div>
+        ) : null}
+
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Bem-vindo</p>
           <h1 className="mt-2 text-2xl font-semibold text-slate-900">Bem-vindo, {userName}!</h1>
@@ -118,7 +134,13 @@ export default async function DashboardPage() {
               >
                 Gerenciar cursos
               </Link>
-<Link
+              <Link
+                href="/admin/instituicoes"
+                className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              >
+                Gerenciar instituições
+              </Link>
+              <Link
                 href="/admin/usuarios"
                 className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
               >
