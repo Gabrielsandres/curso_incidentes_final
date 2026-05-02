@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5 context gathered
-last_updated: "2026-05-02T15:40:59.490Z"
+stopped_at: Phase 5 UI-SPEC approved
+last_updated: "2026-05-02T15:49:39.880Z"
 last_activity: 2026-04-28 -- Phase --phase execution started
 progress:
   total_phases: 5
@@ -87,8 +87,8 @@ Items acknowledged and carried forward:
 
 ## Session Continuity
 
-Last session: 2026-05-02T15:40:59.394Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-b2b-institution-manager/05-CONTEXT.md
+Last session: 2026-05-02T15:49:39.857Z
+Stopped at: Phase 5 UI-SPEC approved
+Resume file: .planning/phases/05-b2b-institution-manager/05-UI-SPEC.md
 
 **Planned Phase:** 2 (catalog-crud) — 7 plans — 2026-04-28T09:36:14.895Z
