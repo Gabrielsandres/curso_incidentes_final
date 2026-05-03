@@ -83,7 +83,7 @@ Requisitos para o "v1 lançável" — plataforma 100% funcional antes do redesig
 
 - [ ] **EMAIL-01** *(deferred — P0 pré-prod, aguardando domínio MDHE; ver `01-04-SUMMARY.md`)*: Supabase Auth está configurado com SMTP do **Resend** (custom SMTP no painel) — emails de confirmação, recuperação e convite passam a sair via Resend
 - [ ] **EMAIL-02** *(deferred — P0 pré-prod, aguardando domínio MDHE; ver `01-04-SUMMARY.md`)*: Domínio de envio (`EMAIL_FROM`) tem SPF/DKIM configurados; entrega validada com inbox de teste em Gmail e Outlook
-- [ ] **EMAIL-03**: Convite institucional dispara com template pt-BR (assunto + corpo) que menciona a instituição contratante
+- [x] **EMAIL-03**: Convite institucional dispara com template pt-BR (assunto + corpo) que menciona a instituição contratante
 
 ## v2 Requirements
 
@@ -180,7 +180,7 @@ Mapeamento preenchido durante a criação do roadmap.
 | MKT-03 | Phase 1 | Complete |
 | EMAIL-01 | Phase 1 | Deferred (P0 pré-prod — aguardando domínio MDHE; ver 01-04-SUMMARY.md) |
 | EMAIL-02 | Phase 1 | Deferred (P0 pré-prod — aguardando domínio MDHE; ver 01-04-SUMMARY.md) |
-| EMAIL-03 | Phase 5 | Pending |
+| EMAIL-03 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 47 total

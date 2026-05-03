@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5 Plan 03 complete — ready to execute 05-04 (middleware GESTOR_ROUTES)
-last_updated: "2026-05-02T21:28:10.504Z"
-last_activity: 2026-05-02
+stopped_at: Phase 5 Plan 07 complete — ready to execute 05-08 (gestor dashboard)
+last_updated: "2026-05-03T15:24:11.477Z"
+last_activity: 2026-05-03
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 30
-  completed_plans: 26
-  percent: 87
+  completed_plans: 28
+  percent: 93
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 ## Current Position
 
 Phase: 5 (b2b-institution-manager) — EXECUTING
-Plan: 4 of 9 complete (next: 05-04 middleware GESTOR_ROUTES)
+Plan: 7 of 9 complete (next: 05-08 gestor dashboard)
 Status: Ready to execute
-Last activity: 2026-05-02
+Last activity: 2026-05-03
 
-Progress: [█████████░] 87%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [█████████░] 87%
 
 *Updated after each plan completion*
 | Phase 5 P6 | 5min | 3 tasks | 3 files |
+| Phase 5 P07 | 12min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,8 @@ Recent decisions affecting current work:
 - Roadmap: Phase 4 (Video) depende apenas da Phase 2 (Catalog) — pode rodar em paralelo com Phase 3 se houver capacidade
 - Roadmap: ENR-03 (admin concede acesso) ficou na Phase 2 (Catalog) porque o admin form de enrollment faz sentido construir junto com o CRUD de cursos
 - [Phase ?]: Plan 05-06: middleware tests use real NextRequest/NextResponse under Vitest node env (no next/server mock) — preserves coverage of cookie/redirect surface
+- [Phase ?]: Plan 05-07: detail page select omits contact_phone — institutions table has no such column (continues 05-03/05-05 schema reality)
+- [Phase ?]: Plan 05-07: B-1 fix landed verbatim in InstitutionManager handleInvite — runtime narrows result.data; result.message access on success branch absent
 
 ### Pending Todos
 
@@ -89,8 +92,8 @@ Items acknowledged and carried forward:
 
 ## Session Continuity
 
-Last session: 2026-05-02T21:27:39.727Z
-Stopped at: Phase 5 Plan 03 complete — ready to execute 05-04 (middleware GESTOR_ROUTES)
+Last session: 2026-05-03T15:24:03.322Z
+Stopped at: Phase 5 Plan 07 complete — ready to execute 05-08 (gestor dashboard)
 Resume file: None
 
 **Planned Phase:** 2 (catalog-crud) — 7 plans — 2026-04-28T09:36:14.895Z
