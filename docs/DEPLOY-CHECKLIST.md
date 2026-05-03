@@ -45,10 +45,66 @@ Aplicar **nesta ordem** via Supabase SQL Editor (Project → SQL Editor → New 
 11. `0011_courses_and_certificates.sql`
 12. `0012_add_institution_manager_role.sql` — Apenas `ALTER TYPE user_role ADD VALUE 'institution_manager'`. **Deve ser aplicada e commitada ANTES da 0013.**
 13. `0013_institutions_enrollments.sql` — Tabelas `institutions`, `institution_members`, `enrollments` (nova estrutura), helper `is_member_of_institution`, RLS, backfill de admins.
+14. `0015_promote_institution_manager_rpc.sql` — Phase 5: RPCs SECURITY DEFINER `promote_institution_manager` + `demote_institution_manager` para promote/demote atômico (single transaction, prevent partial-failure "two managers" state). Aplicar isoladamente após 0013. *(Migração 0014_catalog_metadata.sql é entregue pela Phase 2; quando aplicada, será inserida nesta lista entre 0013 e 0015.)*
 
 > ⚠️ **Atenção:** Abra dois queries separados no SQL Editor — NÃO aplique 0012 e 0013 no mesmo bloco. Aplique `0012_add_institution_manager_role.sql`, confirme que rodou sem erro, feche o query, e só então abra um novo query para `0013_institutions_enrollments.sql`.
 >
 > **Motivo:** O SQL Editor pode executar scripts multi-statement em uma única transação. Se 0012 e 0013 forem aplicados juntos, o Postgres lança `ERROR: unsafe use of new value "institution_manager" of enum type user_role` na primeira policy de 0013 que referencia o novo valor do enum — porque o `COMMIT` de 0012 ainda não ocorreu.
+>
+> ⚠️ **0015:** Após confirmar que 0013 rodou sem erro, abra um novo query e aplique `0015_promote_institution_manager_rpc.sql`. Verifique com `select proname from pg_proc where proname in ('promote_institution_manager','demote_institution_manager');` — devem retornar 2 linhas. *(O nome do arquivo pula 0014 porque a Phase 2 reservou esse slot para `0014_catalog_metadata.sql`; aplique-a primeiro se ainda não estiver no banco.)*
+
+---
+
+## Phase 5 — Configuração Manual Adicional
+
+Phase 5 adicionou um Edge Function estendido (`Criar-usuario` com suporte a `institution_id`) e um template pt-BR de email institucional que vive no painel do Supabase Auth (não no repo). Aplicar **uma vez** antes do release de Phase 5 e **revalidar a cada deploy**.
+
+### 1. Deploy do Edge Function `Criar-usuario`
+
+Phase 5 estendeu o Edge Function para aceitar `institution_id` no payload do invite. Após qualquer alteração em `supabase/functions/Criar-usuario/index.ts`:
+
+```bash
+supabase functions deploy Criar-usuario
+```
+
+Verificação: Supabase Dashboard → **Edge Functions** → `Criar-usuario` → **Logs** mostra evento de deploy recente. Smoke-test invocando a função com payload `institution_id` válido — resposta deve conter `"Convite enviado para {email} da instituição {institutionName}."`
+
+### 2. Template pt-BR no Supabase Auth Panel (EMAIL-03)
+
+**Source of truth:** `docs/email-templates.md`. O template vive no painel do Supabase Auth e **não há API para versionar programaticamente** (verificado em 2026 — Pitfall 2 do RESEARCH Phase 5). Toda alteração em `docs/email-templates.md` exige re-paste manual.
+
+> **W-2 cross-reference:** Se você completou plan 05-04 Task 4 (o operator gate `[BLOCKING] Deploy Edge Function + paste pt-BR Auth template` durante o desenvolvimento da Phase 5), este re-paste é apenas uma checagem de drift — confirme que o painel ainda corresponde a `docs/email-templates.md`. Caso contrário (se o painel está vazio ou este é um ambiente novo), este é o **primeiro** paste do template pt-BR e os smoke tests em §6-7 vão exercitar o rendering institucional pt-BR pela primeira vez.
+
+**Procedimento (uma vez antes do release; repetir a cada alteração no doc):**
+
+1. Abrir `docs/email-templates.md` no editor.
+2. Supabase Dashboard → **Authentication** → **Email Templates** → **Invite User**.
+3. Copiar §Subject do doc → colar no campo **Subject** do painel.
+4. Copiar §HTML Body do doc (bloco `<!DOCTYPE html>...</html>`) → colar no editor de body do painel.
+5. Salvar.
+6. Smoke-test institucional: enviar convite real de `/admin/instituicoes/[slug]` para email controlado; confirmar:
+   - Subject contém o nome da instituição (ex.: "Bem-vindo(a) à plataforma MDHE — convite de Colégio X")
+   - Body em pt-BR contém "como aluno(a) da Colégio X"
+   - Botão "Aceitar convite e criar minha senha" presente; link aponta para URL de confirmação Supabase
+7. Smoke-test fallback B2C: convidar via `/admin/usuarios` (sem `institution_id`); confirmar body usa branch `{{ else }}` ("Você foi convidado(a) pela MDHE Consultoria...") sem nome de instituição.
+
+**Detecção de drift:** antes de cada deploy de produção, comparar visualmente o template no painel com `docs/email-templates.md`. Se divergirem, re-aplicar do doc.
+
+> **Operator warning (I-1):** O Subject do template tem o limite documentado em `docs/email-templates.md` §Known limitations — para convites B2C legados (sem `institution_name`), o Subject resolve para `"Bem-vindo(a) à plataforma MDHE — convite de "` com **espaço final** (porque Subject não suporta `{{ if }}` Go-template). Esta "feiura" cosmética é aceitável para v1 (apenas o admin invoca o caminho B2C via `/admin/usuarios`); só requer ação se um polish pre-release for solicitado.
+
+### 3. Smoke-test Phase 5 pós-deploy
+
+Executar como conta admin **após** todos os passos acima estarem aplicados:
+
+- [ ] `/admin/instituicoes` carrega sem erro; mostra "Nenhuma instituição cadastrada" se for o primeiro deploy
+- [ ] Criar instituição teste via `/admin/instituicoes/nova` redireciona para `/admin/instituicoes/[slug]` após sucesso
+- [ ] Invite institucional via aba "Convidar novo aluno" envia email pt-BR com nome da instituição (ver §2 acima)
+- [ ] Aluno aceita convite, faz login, é redirecionado para `/dashboard` (role `student` por default)
+- [ ] Admin promove aluno a gestor via "Promover a gestor" → toast de sucesso → aluno faz login e acessa `/gestor` com sucesso
+- [ ] Aluno sem role `institution_manager` tentando acessar `/gestor` é redirecionado para `/dashboard`
+- [ ] Gestor órfão (`profiles.role='institution_manager'` sem linha em `institution_members`) é redirecionado para `/dashboard?notice=orphan-manager` com banner âmbar
+- [ ] Admin tentando acessar `/gestor` é redirecionado para `/admin/instituicoes`
+- [ ] Cleanup: `delete from institution_members where institution_id = '<test_id>'; delete from institutions where slug = '<test_slug>'; delete from auth.users where email = '<test_email>';`
 
 ---
 
@@ -170,3 +226,7 @@ npm run build       # next build --webpack
 ```
 
 > **Nota (Windows):** Em alguns ambientes Windows, `npm run test:ci` com `--reporter=verbose` pode exibir saída incompleta devido a uma race condition do Vitest. Se o comando exibir "no tests" mas os arquivos existem, rode `npx vitest run` (sem `--reporter=verbose`) como alternativa e confirme que todos os testes passam antes de prosseguir.
+
+---
+
+*Last updated: 2026-05-02 after Phase 5 (B2B Institution Manager) completion*
